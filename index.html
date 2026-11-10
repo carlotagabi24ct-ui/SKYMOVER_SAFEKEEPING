@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Calculator & Document Upload</title>
+    <!-- Tailwind CSS for modern, professional styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0EA5E9', // Sky Blue theme
+                        primaryHover: '#0284C7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen py-10 px-4">
+
+    <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+        <!-- Header -->
+        <div class="bg-primary px-8 py-6 text-white">
+            <h1 class="text-2xl font-bold tracking-tight">Income Calculator & Upload</h1>
+            <p class="text-sky-100 text-sm mt-1">Fill out your details, review auto-calculations, and attach supporting files.</p>
+        </div>
+
+        <!-- Form Body -->
+        <form id="incomeForm" class="p-8 space-y-6">
+            
+            <!-- Personal / Basic Info -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                <input type="text" id="fullName" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="e.g., Juan Dela Cruz">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Gross Income -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Gross Income (PHP)</label>
+                    <input type="number" id="grossIncome" step="0.01" min="0" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="0.00" oninput="calculateNet()">
+                </div>
+
+                <!-- Total Deductions -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Total Deductions (PHP)</label>
+                    <input type="number" id="deductions" step="0.01" min="0" value="0" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="0.00" oninput="calculateNet()">
+                </div>
+            </div>
+
+            <!-- Auto-Calculated Result Box -->
+            <div class="bg-sky-50 border border-sky-100 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-sky-600">Computed Net Income</span>
+                    <div id="netIncomeDisplay" class="text-2xl font-bold text-slate-800">₱0.00</div>
+                </div>
+                <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-primary font-bold">
+                    PHP
+                </div>
+            </div>
+
+            <!-- File / Picture Upload -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Attach Supporting Document / Picture</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-primary transition cursor-pointer bg-slate-50" onclick="document.getElementById('fileUpload').click();">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-slate-600 justify-center">
+                            <span class="relative font-medium text-primary hover:text-primaryHover">Upload a file</span>
+                            <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p id="fileName" class="text-xs text-slate-500">PNG, JPG, PDF up to 10MB</p>
+                    </div>
+                </div>
+                <input id="fileUpload" type="file" class="hidden" accept="image/*,.pdf" onchange="previewFileName()">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white font-medium py-3 rounded-lg shadow-md transition duration-200">
+                Submit Data
+            </button>
+        </form>
+    </div>
+
+    <!-- JavaScript for Auto-Calculation and Handling Files -->
+    <script>
+        function calculateNet() {
+            const gross = parseFloat(document.getElementById('grossIncome').value) || 0;
+            const deductions = parseFloat(document.getElementById('deductions').value) || 0;
+            const net = gross - deductions;
+
+            // Format as Philippine Peso currency
+            document.getElementById('netIncomeDisplay').innerText = '₱' + net.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function previewFileName() {
+            const fileInput = document.getElementById('fileUpload');
+            const fileNameDisplay = document.getElementById('fileName');
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.innerText = "Selected: " + fileInput.files[0].name;
+                fileNameDisplay.classList.add("text-primary", "font-semibold");
+            }
+        }
+
+        document.getElementById('incomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Form submitted successfully! (You can connect this to a backend script or database later)');
+        });
+    </script>
+</body>
+</html>
