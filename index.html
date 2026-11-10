@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Income Calculator & Document Upload</title>
-    <!-- Tailwind CSS for modern, professional styling -->
+    <title>SKYMOVER SAFEKEEPING - Container Tracking & Billing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0EA5E9', // Sky Blue theme
+                        primary: '#0EA5E9',
                         primaryHover: '#0284C7'
                     }
                 }
@@ -21,98 +20,201 @@
 </head>
 <body class="bg-slate-50 min-h-screen py-10 px-4">
 
-    <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
         <!-- Header -->
         <div class="bg-primary px-8 py-6 text-white">
-            <h1 class="text-2xl font-bold tracking-tight">Income Calculator & Upload</h1>
-            <p class="text-sky-100 text-sm mt-1">Fill out your details, review auto-calculations, and attach supporting files.</p>
+            <h1 class="text-2xl font-bold tracking-tight">SKYMOVER SAFEKEEPING</h1>
+            <p class="text-sky-100 text-sm mt-1">Container Safekeeping, Inspection, and Automated Billing Form</p>
         </div>
 
         <!-- Form Body -->
-        <form id="incomeForm" class="p-8 space-y-6">
+        <form id="safekeepingForm" class="p-8 space-y-8">
             
-            <!-- Personal / Basic Info -->
+            <!-- Section 1: Operational Details -->
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                <input type="text" id="fullName" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="e.g., Juan Dela Cruz">
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Gross Income -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Gross Income (PHP)</label>
-                    <input type="number" id="grossIncome" step="0.01" min="0" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="0.00" oninput="calculateNet()">
-                </div>
-
-                <!-- Total Deductions -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Total Deductions (PHP)</label>
-                    <input type="number" id="deductions" step="0.01" min="0" value="0" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="0.00" oninput="calculateNet()">
-                </div>
-            </div>
-
-            <!-- Auto-Calculated Result Box -->
-            <div class="bg-sky-50 border border-sky-100 rounded-xl p-4 flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-sky-600">Computed Net Income</span>
-                    <div id="netIncomeDisplay" class="text-2xl font-bold text-slate-800">₱0.00</div>
-                </div>
-                <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-primary font-bold">
-                    PHP
-                </div>
-            </div>
-
-            <!-- File / Picture Upload -->
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Attach Supporting Document / Picture</label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-primary transition cursor-pointer bg-slate-50" onclick="document.getElementById('fileUpload').click();">
-                    <div class="space-y-1 text-center">
-                        <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <div class="flex text-sm text-slate-600 justify-center">
-                            <span class="relative font-medium text-primary hover:text-primaryHover">Upload a file</span>
-                            <p class="pl-1">or drag and drop</p>
-                        </div>
-                        <p id="fileName" class="text-xs text-slate-500">PNG, JPG, PDF up to 10MB</p>
+                <h2 class="text-lg font-semibold text-slate-800 border-b pb-2 mb-4">1. Operational Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Container Number</label>
+                        <input type="text" id="containerNumber" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g., MSKU1234567">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Shipping Line</label>
+                        <input type="text" id="shippingLine" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g., Maersk">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Trucking Name</label>
+                        <input type="text" id="truckingName" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Trucking Provider">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">CNTR Type</label>
+                        <select id="cntrType" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white" onchange="toggleStorageRates()">
+                            <option value="Dry">Dry Van</option>
+                            <option value="Reefer">Reefer Van</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Equipment Type</label>
+                        <input type="text" id="equipmentType" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g., 40HC">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Checker Inspector</label>
+                        <input type="text" id="checkerInspector" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Inspector Name">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Operator</label>
+                        <input type="text" id="operator" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Operator Name">
                     </div>
                 </div>
-                <input id="fileUpload" type="file" class="hidden" accept="image/*,.pdf" onchange="previewFileName()">
+            </div>
+
+            <!-- Section 2: Dates & Storage Tracking -->
+            <div>
+                <h2 class="text-lg font-semibold text-slate-800 border-b pb-2 mb-4">2. Schedule & Storage Computation</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Arrival Date</label>
+                        <input type="date" id="arrivalDate" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" onchange="calculateStorageDays()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Pull Out Date</label>
+                        <input type="date" id="pullOutDate" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" onchange="calculateStorageDays()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Storage Days (Auto)</label>
+                        <input type="number" id="storageDays" readonly class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 font-bold text-slate-700" value="0">
+                    </div>
+
+                    <!-- Rates -->
+                    <div id="dryRateBox">
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Storage Fee Dry Van (Daily)</label>
+                        <input type="number" id="storageFeeDry" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" oninput="calculateTotals()">
+                    </div>
+                    <div id="reeferRateBox" class="hidden">
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Storage Fee Reefer Van (Daily)</label>
+                        <input type="number" id="storageFeeReefer" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" oninput="calculateTotals()">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Storage Amount (Auto)</label>
+                        <input type="text" id="storageAmountDisplay" readonly class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 font-bold text-slate-700" value="₱0.00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Yard Locations & Additional Fees -->
+            <div>
+                <h2 class="text-lg font-semibold text-slate-800 border-b pb-2 mb-4">3. Yard Location & Handling Fees</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Location CY 1</label>
+                        <input type="text" id="locationCY1" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Primary CY">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Location Area CY 1</label>
+                        <input type="text" id="locationAreaCY1" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Area / Slot 1">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Location CY 2 (Optional)</label>
+                        <input type="text" id="locationCY2" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Secondary CY">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Location Area CY 2 (Optional)</label>
+                        <input type="text" id="locationAreaCY2" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Area / Slot 2">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Van In Amount</label>
+                        <input type="number" id="vanInAmount" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" oninput="calculateTotals()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Van Out Amount</label>
+                        <input type="number" id="vanOutAmount" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" oninput="calculateTotals()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Attachments & Final Billing Banner -->
+            <div class="bg-sky-50 border border-sky-100 rounded-xl p-6 space-y-4">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-sky-600">Total Amount Bill</span>
+                        <div id="totalAmountDisplay" class="text-3xl font-extrabold text-slate-800">₱0.00</div>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Attachment Photo / Gate Pass</label>
+                        <input type="file" id="attachmentPhoto" accept="image/*" class="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-100 file:text-primary hover:file:bg-sky-200 cursor-pointer">
+                    </div>
+                </div>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white font-medium py-3 rounded-lg shadow-md transition duration-200">
-                Submit Data
+            <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white font-medium py-3 rounded-lg shadow-md transition duration-200 text-lg">
+                Save Safekeeping Record
             </button>
         </form>
     </div>
 
-    <!-- JavaScript for Auto-Calculation and Handling Files -->
+    <!-- JavaScript Automation -->
     <script>
-        function calculateNet() {
-            const gross = parseFloat(document.getElementById('grossIncome').value) || 0;
-            const deductions = parseFloat(document.getElementById('deductions').value) || 0;
-            const net = gross - deductions;
+        function toggleStorageRates() {
+            const type = document.getElementById('cntrType').value;
+            const dryBox = document.getElementById('dryRateBox');
+            const reeferBox = document.getElementById('reeferRateBox');
 
-            // Format as Philippine Peso currency
-            document.getElementById('netIncomeDisplay').innerText = '₱' + net.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        function previewFileName() {
-            const fileInput = document.getElementById('fileUpload');
-            const fileNameDisplay = document.getElementById('fileName');
-            if (fileInput.files.length > 0) {
-                fileNameDisplay.innerText = "Selected: " + fileInput.files[0].name;
-                fileNameDisplay.classList.add("text-primary", "font-semibold");
+            if (type === 'Reefer') {
+                dryBox.classList.add('hidden');
+                reeferBox.classList.remove('hidden');
+                document.getElementById('storageFeeDry').value = 0;
+            } else {
+                reeferBox.classList.add('hidden');
+                dryBox.classList.remove('hidden');
+                document.getElementById('storageFeeReefer').value = 0;
             }
+            calculateTotals();
         }
 
-        document.getElementById('incomeForm').addEventListener('submit', function(e) {
+        function calculateStorageDays() {
+            const arrival = document.getElementById('arrivalDate').value;
+            const pullout = document.getElementById('pullOutDate').value;
+
+            if (arrival && pullout) {
+                const date1 = new Date(arrival);
+                const date2 = new Date(pullout);
+                const diffTime = date2 - date1;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                document.getElementById('storageDays').value = diffDays > 0 ? diffDays : 0;
+            } else {
+                document.getElementById('storageDays').value = 0;
+            }
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            const days = parseFloat(document.getElementById('storageDays').value) || 0;
+            const cntrType = document.getElementById('cntrType').value;
+            
+            let dailyRate = 0;
+            if (cntrType === 'Reefer') {
+                dailyRate = parseFloat(document.getElementById('storageFeeReefer').value) || 0;
+            } else {
+                dailyRate = parseFloat(document.getElementById('storageFeeDry').value) || 0;
+            }
+
+            const storageTotal = days * dailyRate;
+            const vanIn = parseFloat(document.getElementById('vanInAmount').value) || 0;
+            const vanOut = parseFloat(document.getElementById('vanOutAmount').value) || 0;
+
+            const grandTotal = storageTotal + vanIn + vanOut;
+
+            // Update displays
+            document.getElementById('storageAmountDisplay').innerText = '₱' + storageTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('totalAmountDisplay').innerText = '₱' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        document.getElementById('safekeepingForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Form submitted successfully! (You can connect this to a backend script or database later)');
+            alert('SKYMOVER SAFEKEEPING record processed successfully with auto-computed billing!');
         });
     </script>
 </body>
