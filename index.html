@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKYMOVER SAFEKEEPING - Container Tracking & Billing</title>
+    <title>SKYMOVER SAFEKEEPING</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,7 +24,6 @@
         <!-- Header -->
         <div class="bg-primary px-8 py-6 text-white">
             <h1 class="text-2xl font-bold tracking-tight">SKYMOVER SAFEKEEPING</h1>
-            <p class="text-sky-100 text-sm mt-1">Container Safekeeping, Inspection, and Automated Billing Form</p>
         </div>
 
         <!-- Form Body -->
@@ -40,11 +39,24 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Shipping Line</label>
-                        <input type="text" id="shippingLine" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g., Maersk">
+                        <select id="ShippingLine" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white" onchange="toggleStorageRates()">
+                            <option value="TS LINE">TS LINE</option>
+                            <option value="EVERGREEN">EVERGREEN</option>
+                            <option value="SINO TRANS">SINO TRANS</option>
+                            <option value="ASL">ASL</option>
+                            <option value="COSO">COSO</option>
+                            <option value="ONE">ONE</option>
+                            <option value="M-SC">M-SC</option>
+                            <option value="HMM">HMM</option>
+                            <option value="MAERKS">MAERKS</option>
+                            <option value="CMA-CGM">CMA-CGM</option>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Trucking Name</label>
-                        <input type="text" id="truckingName" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Trucking Provider">
+                        <input type="text" id="truckingName" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Trucking Name">
+                            <option value="VTS">VTS</option>
+                            <option value="GGS">GGS</option>
+                            <option value="SKYMOVER">SKYMOVER</option>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">CNTR Type</label>
