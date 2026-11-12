@@ -372,30 +372,63 @@
                     </div>
                 `;
             } else if (type === 'secondhand') {
-                titleEl.innerText = currentLang === 'zh' ? '二手运单与转让系统 (Second Hand)' : 'Second Hand / Transshipment Hub';
-                subtitleEl.innerText = currentLang === 'zh' ? 'Waybill, Photograph, Commission' : 'Waybill, Photograph, Commission';
+                titleEl.innerText = currentLang === 'zh' ? '中转站与转运分配管理 (Hub & Transshipment Hub)' : 'Hub & Transshipment Assignment Management';
+                subtitleEl.innerText = currentLang === 'zh' ? '运单审核、车辆重新指派、转运分配与状态确认' : 'Review, reassign, accept or reject transshipment hub waybills';
                 iconEl.className = 'fa-solid fa-user-gear';
+                
+                // Render interactive transshipment hub list from database
+                const hubs = window.appData.transshipments || [
+                    { id: 'sh1', code: 'SH-Cargo #9021', route: 'Manila North Harbor → Valenzuela Warehouse', status: 'Pending Review', commission: '₱ 2,500', assignedTruck: 'NCR-4821' },
+                    { id: 'sh2', code: 'SH-Cargo #9022', route: 'MICT Port → Laguna Technopark', status: 'Accepted', commission: '₱ 3,200', assignedTruck: 'CAL-9912' },
+                    { id: 'sh3', code: 'SH-Cargo #9023', route: 'Batangas Port → Cavite Gateway', status: 'Rejected', commission: '₱ 4,100', assignedTruck: 'Unassigned' }
+                ];
+                window.appData.transshipments = hubs;
+
+                let hubRows = hubs.map(h => `
+                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:bg-slate-100/80">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center space-x-3">
+                                <span class="font-extrabold text-slate-900 text-base">${h.code}</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                    h.status === 'Accepted' ? 'bg-emerald-100 text-emerald-800' :
+                                    h.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+                                }">${h.status}</span>
+                                <span class="bg-sky-100 text-sky-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Commission: ${h.commission}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 font-medium"><i class="fa-solid fa-route text-sky-600 mr-1"></i> Route: ${h.route}</p>
+                            <p class="text-xs text-slate-500"><i class="fa-solid fa-truck text-slate-400 mr-1"></i> Assigned Unit: <strong class="text-slate-700">${h.assignedTruck}</strong></p>
+                        </div>
+                        <div class="flex items-center space-x-2 shrink-0 w-full md:w-auto justify-end">
+                            <button onclick="updateTransshipmentStatus('${h.id}', 'Accepted')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-semibold shadow transition flex items-center space-x-1">
+                                <i class="fa-solid fa-check"></i>
+                                <span>Accept</span>
+                            </button>
+                            <button onclick="updateTransshipmentStatus('${h.id}', 'Rejected')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-semibold shadow transition flex items-center space-x-1">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Reject</span>
+                            </button>
+                            <button onclick="showReassignModal('${h.id}')" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-semibold shadow transition flex items-center space-x-1">
+                                <i class="fa-solid fa-shuffle"></i>
+                                <span>Reassign</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
                 bodyEl.innerHTML = `
                     <div class="space-y-6">
-                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between">
+                        <div class="bg-amber-50 border border-amber-200 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
-                                <h4 class="font-bold text-amber-900 text-sm">Sub-contractor / Second-hand Commission Market</h4>
-                                <p class="text-xs text-amber-700 mt-0.5">Manage delegated container trips, photographs & agent commissions.</p>
+                                <h4 class="font-bold text-amber-900 text-base">Transshipment Hub & Secondary Assignment Control</h4>
+                                <p class="text-xs text-amber-700 mt-1">Review incoming secondary container waybills, assign available fleet trucks, or accept/reject sub-contractor orders.</p>
                             </div>
-                            <button onclick="showToast('New sub-order broadcasted!')" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow transition whitespace-nowrap">Post Trip</button>
+                            <button onclick="showAddNewTransshipmentModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow transition whitespace-nowrap">+ Post New Hub Order</button>
                         </div>
 
                         <div class="space-y-3">
-                            <h4 class="font-bold text-slate-800 text-sm">Available Secondary Assignments</h4>
-                            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <div class="space-y-1">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="font-bold text-slate-900">SH-Cargo #9021</span>
-                                        <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Commission: ₱ 2,500</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Route: Manila North Harbor → Valenzuela Warehouse</p>
-                                </div>
-                                <button onclick="showToast('Successfully accepted commission task!')" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow transition">Accept Task</button>
+                            <h4 class="font-bold text-slate-800 text-sm">Active Transshipment Hub Queue (${hubs.length})</h4>
+                            <div class="space-y-3">
+                                ${hubRows}
                             </div>
                         </div>
                     </div>
@@ -870,6 +903,97 @@
             await window.deleteRecordFromCloud('fuelLogs', id);
             showToast('Fuel log deleted.');
             openSubModule('fuel');
+        };
+
+        // Transshipment / Hub Management Actions
+        window.updateTransshipmentStatus = function(id, newStatus) {
+            if (!window.appData.transshipments) return;
+            const item = window.appData.transshipments.find(h => h.id === id);
+            if (item) {
+                item.status = newStatus;
+                showToast(`Transshipment ${item.code} status updated to: ${newStatus}`);
+                openModal('secondhand'); // Refresh modal view
+            }
+        };
+
+        window.showReassignModal = function(id) {
+            const item = window.appData.transshipments.find(h => h.id === id);
+            if (!item) return;
+            const bodyEl = document.getElementById('modalBodyContent');
+            bodyEl.innerHTML = `
+                <button onclick="openModal('secondhand')" class="mb-4 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold transition flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i><span>Back to Transshipment Hub</span>
+                </button>
+                <form onsubmit="event.preventDefault(); saveReassignment('${id}');" class="space-y-4 max-w-md mx-auto">
+                    <h3 class="font-bold text-slate-900 text-base mb-1">Reassign Truck Unit for ${item.code}</h3>
+                    <p class="text-xs text-slate-500 mb-3">Current route: ${item.route}</p>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Available Fleet Unit</label>
+                        <select id="reassignTruck" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white">
+                            <option value="NCR-4821">NCR-4821 (Sinotruk Howo 380HP)</option>
+                            <option value="CAL-9912">CAL-9912 (Isuzu Giga Prime)</option>
+                            <option value="MIA-1029">MIA-1029 (UD Trucks Quester)</option>
+                            <option value="BAT-7710">BAT-7710 (Hino Profia 40ft)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl shadow transition text-sm">Confirm Reassignment</button>
+                </form>
+            `;
+        };
+
+        window.saveReassignment = function(id) {
+            const truck = document.getElementById('reassignTruck').value;
+            const item = window.appData.transshipments.find(h => h.id === id);
+            if (item) {
+                item.assignedTruck = truck;
+                item.status = 'Accepted';
+                showToast(`Successfully reassigned ${item.code} to unit ${truck}!`);
+                openModal('secondhand');
+            }
+        };
+
+        window.showAddNewTransshipmentModal = function() {
+            const bodyEl = document.getElementById('modalBodyContent');
+            bodyEl.innerHTML = `
+                <button onclick="openModal('secondhand')" class="mb-4 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold transition flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i><span>Back to Transshipment Hub</span>
+                </button>
+                <form onsubmit="event.preventDefault(); saveNewTransshipment();" class="space-y-4 max-w-md mx-auto">
+                    <h3 class="font-bold text-slate-900 text-base mb-2">Post New Hub Transshipment Order</h3>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Cargo Code / Order No.</label>
+                        <input type="text" id="newHubCode" required placeholder="SH-Cargo #9024" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Route (Origin → Destination)</label>
+                        <input type="text" id="newHubRoute" required placeholder="Manila South Harbor → Calamba DC" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Commission Amount (₱)</label>
+                        <input type="text" id="newHubComm" required placeholder="₱ 3,500" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900">
+                    </div>
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl shadow transition text-sm">Post to Hub</button>
+                </form>
+            `;
+        };
+
+        window.saveNewTransshipment = function() {
+            const code = document.getElementById('newHubCode').value;
+            const route = document.getElementById('newHubRoute').value;
+            const commission = document.getElementById('newHubComm').value;
+
+            if (!window.appData.transshipments) window.appData.transshipments = [];
+            window.appData.transshipments.push({
+                id: 'sh-' + Date.now(),
+                code,
+                route,
+                status: 'Pending Review',
+                commission,
+                assignedTruck: 'Unassigned'
+            });
+
+            showToast('New transshipment hub order posted successfully!');
+            openModal('secondhand');
         };
 
         function showToast(message) {
