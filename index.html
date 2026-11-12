@@ -25,6 +25,7 @@
         .Reserved { background: #fff4dc; color: #946200; }
         .Hold, .Damaged { background: #ffebe8; color: #b33225; }
         .Released { background: #eaf1fb; color: #315f98; }
+        .drag-over { border-color: #d97706 !style; background-color: rgba(251, 191, 36, 0.05); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -369,7 +370,7 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 3: Gate-In with Delivery Proof / Photo Attachment -->
+            <!-- Yard Tab 3: Gate-In with Drag-and-Drop Photo Attachment -->
             <div id="yardGateIn" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-800 mb-4">Record Yard Gate-In Entry</h3>
@@ -394,14 +395,16 @@
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
                             
-                            <!-- ATTACHMENT: UPLOAD DELIVERY PROOF / PHOTOS -->
-                            <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
-                                <label class="font-semibold text-slate-700 mb-2 block"><i class="fa-solid fa-camera mr-1 text-amber-600"></i> Upload Delivery Proof / Photos (Gate-In)</label>
-                                <div class="flex flex-col sm:flex-row items-center gap-4">
-                                    <input type="file" id="gateInPhotoInput" accept="image/*" multiple onchange="handleGateInPhotoPreview(event)" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
-                                    <span class="text-[11px] text-slate-500">Attach container inspection photo, EIR receipt, or damage snapshot.</span>
-                                </div>
-                                <div id="gateInPhotoPreviewContainer" class="flex flex-wrap gap-3 mt-3"></div>
+                            <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-IN -->
+                            <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateInDropZone" 
+                                 ondragover="handleDragOver(event, 'gateInDropZone')" 
+                                 ondragleave="handleDragLeave(event, 'gateInDropZone')" 
+                                 ondrop="handleDrop(event, 'gateIn')">
+                                <label class="font-semibold text-slate-700 mb-1 block"><i class="fa-solid fa-cloud-arrow-up mr-1 text-amber-600"></i> Drag & Drop Photos / Files Here</label>
+                                <p class="text-[11px] text-slate-500 mb-3">or click the button below to browse files</p>
+                                <input type="file" id="gateInPhotoInput" accept="image/*,application/pdf" multiple onchange="handleFileInput(event, 'gateIn')" class="hidden">
+                                <button type="button" onclick="document.getElementById('gateInPhotoInput').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-lg font-semibold text-xs transition">Browse Files</button>
+                                <div id="gateInPhotoPreviewContainer" class="flex flex-wrap justify-center gap-3 mt-4"></div>
                             </div>
                         </div>
 
@@ -413,7 +416,7 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 4: Gate-Out -->
+            <!-- Yard Tab 4: Gate-Out with Drag-and-Drop Photo Attachment -->
             <div id="yardGateOut" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-800 mb-4">Container Gate-Out / Release</h3>
@@ -425,17 +428,21 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount</label><input type="number" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Reefer Van</option><option>Dry Van</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount</label><select name="storageamount" class="p-2 border rounded-lg w-full"><option>450</option><option>500</option><option>800</option></select></div>                            
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
 
-                            <!-- ATTACHMENT: UPLOAD DELIVERY PROOF / PHOTOS -->
-                            <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
-                                <label class="font-semibold text-slate-700 mb-2 block"><i class="fa-solid fa-camera mr-1 text-amber-600"></i> Upload Delivery Proof / Photos (Gate-Out)</label>
-                                <div class="flex flex-col sm:flex-row items-center gap-4">
-                                    <input type="file" id="gateOutPhotoInput" accept="image/*" multiple onchange="handleGateOutPhotoPreview(event)" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
-                                    <span class="text-[11px] text-slate-500">Attach container inspection photo, EIR receipt, or damage snapshot.</span>
-                                </div>
-                                <div id="gateOutPhotoPreviewContainer" class="flex flex-wrap gap-3 mt-3"></div>
+                            <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-OUT -->
+                            <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateOutDropZone" 
+                                 ondragover="handleDragOver(event, 'gateOutDropZone')" 
+                                 ondragleave="handleDragLeave(event, 'gateOutDropZone')" 
+                                 ondrop="handleDrop(event, 'gateOut')">
+                                <label class="font-semibold text-slate-700 mb-1 block"><i class="fa-solid fa-cloud-arrow-up mr-1 text-amber-600"></i> Drag & Drop Photos / Files Here (Gate-Out)</label>
+                                <p class="text-[11px] text-slate-500 mb-3">or click the button below to browse files</p>
+                                <input type="file" id="gateOutPhotoInput" accept="image/*,application/pdf" multiple onchange="handleFileInput(event, 'gateOut')" class="hidden">
+                                <button type="button" onclick="document.getElementById('gateOutPhotoInput').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-lg font-semibold text-xs transition">Browse Files</button>
+                                <div id="gateOutPhotoPreviewContainer" class="flex flex-wrap justify-center gap-3 mt-4"></div>
                             </div>
                         </div>
                         <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Confirm Gate-Out</button>
@@ -518,57 +525,77 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC WITH SAFE STORAGE PARSING & PHOTO ATTACHMENTS -->
+    <!-- JAVASCRIPT LOGIC WITH DRAG & DROP FILE/PHOTO SUPPORT -->
     <script>
-        // Temporary staging array for Gate-In uploaded photo data URLs
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
 
-        function handleGateInPhotoPreview(e) {
-            const files = e.target.files;
-            const container = document.getElementById('gateInPhotoPreviewContainer');
-            if (!container) return;
+        // Drag and Drop Handlers
+        function handleDragOver(e, zoneId) {
+            e.preventDefault();
+            e.stopPropagation();
+            const zone = document.getElementById(zoneId);
+            if(zone) zone.classList.add('bg-amber-100', 'border-amber-500');
+        }
+
+        function handleDragLeave(e, zoneId) {
+            e.preventDefault();
+            e.stopPropagation();
+            const zone = document.getElementById(zoneId);
+            if(zone) zone.classList.remove('bg-amber-100', 'border-amber-500');
+        }
+
+        function handleDrop(e, type) {
+            e.preventDefault();
+            e.stopPropagation();
+            const zoneId = type === 'gateIn' ? 'gateInDropZone' : 'gateOutDropZone';
+            const zone = document.getElementById(zoneId);
+            if(zone) zone.classList.remove('bg-amber-100', 'border-amber-500');
             
-            for (let file of files) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const base64Data = event.target.result;
-                    stagedGateInPhotos.push({
-                        name: file.name,
-                        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-                        dataUrl: base64Data,
-                        date: new Date().toISOString()
-                    });
-                    
-                    const thumb = document.createElement('div');
-                    thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm';
-                    thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
-                    container.appendChild(thumb);
-                };
-                reader.readAsDataURL(file);
+            const files = e.dataTransfer.files;
+            if(files && files.length > 0) {
+                processFiles(files, type);
             }
         }
 
-        function handleGateOutPhotoPreview(e) {
+        function handleFileInput(e, type) {
             const files = e.target.files;
-            const container = document.getElementById('gateOutPhotoPreviewContainer');
-            if (!container) return;
-            
+            if(files && files.length > 0) {
+                processFiles(files, type);
+            }
+        }
+
+        function processFiles(files, type) {
+            const containerId = type === 'gateIn' ? 'gateInPhotoPreviewContainer' : 'gateOutPhotoPreviewContainer';
+            const previewContainer = document.getElementById(containerId);
+            if(!previewContainer) return;
+
             for (let file of files) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const base64Data = event.target.result;
-                    stagedGateOutPhotos.push({
+                    const fileObj = {
                         name: file.name,
                         size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
                         dataUrl: base64Data,
                         date: new Date().toISOString()
-                    });
+                    };
+
+                    if(type === 'gateIn') {
+                        stagedGateInPhotos.push(fileObj);
+                    } else {
+                        stagedGateOutPhotos.push(fileObj);
+                    }
                     
                     const thumb = document.createElement('div');
-                    thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm';
-                    thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
-                    container.appendChild(thumb);
+                    thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white flex items-center justify-center';
+                    
+                    if(file.type.startsWith('image/')) {
+                        thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
+                    } else {
+                        thumb.innerHTML = `<div class="text-[9px] font-bold text-slate-700 text-center p-1 truncate">${file.name}</div>`;
+                    }
+                    previewContainer.appendChild(thumb);
                 };
                 reader.readAsDataURL(file);
             }
@@ -1153,7 +1180,6 @@
         function renderYardOutSelect() {
             const sel = document.getElementById('yardOutContainer');
             if(sel) {
-                // Modified selection: If vanInStats is UNPAID, we can optionally filter or flag it, but the strict validation check is handled upon submission.
                 sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => `<option value="${c.id}">${c.number} — ${c.size} — ${c.line} (${c.status}) ${c.vanInStats === 'UNPAID' ? '⚠️ [UNPAID]' : ''}</option>`).join('');
             }
         }
@@ -1223,17 +1249,16 @@
             switchYardTab('yardInventory');
         }
 
-        // --- UPDATED GATE-OUT LOGIC FOR UNPAID / PAID CHECK ---
+        // Gate-Out logic checking UNPAID status
         function handleYardGateOut(e) {
             e.preventDefault();
             let f = Object.fromEntries(new FormData(e.target));
             let c = yardDb.containers.find(x => x.id === f.container);
             if(!c) return alert('Select a valid container.');
 
-            // REQUIREMENT CHECK: If Van In Amount is saved as UNPAID, reflect/block Gate-Out; if PAID, no issue.
             if(c.vanInStats && c.vanInStats.toUpperCase() === 'UNPAID') {
                 alert(`⚠️ Cannot Proceed with Gate-Out!\n\nContainer ${c.number} has an UNPAID Van In status (Amount: ₱${c.vanInAmount || '0.00'}). Please settle the balance to PAID before releasing.`);
-                return; // Blocks reflection / gate-out submission
+                return; 
             }
 
             if(!confirm('Confirm gate-out for ' + c.number + '?')) return;
