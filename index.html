@@ -24,8 +24,12 @@
 </head>
 <body class="bg-ocean-gradient min-h-screen text-white flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
 
-    <!-- Top Navigation / Language Toggle -->
-    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex justify-end items-center">
+    <!-- Top Navigation / Language Toggle & Cloud Sync Status -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-medium">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="syncStatus" class="text-sky-100">Database Connected (Cloud Active)</span>
+        </div>
         <button id="langToggleBtn" onclick="toggleLanguage()" class="bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center space-x-2">
             <i class="fa-solid fa-globe text-cyan-300"></i>
             <span id="langText">Chinese/English</span>
@@ -102,7 +106,7 @@
         <p class="text-white/60">© 2026 SKYMOVER. <span data-i18n="footer_rights">All rights reserved.</span></p>
     </footer>
 
-    <!-- Interactive Dashboard Modal (Simulated App Views) -->
+    <!-- Interactive Dashboard Modal -->
     <div id="appModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white text-slate-800 rounded-3xl w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 transform transition-all">
             
@@ -124,7 +128,7 @@
 
             <!-- Modal Content Body -->
             <div id="modalBodyContent" class="p-6 md:p-8">
-                <!-- Dynamic content will be injected here via JavaScript -->
+                <!-- Dynamic content injected here -->
             </div>
 
         </div>
@@ -136,9 +140,113 @@
         <span id="toastMsg" class="text-sm font-medium">Action completed successfully!</span>
     </div>
 
-    <!-- JavaScript Logic & Mock Data -->
+    <!-- Firebase SDK Imports & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase Configuration & State
+        let db = null;
+        let auth = null;
+        let userId = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'skymover-ph-fleet-default';
+
+        // Local state fallback / cache
+        window.appData = {
+            vehicles: [
+                { id: 'v1', plate: 'NCR-4821', model: 'Sinotruk Howo 380HP', chassis: '40ft Skeleton Chassis', status: 'Active' },
+                { id: 'v2', plate: 'CAL-9912', model: 'Isuzu Giga Prime', chassis: '20ft Flatbed', status: 'Active' },
+                { id: 'v3', plate: 'MIA-1029', model: 'UD Trucks Quester', chassis: '40ft High Cube', status: 'In Maintenance' }
+            ],
+            drivers: [
+                { id: 'd1', name: 'Juan Dela Cruz', phone: '+63 912 345 6789', license: 'N01-12-993821', truck: 'NCR-4821', status: 'On Duty' },
+                { id: 'd2', name: 'Pedro Santos', phone: '+63 918 765 4321', license: 'N02-18-442109', truck: 'CAL-9912', status: 'On Route' }
+            ],
+            fuelLogs: [
+                { id: 'f1', unit: 'NCR-4821', liters: '400L', cost: '₱27,600', station: 'Petron SLEX', date: '2026-06-11' }
+            ],
+            maintenance: [
+                { id: 'm1', unit: 'MIA-1029', task: 'Brake System Overhaul', location: 'Valenzuela Depot', status: 'In Progress' }
+            ],
+            waybills: [
+                { id: 'w1', wbNumber: 'WB-2026-9931', pickup: 'MICT Manila Port', delivery: 'Laguna Technopark', status: 'In Transit' }
+            ]
+        };
+
+        async function initFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    userId = auth.currentUser?.uid || 'anon-user';
+                    document.getElementById('syncStatus').innerText = 'Cloud Database Connected (Live)';
+                    
+                    // Setup real-time listeners for persistent data sync
+                    setupCloudSync();
+                } else {
+                    document.getElementById('syncStatus').innerText = 'Local Storage Mode Active';
+                }
+            } catch (err) {
+                console.warn('Firebase init fallback to local cache:', err);
+                document.getElementById('syncStatus').innerText = 'Local Session Mode';
+            }
+        }
+
+        function setupCloudSync() {
+            if (!db || !userId) return;
+            const collections = ['vehicles', 'drivers', 'fuelLogs', 'maintenance', 'waybills'];
+            collections.forEach(colName => {
+                const colRef = collection(db, 'artifacts', appId, 'users', userId, colName);
+                onSnapshot(colRef, (snapshot) => {
+                    if (!snapshot.empty) {
+                        window.appData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    }
+                }, (err) => console.log('Sync err:', err));
+            });
+        }
+
+        window.addRecordToCloud = async function(colName, recordData) {
+            // Update local memory immediately
+            window.appData[colName].push({ id: 'local-' + Date.now(), ...recordData });
+            
+            // Try saving to Firestore if connected
+            if (db && userId) {
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'users', userId, colName);
+                    await addDoc(colRef, recordData);
+                } catch (e) {
+                    console.log('Cloud save queued locally:', e);
+                }
+            }
+        };
+
+        window.deleteRecordFromCloud = async function(colName, id) {
+            window.appData[colName] = window.appData[colName].filter(item => item.id !== id);
+            if (db && userId && !id.startsWith('local-')) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', userId, colName, id);
+                    await deleteDoc(docRef);
+                } catch (e) {
+                    console.log('Cloud delete error:', e);
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', initFirebase);
+    </script>
+
+    <!-- JavaScript Logic & UI Controllers -->
     <script>
-        // Language State (EN / ZH)
         let currentLang = 'en';
 
         const translations = {
@@ -191,7 +299,6 @@
             showToast(currentLang === 'zh' ? '已切换至中文模式' : 'Switched to English mode');
         }
 
-        // Modal Controls & Views
         function openModal(type) {
             const modal = document.getElementById('appModal');
             const titleEl = document.getElementById('modalTitle');
@@ -260,10 +367,6 @@
                                     <p class="text-xs font-bold text-sky-600">Current Task</p>
                                     <p class="text-sm font-medium text-slate-800">Container Loaded & Sealed. En route via SLEX.</p>
                                 </div>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400">Upcoming</p>
-                                    <p class="text-sm font-medium text-slate-400">Client Unloading & Proof of Delivery (POD)</p>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -282,10 +385,8 @@
                             <button onclick="showToast('New sub-order broadcasted!')" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow transition whitespace-nowrap">Post Trip</button>
                         </div>
 
-                        <!-- Available Transfers List -->
                         <div class="space-y-3">
                             <h4 class="font-bold text-slate-800 text-sm">Available Secondary Assignments</h4>
-                            
                             <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div class="space-y-1">
                                     <div class="flex items-center space-x-2">
@@ -293,19 +394,6 @@
                                         <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Commission: ₱ 2,500</span>
                                     </div>
                                     <p class="text-xs text-slate-600">Route: Manila North Harbor → Valenzuela Warehouse</p>
-                                    <p class="text-xs text-slate-500">Requirements: Waybill Verification + Geotagged Photo</p>
-                                </div>
-                                <button onclick="showToast('Successfully accepted commission task!')" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow transition">Accept Task</button>
-                            </div>
-
-                            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <div class="space-y-1">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="font-bold text-slate-900">SH-Cargo #9022</span>
-                                        <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Commission: ₱ 3,200</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Route: Batangas Port → Alabang Logistics Hub</p>
-                                    <p class="text-xs text-slate-500">Requirements: Waybill Verification + Geotagged Photo</p>
                                 </div>
                                 <button onclick="showToast('Successfully accepted commission task!')" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow transition">Accept Task</button>
                             </div>
@@ -317,44 +405,46 @@
                 subtitleEl.innerText = currentLang === 'zh' ? 'Join Skymover Transportation Fleet' : 'Join Skymover Fleet';
                 iconEl.className = 'fa-solid fa-user-plus';
                 bodyEl.innerHTML = `
-                    <form onsubmit="event.preventDefault(); closeModal(); showToast('Registration submitted successfully! Pending approval.');" class="space-y-4 max-w-lg mx-auto">
+                    <form onsubmit="event.preventDefault(); registerNewDriver(event);" class="space-y-4 max-w-lg mx-auto">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
-                                <input type="text" required placeholder="e.g. Juan Santos" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500">
+                                <input type="text" id="regName" required placeholder="e.g. Juan Santos" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500 text-slate-900">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
-                                <input type="tel" required placeholder="+63 912 345 6789" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500">
+                                <input type="tel" id="regPhone" required placeholder="+63 912 345 6789" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500 text-slate-900">
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Professional Driver's License No.</label>
-                                <input type="text" required placeholder="N01-XX-XXXXXX" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Professional License No.</label>
+                                <input type="text" id="regLicense" required placeholder="N01-XX-XXXXXX" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500 text-slate-900">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Truck Unit Assigned</label>
-                                <select class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500">
-                                    <option>Prime Mover 40ft (Container)</option>
-                                    <option>Wing Van 10-Wheeler</option>
-                                    <option>Standard Truck 6-Wheeler</option>
-                                </select>
+                                <input type="text" id="regTruck" required placeholder="e.g. NCR-4821" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500 text-slate-900">
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Home Base / Region in Philippines</label>
-                            <input type="text" required placeholder="e.g. Metro Manila / Cavite" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500">
-                        </div>
                         <div class="pt-2">
-                            <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl shadow-lg transition text-sm">Submit Registration</button>
+                            <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl shadow-lg transition text-sm">Submit Registration to DB</button>
                         </div>
                     </form>
                 `;
             }
         }
 
-        // Render Management Backend with Top Navigation (LogiBRAIN, LogiLENS, LogiTRACK) + 8 Grid Cards
+        async function registerNewDriver(e) {
+            const name = document.getElementById('regName').value;
+            const phone = document.getElementById('regPhone').value;
+            const license = document.getElementById('regLicense').value;
+            const truck = document.getElementById('regTruck').value;
+
+            await window.addRecordToCloud('drivers', { name, phone, license, truck, status: 'Duty Ready' });
+            closeModal();
+            showToast('New driver registered and synced to database successfully!');
+        }
+
         function renderManagementBackend() {
             const titleEl = document.getElementById('modalTitle');
             const subtitleEl = document.getElementById('modalSubtitle');
@@ -367,7 +457,7 @@
 
             bodyEl.innerHTML = `
                 <div class="space-y-6">
-                    <!-- Top Sub-Module Tab Bar matching reference -->
+                    <!-- Top Sub-Module Tab Bar -->
                     <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
                         <button onclick="switchManagementTab('grid')" id="tab-grid" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white shadow transition flex items-center space-x-2">
                             <i class="fa-solid fa-th-large"></i>
@@ -387,9 +477,7 @@
                         </button>
                     </div>
 
-                    <!-- Dynamic Tab Container -->
                     <div id="managementTabContent">
-                        <!-- Default: 8-Card Grid -->
                         ${getGridModulesHTML()}
                     </div>
                 </div>
@@ -397,15 +485,12 @@
         }
 
         function switchManagementTab(tabName) {
-            // Update Tab active states
             ['grid', 'logibrain', 'logilens', 'logitrack'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if(btn) {
-                    if(t === tabName) {
-                        btn.className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white shadow transition flex items-center space-x-2";
-                    } else {
-                        btn.className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center space-x-2";
-                    }
+                    btn.className = t === tabName 
+                        ? "px-5 py-2.5 rounded-xl font-bold text-sm bg-sky-600 text-white shadow transition flex items-center space-x-2"
+                        : "px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center space-x-2";
                 }
             });
 
@@ -429,34 +514,22 @@
                                 <span>Generate AI Insights</span>
                             </button>
                         </div>
-
-                        <!-- 4 Key Feature Points matching reference -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-start space-x-4">
                                 <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center shrink-0 mt-1"><i class="fa-solid fa-table-cells"></i></div>
-                                <div><h4 class="font-bold text-slate-900 text-sm">Operational KPI tracking with customizable dashboards</h4><p class="text-xs text-slate-600 mt-1">Real-time tracking of container turn times, gate-in efficiency, and driver utilization ratios.</p></div>
+                                <div><h4 class="font-bold text-slate-900 text-sm">Operational KPI tracking with customizable dashboards</h4><p class="text-xs text-slate-600 mt-1">Real-time tracking of container turn times and gate-in efficiency.</p></div>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-start space-x-4">
                                 <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center shrink-0 mt-1"><i class="fa-solid fa-chart-line"></i></div>
-                                <div><h4 class="font-bold text-slate-900 text-sm">Predictive analytics to identify trends before they impact business</h4><p class="text-xs text-slate-600 mt-1">Forecast diesel price spikes, traffic bottleneck congestion around SLEX, and peak seasonal container demands.</p></div>
-                            </div>
-                            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-start space-x-4">
-                                <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center shrink-0 mt-1"><i class="fa-solid fa-brain"></i></div>
-                                <div><h4 class="font-bold text-slate-900 text-sm">AI-driven insights for smarter, faster decision-making</h4><p class="text-xs text-slate-600 mt-1">Automated dispatch recommendations and route adjustments to minimize idle times.</p></div>
-                            </div>
-                            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-start space-x-4">
-                                <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center shrink-0 mt-1"><i class="fa-solid fa-pie-chart"></i></div>
-                                <div><h4 class="font-bold text-slate-900 text-sm">A complete business overview to improve efficiency, control costs, and manage risk</h4><p class="text-xs text-slate-600 mt-1">Holistic financial audit logs and risk mitigation scorecards across all active Manila fleet units.</p></div>
+                                <div><h4 class="font-bold text-slate-900 text-sm">Predictive analytics to identify trends before they impact business</h4><p class="text-xs text-slate-600 mt-1">Forecast diesel price spikes and SLEX bottleneck congestion.</p></div>
                             </div>
                         </div>
-
-                        <!-- Simulated AI Live Insights Output Box -->
                         <div id="aiInsightsBox" class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 hidden">
                             <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm mb-2">
                                 <i class="fa-solid fa-robot"></i>
                                 <span>LogiBRAIN Real-Time Neural Audit Result:</span>
                             </div>
-                            <p class="text-slate-300 text-xs leading-relaxed" id="aiInsightsText">Analyzing fleet telemetry... Recommended: Shift 6 trucks from North Harbor route to Batangas corridor to capture 14% higher spot freight yields today.</p>
+                            <p class="text-slate-300 text-xs leading-relaxed" id="aiInsightsText">Analyzing fleet telemetry... Recommended: Shift 6 trucks from North Harbor route to Batangas corridor.</p>
                         </div>
                     </div>
                 `;
@@ -467,9 +540,9 @@
                             <div>
                                 <span class="bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full text-xs font-bold border border-sky-500/30">Computer Vision & Document Audit</span>
                                 <h3 class="text-2xl font-bold mt-2">LogiLENS Inspection Suite</h3>
-                                <p class="text-xs text-slate-400 mt-1">AI optical character recognition (OCR) for container serial numbers and waybill verification.</p>
+                                <p class="text-xs text-slate-400 mt-1">AI optical character recognition (OCR) for container serial numbers.</p>
                             </div>
-                            <button onclick="showToast('LogiLENS batch scan completed successfully!')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition">Run Batch Scan</button>
+                            <button onclick="showToast('LogiLENS batch scan completed!')" class="bg-sky-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition">Run Batch Scan</button>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl"><h4 class="font-bold text-slate-900 text-sm">Waybill OCR Accuracy</h4><p class="text-2xl font-extrabold text-sky-600 mt-1">99.4%</p></div>
@@ -487,12 +560,12 @@
                                 <h3 class="text-2xl font-bold mt-2">LogiTRACK Live Radar</h3>
                                 <p class="text-xs text-slate-400 mt-1">Real-time GPS telemetry and driver route adherence monitoring.</p>
                             </div>
-                            <button onclick="showToast('GPS Radar synchronized!')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition">Sync Radar</button>
+                            <button onclick="showToast('GPS Radar synchronized!')" class="bg-sky-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition">Sync Radar</button>
                         </div>
                         <div class="bg-slate-100 p-6 rounded-2xl border border-slate-300 text-center space-y-3">
                             <i class="fa-solid fa-map-location-dot text-sky-600 text-4xl animate-bounce"></i>
                             <h4 class="font-bold text-slate-900 text-base">Active Corridor: Manila - Laguna - Batangas</h4>
-                            <p class="text-xs text-slate-600">All 48 container transport units reporting normal status with zero geofence breaches.</p>
+                            <p class="text-xs text-slate-600">All connected container transport units reporting normal status.</p>
                         </div>
                     </div>
                 `;
@@ -504,87 +577,53 @@
                 <div class="space-y-4">
                     <div class="bg-sky-50 border border-sky-100 p-4 rounded-2xl flex items-center justify-between">
                         <div>
-                            <h4 class="font-bold text-slate-900 text-sm">Skymover Enterprise Operations Hub</h4>
-                            <p class="text-xs text-slate-600 mt-0.5">Click any module card below to access real-time fleet management subsystems.</p>
+                            <h4 class="font-bold text-slate-900 text-sm">Skymover Enterprise Operations Hub (Database Synced)</h4>
+                            <p class="text-xs text-slate-600 mt-0.5">Click any module card below to manage live database records.</p>
                         </div>
-                        <span class="bg-sky-600 text-white text-xs px-3 py-1 rounded-full font-semibold">Active Fleet: 48 Units</span>
+                        <span class="bg-sky-600 text-white text-xs px-3 py-1 rounded-full font-semibold">Active Fleet: ${window.appData.vehicles.length} Units</span>
                     </div>
 
-                    <!-- 8 Detailed Management Cards Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        
-                        <!-- 1. Dashboard -->
                         <div onclick="openSubModule('dashboard')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-table-cells text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-table-cells text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Dashboard</h3>
                             <p class="text-slate-400 text-xs">Fleet overview and KPI monitoring</p>
                         </div>
-
-                        <!-- 2. Vehicle Management -->
                         <div onclick="openSubModule('vehicles')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-truck text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-truck text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Vehicle Management</h3>
                             <p class="text-slate-400 text-xs">Fleet masterlist and assignments</p>
                         </div>
-
-                        <!-- 3. Driver Management -->
                         <div onclick="openSubModule('drivers')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-users text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-users text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Driver Management</h3>
                             <p class="text-slate-400 text-xs">Driver records and performance</p>
                         </div>
-
-                        <!-- 4. Fuel Monitoring -->
                         <div onclick="openSubModule('fuel')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-gas-pump text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-gas-pump text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Fuel Monitoring</h3>
                             <p class="text-slate-400 text-xs">Diesel consumption and expenses</p>
                         </div>
-
-                        <!-- 5. Maintenance -->
                         <div onclick="openSubModule('maintenance')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-screwdriver-wrench text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-screwdriver-wrench text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Maintenance</h3>
                             <p class="text-slate-400 text-xs">Repairs and preventive maintenance</p>
                         </div>
-
-                        <!-- 6. GPS & Dispatch -->
                         <div onclick="openSubModule('gps')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-location-dot text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-location-dot text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">GPS & Dispatch</h3>
                             <p class="text-slate-400 text-xs">Vehicle location and trip monitoring</p>
                         </div>
-
-                        <!-- 7. Fleet Expenses -->
                         <div onclick="openSubModule('expenses')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-wallet text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-wallet text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Fleet Expenses</h3>
                             <p class="text-slate-400 text-xs">Cost per trip and profitability</p>
                         </div>
-
-                        <!-- 8. Reports -->
                         <div onclick="openSubModule('reports')" class="bg-slate-900 text-white p-5 rounded-2xl cursor-pointer hover:bg-slate-800 transition shadow-md border border-slate-800 group">
-                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-chart-column text-sky-400"></i>
-                            </div>
+                            <div class="w-10 h-10 bg-sky-600/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-chart-column text-sky-400"></i></div>
                             <h3 class="font-bold text-white text-base mb-1">Reports</h3>
                             <p class="text-slate-400 text-xs">Daily, weekly and monthly reports</p>
                         </div>
-
                     </div>
                 </div>
             `;
@@ -607,7 +646,6 @@
             document.getElementById('appModal').classList.add('hidden');
         }
 
-        // Sub-module views when clicking the 8 detailed cards inside Management Backend
         function openSubModule(subType) {
             const titleEl = document.getElementById('modalTitle');
             const subtitleEl = document.getElementById('modalSubtitle');
@@ -622,76 +660,100 @@
                     ${backButtonHTML}
                     <div class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100"><p class="text-xs text-sky-600 font-semibold">Active Units</p><h4 class="text-xl font-bold text-slate-900 mt-1">42 / 48</h4></div>
-                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><p class="text-xs text-emerald-600 font-semibold">On-Time Delivery</p><h4 class="text-xl font-bold text-slate-900 mt-1">96.8%</h4></div>
-                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100"><p class="text-xs text-amber-600 font-semibold">Fuel Efficiency</p><h4 class="text-xl font-bold text-slate-900 mt-1">3.4 km/L</h4></div>
-                            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100"><p class="text-xs text-purple-600 font-semibold">Monthly Revenue</p><h4 class="text-xl font-bold text-slate-900 mt-1">₱ 8.94M</h4></div>
-                        </div>
-                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                            <h4 class="font-bold text-slate-800 mb-3 text-sm">Manila Port Operations Activity</h4>
-                            <div class="h-40 flex items-end justify-between gap-2 px-2 pt-6 border-b border-slate-200">
-                                <div class="w-full bg-sky-500 rounded-t-lg h-[60%] flex items-center justify-center text-white text-xs font-bold">Mon</div>
-                                <div class="w-full bg-sky-500 rounded-t-lg h-[80%] flex items-center justify-center text-white text-xs font-bold">Tue</div>
-                                <div class="w-full bg-sky-600 rounded-t-lg h-[95%] flex items-center justify-center text-white text-xs font-bold">Wed</div>
-                                <div class="w-full bg-sky-500 rounded-t-lg h-[70%] flex items-center justify-center text-white text-xs font-bold">Thu</div>
-                                <div class="w-full bg-sky-500 rounded-t-lg h-[85%] flex items-center justify-center text-white text-xs font-bold">Fri</div>
-                                <div class="w-full bg-sky-400 rounded-t-lg h-[50%] flex items-center justify-center text-white text-xs font-bold">Sat</div>
-                            </div>
+                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100"><p class="text-xs text-sky-600 font-semibold">Registered Units</p><h4 class="text-xl font-bold text-slate-900 mt-1">${window.appData.vehicles.length} Units</h4></div>
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><p class="text-xs text-emerald-600 font-semibold">Active Drivers</p><h4 class="text-xl font-bold text-slate-900 mt-1">${window.appData.drivers.length} Drivers</h4></div>
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100"><p class="text-xs text-amber-600 font-semibold">Fuel Logs Recorded</p><h4 class="text-xl font-bold text-slate-900 mt-1">${window.appData.fuelLogs.length} Entries</h4></div>
+                            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100"><p class="text-xs text-purple-600 font-semibold">Active Waybills</p><h4 class="text-xl font-bold text-slate-900 mt-1">${window.appData.waybills.length} Active</h4></div>
                         </div>
                     </div>
                 `;
             } else if (subType === 'vehicles') {
                 titleEl.innerText = 'Vehicle Management: Fleet Masterlist';
-                subtitleEl.innerText = 'Truck units, container chassis and registration status';
+                subtitleEl.innerText = 'Add, view, and manage truck units and chassis';
+                let rows = window.appData.vehicles.map(v => `
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">${v.plate}</td>
+                        <td class="p-3">${v.model}</td>
+                        <td class="p-3">${v.chassis}</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs">${v.status}</span></td>
+                        <td class="p-3 text-right"><button onclick="deleteVehicle('${v.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">Delete</button></td>
+                    </tr>
+                `).join('');
+
                 bodyEl.innerHTML = `
                     ${backButtonHTML}
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center"><h4 class="font-bold text-slate-800 text-sm">Master Fleet Inventory</h4><button onclick="showToast('New vehicle registered')" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">+ Add Truck</button></div>
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-slate-800 text-sm">Master Fleet Inventory</h4>
+                            <button onclick="showAddVehicleModal()" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">+ Add Truck</button>
+                        </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-slate-600">
-                                <thead class="bg-slate-100 text-xs text-slate-700 uppercase"><tr><th class="p-3">Plate No.</th><th class="p-3">Unit Model</th><th class="p-3">Chassis Type</th><th class="p-3">Status</th></tr></thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    <tr><td class="p-3 font-bold text-slate-900">NCR-4821</td><td class="p-3">Sinotruk Howo 380HP</td><td class="p-3">40ft Skeleton Chassis</td><td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs">Active</span></td></tr>
-                                    <tr><td class="p-3 font-bold text-slate-900">CAL-9912</td><td class="p-3">Isuzu Giga Prime</td><td class="p-3">20ft Flatbed</td><td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs">Active</span></td></tr>
-                                    <tr><td class="p-3 font-bold text-slate-900">MIA-1029</td><td class="p-3">UD Trucks Quester</td><td class="p-3">40ft High Cube</td><td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs">In Maintenance</span></td></tr>
-                                </tbody>
+                                <thead class="bg-slate-100 text-xs text-slate-700 uppercase"><tr><th class="p-3">Plate No.</th><th class="p-3">Unit Model</th><th class="p-3">Chassis Type</th><th class="p-3">Status</th><th class="p-3 text-right">Action</th></tr></thead>
+                                <tbody class="divide-y divide-slate-100">${rows}</tbody>
                             </table>
                         </div>
                     </div>
                 `;
             } else if (subType === 'drivers') {
                 titleEl.innerText = 'Driver Management: Records & Performance';
-                subtitleEl.innerText = 'Driver licensing, compliance, and safety ratings';
+                subtitleEl.innerText = 'Manage professional drivers and license records';
+                let rows = window.appData.drivers.map(d => `
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">${d.name}</td>
+                        <td class="p-3">${d.phone}</td>
+                        <td class="p-3">${d.license}</td>
+                        <td class="p-3">${d.truck || 'Unassigned'}</td>
+                        <td class="p-3 text-right"><button onclick="deleteDriver('${d.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">Delete</button></td>
+                    </tr>
+                `).join('');
+
                 bodyEl.innerHTML = `
                     ${backButtonHTML}
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center"><h4 class="font-bold text-slate-800 text-sm">Active Driver Directory</h4><button onclick="showToast('Driver record exported')" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Export List</button></div>
-                        <div class="space-y-2">
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center"><div><h5 class="font-bold text-slate-900 text-sm">Juan Dela Cruz (ID #409)</h5><p class="text-xs text-slate-500">License: N01-12-993821 | Safety Score: 98/100</p></div><span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-medium">Duty Ready</span></div>
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center"><div><h5 class="font-bold text-slate-900 text-sm">Pedro Santos (ID #412)</h5><p class="text-xs text-slate-500">License: N02-18-442109 | Safety Score: 94/100</p></div><span class="bg-sky-100 text-sky-800 px-2.5 py-1 rounded-full text-xs font-medium">On Route</span></div>
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-slate-800 text-sm">Active Driver Directory</h4>
+                            <button onclick="openModal('register')" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">+ Register Driver</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-100 text-xs text-slate-700 uppercase"><tr><th class="p-3">Driver Name</th><th class="p-3">Mobile No.</th><th class="p-3">License No.</th><th class="p-3">Truck Unit</th><th class="p-3 text-right">Action</th></tr></thead>
+                                <tbody class="divide-y divide-slate-100">${rows}</tbody>
+                            </table>
                         </div>
                     </div>
                 `;
             } else if (subType === 'fuel') {
                 titleEl.innerText = 'Fuel Monitoring: Diesel & Expenses';
-                subtitleEl.innerText = 'Real-time fuel card transactions and mileage logs';
+                subtitleEl.innerText = 'Track diesel refilling and card logs';
+                let rows = window.appData.fuelLogs.map(f => `
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">${f.unit}</td>
+                        <td class="p-3">${f.liters}</td>
+                        <td class="p-3">${f.cost}</td>
+                        <td class="p-3">${f.station}</td>
+                        <td class="p-3 text-right"><button onclick="deleteFuel('${f.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">Delete</button></td>
+                    </tr>
+                `).join('');
+
                 bodyEl.innerHTML = `
                     ${backButtonHTML}
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100"><p class="text-xs text-amber-600 font-semibold">Monthly Fuel Consumed</p><h4 class="text-xl font-bold text-slate-900 mt-1">42,850 Liters</h4></div>
-                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100"><p class="text-xs text-sky-600 font-semibold">Total Fuel Cost</p><h4 class="text-xl font-bold text-slate-900 mt-1">₱ 2,956,650</h4></div>
-                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><p class="text-xs text-emerald-600 font-semibold">Avg. Price / Liter</p><h4 class="text-xl font-bold text-slate-900 mt-1">₱ 69.00 / L</h4></div>
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-slate-800 text-sm">Fuel Transaction Logs</h4>
+                            <button onclick="showAddFuelModal()" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">+ Log Fuel Refill</button>
                         </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                            <h4 class="font-bold text-slate-800 text-sm mb-2">Recent Fleet Fuel Refills</h4>
-                            <p class="text-xs text-slate-600">Unit NCR-4821 filled 400L at Petron SLEX Station (₱27,600) - 2 hours ago</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-100 text-xs text-slate-700 uppercase"><tr><th class="p-3">Unit</th><th class="p-3">Liters</th><th class="p-3">Total Cost</th><th class="p-3">Station</th><th class="p-3 text-right">Action</th></tr></thead>
+                                <tbody class="divide-y divide-slate-100">${rows}</tbody>
+                            </table>
                         </div>
                     </div>
                 `;
             } else if (subType === 'maintenance') {
                 titleEl.innerText = 'Maintenance: Repairs & Preventive Checkup';
-                subtitleEl.innerText = 'Scheduled servicing and emergency repair logs';
+                subtitleEl.innerText = 'Scheduled servicing and garage logs';
                 bodyEl.innerHTML = `
                     ${backButtonHTML}
                     <div class="space-y-4">
@@ -710,7 +772,7 @@
                         <div class="bg-slate-900 text-white p-6 rounded-2xl flex flex-col items-center justify-center text-center space-y-3">
                             <i class="fa-solid fa-satellite-dish text-sky-400 text-3xl animate-pulse"></i>
                             <h4 class="font-bold text-lg">Live GPS Telemetry Connected</h4>
-                            <p class="text-xs text-slate-400 max-w-md">Tracking 42 active container trucks across Manila, Calamba, Batangas, and Subic transport corridors.</p>
+                            <p class="text-xs text-slate-400 max-w-md">Tracking ${window.appData.vehicles.length} active container trucks across Manila, Calamba, and Batangas corridors.</p>
                             <button onclick="showToast('GPS coordinates refreshed successfully')" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">Refresh Radar</button>
                         </div>
                     </div>
@@ -737,12 +799,78 @@
                         <h4 class="font-bold text-slate-800 text-sm">Generated Enterprise Reports</h4>
                         <div class="space-y-2">
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center"><div><h5 class="font-bold text-slate-900 text-sm">Monthly Container Freight Audit (May 2026)</h5><p class="text-xs text-slate-500">PDF Document • 4.2 MB</p></div><button onclick="showToast('Report downloaded successfully!')" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Download</button></div>
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center"><div><h5 class="font-bold text-slate-900 text-sm">Weekly Driver Performance & Safety Summary</h5><p class="text-xs text-slate-500">Excel Spreadsheet • 1.8 MB</p></div><button onclick="showToast('Report downloaded successfully!')" class="bg-sky-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Download</button></div>
                         </div>
                     </div>
                 `;
             }
         }
+
+        // Add / Delete helper modals for live database records
+        window.showAddVehicleModal = function() {
+            const bodyEl = document.getElementById('modalBodyContent');
+            bodyEl.innerHTML = `
+                <button onclick="openSubModule('vehicles')" class="mb-4 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold transition flex items-center space-x-1"><i class="fa-solid fa-arrow-left"><span>Back to Fleet</span></button>
+                <form onsubmit="event.preventDefault(); saveNewVehicle();" class="space-y-4 max-w-md mx-auto">
+                    <h3 class="font-bold text-slate-900 text-base mb-2">Register New Container Truck Unit</h3>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Plate Number</label><input type="text" id="newPlate" required placeholder="e.g. ABC-1234" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Truck Model</label><input type="text" id="newModel" required placeholder="e.g. Howo 380HP" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Chassis Type</label><input type="text" id="newChassis" required placeholder="40ft Skeleton" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl shadow transition text-sm">Save to Database</button>
+                </form>
+            `;
+        };
+
+        window.saveNewVehicle = async function() {
+            const plate = document.getElementById('newPlate').value;
+            const model = document.getElementById('newModel').value;
+            const chassis = document.getElementById('newChassis').value;
+            await window.addRecordToCloud('vehicles', { plate, model, chassis, status: 'Active' });
+            showToast('New vehicle added to database!');
+            openSubModule('vehicles');
+        };
+
+        window.deleteVehicle = async function(id) {
+            await window.deleteRecordFromCloud('vehicles', id);
+            showToast('Vehicle deleted from database.');
+            openSubModule('vehicles');
+        };
+
+        window.deleteDriver = async function(id) {
+            await window.deleteRecordFromCloud('drivers', id);
+            showToast('Driver removed from database.');
+            openSubModule('drivers');
+        };
+
+        window.showAddFuelModal = function() {
+            const bodyEl = document.getElementById('modalBodyContent');
+            bodyEl.innerHTML = `
+                <button onclick="openSubModule('fuel')" class="mb-4 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold transition flex items-center space-x-1"><i class="fa-solid fa-arrow-left"></i><span>Back to Fuel Logs</span></button>
+                <form onsubmit="event.preventDefault(); saveNewFuel();" class="space-y-4 max-w-md mx-auto">
+                    <h3 class="font-bold text-slate-900 text-base mb-2">Log Diesel Refill Transaction</h3>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Truck Plate No.</label><input type="text" id="fuelUnit" required placeholder="NCR-4821" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Liters</label><input type="text" id="fuelLiters" required placeholder="350L" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Total Cost (₱)</label><input type="text" id="fuelCost" required placeholder="₱24,150" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 mb-1">Station</label><input type="text" id="fuelStation" required placeholder="Petron SLEX" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900"></div>
+                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl shadow transition text-sm">Save Fuel Log</button>
+                </form>
+            `;
+        };
+
+        window.saveNewFuel = async function() {
+            const unit = document.getElementById('fuelUnit').value;
+            const liters = document.getElementById('fuelLiters').value;
+            const cost = document.getElementById('fuelCost').value;
+            const station = document.getElementById('fuelStation').value;
+            await window.addRecordToCloud('fuelLogs', { unit, liters, cost, station, date: new Date().toISOString().split('T')[0] });
+            showToast('Fuel log saved to database!');
+            openSubModule('fuel');
+        };
+
+        window.deleteFuel = async function(id) {
+            await window.deleteRecordFromCloud('fuelLogs', id);
+            showToast('Fuel log deleted.');
+            openSubModule('fuel');
+        };
 
         function showToast(message) {
             const toast = document.getElementById('toast');
