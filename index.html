@@ -25,7 +25,7 @@
         .Reserved { background: #fff4dc; color: #946200; }
         .Hold, .Damaged { background: #ffebe8; color: #b33225; }
         .Released { background: #eaf1fb; color: #315f98; }
-        .drag-over { border-color: #d97706 !style; background-color: rgba(251, 191, 36, 0.05); }
+        .drag-over { border-color: #d97706 !important; background-color: rgba(251, 191, 36, 0.05); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -389,10 +389,10 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Block</label><select name="block" class="p-2 border rounded-lg w-full"><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Bay</label><select name="bay" class="p-2 border rounded-lg w-full"><option>BAY-1</option><option>BAY-2</option><option>BAY-3</option><option>BAY-4</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Row</label><select name="row" class="p-2 border rounded-lg w-full"><option>GROUND</option><option>2ND ROW</option><option>3RD ROW</option><option>4TH ROW</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount</label><input type="number" name="vanInAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount</label><input type="number" id="gateInVanAmount" name="vanInAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van In Status Payment</label><select name="vanInStats" class="p-2 border rounded-lg w-full"><option>PAID</option><option>UNPAID</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Tier</label><input name="tier" class="p-2 border rounded-lg w-full" placeholder="1"></div>
-                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
+                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" id="gateInDateInput" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
                             
                             <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-IN -->
@@ -416,21 +416,40 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 4: Gate-Out with Drag-and-Drop Photo Attachment -->
+            <!-- Yard Tab 4: Gate-Out with Auto Storage & Total Calculation -->
             <div id="yardGateOut" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-800 mb-4">Container Gate-Out / Release</h3>
                     <form id="yardGateOutForm" onsubmit="handleYardGateOut(event)" class="space-y-4 text-xs">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Container Number *</label><select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full"><option value="">Select container in yard</option></select></div>
+                            <div class="md:col-span-2">
+                                <label class="font-semibold text-slate-600 mb-1 block">Container Number *</label>
+                                <select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full" onchange="onContainerSelectForGateOut()"><option value="">Select container in yard</option></select>
+                            </div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer</label><input name="customer" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount</label><input type="number" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Reefer Van</option><option>Dry Van</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount</label><select name="storageamount" class="p-2 border rounded-lg w-full"><option>450</option><option>500</option><option>800</option></select></div>                            
-                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
+                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount (₱)</label><input type="number" id="calcVanInAmount" name="vanInAmount" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-semibold" value="0"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount (₱)</label><input type="number" id="calcVanOutAmount" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full" oninput="recalculateTotals()"></div>
+                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee Type</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Dry Van</option><option>Reefer Van</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><input type="number" id="calcStorageAmount" name="storageamount" value="450" class="p-2 border rounded-lg w-full" oninput="recalculateTotals()"></div>
+                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time (Read-only)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" id="calcGateOutDate" type="datetime-local" required class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"></div>
+
+                            <!-- AUTO CALCULATED FIELDS -->
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 flex flex-col justify-center">
+                                <span class="font-bold text-amber-900 text-xs">Storage Days:</span>
+                                <input type="number" id="calcStorageDays" name="storageDays" readonly class="text-xl font-extrabold text-amber-700 bg-transparent border-0 p-0 w-full" value="0">
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 flex flex-col justify-center">
+                                <span class="font-bold text-emerald-900 text-xs">Total Amount Summation (₱):</span>
+                                <input type="text" id="calcTotalAmount" name="totalAmount" readonly class="text-xl font-extrabold text-emerald-700 bg-transparent border-0 p-0 w-full font-mono" value="0.00">
+                            </div>
+
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
 
                             <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-OUT -->
@@ -463,8 +482,8 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Shipping Line</th><th class="p-3">On-Hand</th><th class="p-3">Available</th><th class="p-3">Reserved</th><th class="p-3">Damaged / Hold</th></tr></thead><tbody id="yardLineRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Driver</th><th class="p-3">Customer</th><th class="p-3">EIR / Ref.</th><th class="p-3">Remarks</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History & Billings</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Storage Days</th><th class="p-3">Total Amount</th><th class="p-3">EIR / Ref.</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
 
@@ -525,7 +544,7 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC WITH DRAG & DROP FILE/PHOTO SUPPORT -->
+    <!-- JAVASCRIPT LOGIC WITH AUTO STORAGE DAYS & TOTAL CALCULATION -->
     <script>
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
@@ -1184,6 +1203,45 @@
             }
         }
 
+        function onContainerSelectForGateOut() {
+            const selId = document.getElementById('yardOutContainer').value;
+            const c = yardDb.containers.find(x => x.id === selId);
+            if(c) {
+                document.getElementById('calcGateInDisplay').value = c.date || '';
+                document.getElementById('calcVanInAmount').value = c.vanInAmount || 0;
+                recalculateTotals();
+            } else {
+                document.getElementById('calcGateInDisplay').value = '';
+                document.getElementById('calcVanInAmount').value = 0;
+                document.getElementById('calcStorageDays').value = 0;
+                document.getElementById('calcTotalAmount').value = '0.00';
+            }
+        }
+
+        function recalculateTotals() {
+            const gateInVal = document.getElementById('calcGateInDisplay').value;
+            const gateOutVal = document.getElementById('calcGateOutDate').value;
+            const vanIn = parseFloat(document.getElementById('calcVanInAmount').value) || 0;
+            const vanOut = parseFloat(document.getElementById('calcVanOutAmount').value) || 0;
+            const storageRate = parseFloat(document.getElementById('calcStorageAmount').value) || 0;
+
+            let storageDays = 0;
+            if(gateInVal && gateOutVal) {
+                const dIn = new Date(gateInVal);
+                const dOut = new Date(gateOutVal);
+                const diffTime = dOut - dIn;
+                if(diffTime > 0) {
+                    // Convert ms to full or fractional days, minimum 1 day if released after gate-in
+                    storageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                }
+            }
+            document.getElementById('calcStorageDays').value = storageDays;
+
+            // Total Amount Summation Formula: Van In Amount + Van Out Amount + (Storage Amount * Storage Days)
+            const totalAmount = vanIn + vanOut + (storageRate * storageDays);
+            document.getElementById('calcTotalAmount').value = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
         function renderYardReports() {
             let a = liveYard();
             const r1 = document.getElementById('yardRptGateIn');
@@ -1207,8 +1265,16 @@
             const moveRows = document.getElementById('yardMovementRows');
             if(moveRows) {
                 moveRows.innerHTML = (yardDb.movements || []).length ? yardDb.movements.slice().reverse().map(m => `
-                    <tr class="border-b"><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.driver||'—'}</td><td class="p-3">${m.customer||'—'}</td><td class="p-3">${m.eir||'—'}</td><td class="p-3">${m.remarks||'—'}</td></tr>
-                `).join('') : '<tr><td colspan="8" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
+                    <tr class="border-b">
+                        <td class="p-3">${stamp(m.date)}</td>
+                        <td class="p-3 font-semibold">${m.kind}</td>
+                        <td class="p-3 font-mono">${m.number}</td>
+                        <td class="p-3">${m.plate}</td>
+                        <td class="p-3 font-bold">${m.storageDays !== undefined ? m.storageDays + ' days' : '—'}</td>
+                        <td class="p-3 font-bold text-emerald-600">${m.totalAmount ? '₱' + m.totalAmount : '—'}</td>
+                        <td class="p-3">${m.eir||'—'}</td>
+                    </tr>
+                `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
             }
         }
 
@@ -1249,7 +1315,7 @@
             switchYardTab('yardInventory');
         }
 
-        // Gate-Out logic checking UNPAID status
+        // Gate-Out logic with Storage Days & Total Amount Computation
         function handleYardGateOut(e) {
             e.preventDefault();
             let f = Object.fromEntries(new FormData(e.target));
@@ -1261,7 +1327,11 @@
                 return; 
             }
 
-            if(!confirm('Confirm gate-out for ' + c.number + '?')) return;
+            const storageDays = parseInt(document.getElementById('calcStorageDays').value) || 0;
+            const totalAmount = document.getElementById('calcTotalAmount').value;
+
+            if(!confirm(`Confirm gate-out for ${c.number}?\nStorage Days: ${storageDays}\nTotal Billing Amount: ₱${totalAmount}`)) return;
+            
             c.status = 'Released';
             if(!yardDb.movements) yardDb.movements = [];
             yardDb.movements.push({
@@ -1273,6 +1343,8 @@
                 customer: f.customer, 
                 eir: f.eir, 
                 vanOutAmount: f.vanOutAmount,
+                storageDays: storageDays,
+                totalAmount: totalAmount,
                 remarks: f.remarks,
                 photos: [...stagedGateOutPhotos]
             });
@@ -1333,7 +1405,7 @@
         }
 
         function exportYardMovements() {
-            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Van Out Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.vanOutAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
         }
 
         function clearYardData() {
