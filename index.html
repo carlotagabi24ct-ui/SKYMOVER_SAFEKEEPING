@@ -339,7 +339,6 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Initialize Philippine database state
         let db = JSON.parse(localStorage.getItem('skymover_ph_db')) || {
             vehicles: [
                 { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" },
@@ -350,6 +349,21 @@
                 { name: "Juan Dela Cruz", license: "N02-12-345678", status: "On Trip", rating: "4.9 ★" },
                 { name: "Roberto Santos", license: "N01-99-876543", status: "Available", rating: "4.8 ★" }
             ],
+            fuelLogs: [
+                { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" },
+                { unit: "SKV-102", liters: "150 L", cost: "₱9,750", date: "2026-11-11", station: "Caltex SLEX" }
+            ],
+            maintenanceLogs: [
+                { unit: "SKV-103", issue: "Brake Pad Replacement & Hydraulic Check", date: "2026-11-10", cost: "₱8,500", status: "In Shop" }
+            ],
+            dispatchLogs: [
+                { unit: "SKV-101", route: "Manila Port → Valenzuela Depot", status: "In Transit (NLEX KM 24)", driver: "Juan Dela Cruz" },
+                { unit: "SKV-102", route: "Batangas Terminal → Laguna Technopark", status: "Arrived", driver: "Roberto Santos" }
+            ],
+            expenseLogs: [
+                { trip: "Trip #401", fuel: "₱7,800", tolls: "₱1,250", maintenance: "₱0", total: "₱9,050" },
+                { trip: "Trip #402", fuel: "₱9,750", tolls: "₱1,800", maintenance: "₱8,500", total: "₱20,050" }
+            ],
             transshipments: [
                 { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" },
                 { id: "TR-9002", origin: "Batangas Container Terminal", container: "CMAU-554120-9", commission: "₱6,200", status: "Pending Hub Review" }
@@ -358,11 +372,6 @@
                 { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof" }
             ]
         };
-
-        if (!db.vehicles) db.vehicles = [];
-        if (!db.drivers) db.drivers = [];
-        if (!db.transshipments) db.transshipments = [];
-        if (!db.uploads) db.uploads = [];
 
         function saveDB() {
             localStorage.setItem('skymover_ph_db', JSON.stringify(db));
@@ -497,7 +506,6 @@
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
         }
 
-        // Handle Photo Upload from Driver Portal
         function handlePhotoUpload(e) {
             const file = e.target.files[0];
             if(file) {
@@ -513,69 +521,7 @@
             }
         }
 
-        // Open Extraction Report Modal
-        function openExtractionReport() {
-            const modal = document.getElementById('subModuleModal');
-            const content = document.getElementById('subModuleContent');
-            modal.classList.remove('hidden');
-
-            const vehicles = db.vehicles || [];
-            const drivers = db.drivers || [];
-            const transshipments = db.transshipments || [];
-            const uploads = db.uploads || [];
-
-            let vehicleRows = vehicles.length > 0 ? vehicles.map(v => `<tr class="border-b border-slate-800"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2 text-sky-400">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('') : `<tr><td colspan="4" class="p-3 text-center text-slate-500">No vehicles recorded.</td></tr>`;
-            
-            let driverRows = drivers.length > 0 ? drivers.map(d => `<tr class="border-b border-slate-800"><td class="p-2 font-medium">${d.name}</td><td class="p-2 font-mono">${d.license}</td><td class="p-2 text-emerald-400">${d.status}</td><td class="p-2">${d.rating}</td></tr>`).join('') : `<tr><td colspan="4" class="p-3 text-center text-slate-500">No drivers recorded.</td></tr>`;
-
-            let transRows = transshipments.length > 0 ? transshipments.map(t => `<tr class="border-b border-slate-800"><td class="p-2 font-mono text-sky-400">${t.id}</td><td class="p-2">${t.origin}</td><td class="p-2">${t.container}</td><td class="p-2 text-emerald-400">${t.commission}</td><td class="p-2">${t.status}</td></tr>`).join('') : `<tr><td colspan="5" class="p-3 text-center text-slate-500">No transshipment orders recorded.</td></tr>`;
-            
-            let uploadRows = uploads.length > 0 ? uploads.map(u => `<tr class="border-b border-slate-800"><td class="p-2 font-medium text-purple-300"><i class="fa-solid fa-image mr-1"></i> ${u.name}</td><td class="p-2">${u.date}</td><td class="p-2">${u.size}</td><td class="p-2">${u.type}</td></tr>`).join('') : `<tr><td colspan="4" class="p-3 text-center text-slate-500">No photos uploaded yet.</td></tr>`;
-
-            content.innerHTML = `
-                <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Philippine Fleet Extraction & Audit Report</h3>
-                        <p class="text-xs text-slate-400">Aggregated domestic inventory, driver masterlists, transshipments, and delivery photos.</p>
-                    </div>
-                    <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
-                        <i class="fa-solid fa-print mr-1"></i> Print / Export Report
-                    </button>
-                </div>
-
-                <div class="space-y-6 text-xs">
-                    <div>
-                        <h4 class="font-bold text-sm text-sky-400 mb-2">1. Philippine Fleet Masterlist & Status (${vehicles.length} Units)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Assigned Driver</th></tr>${vehicleRows}</table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-sm text-indigo-400 mb-2">2. Driver Records & Performance (${drivers.length} Drivers)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Driver Name</th><th class="p-2">License Number</th><th class="p-2">Status</th><th class="p-2">Rating</th></tr>${driverRows}</table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-sm text-emerald-400 mb-2">3. Transshipment & Hub Acceptance Records (${transshipments.length} Orders)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Order ID</th><th class="p-2">Origin Hub</th><th class="p-2">Container</th><th class="p-2">Commission</th><th class="p-2">Status</th></tr>${transRows}</table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-sm text-purple-400 mb-2">4. Uploaded Delivery Proof Photographs (${uploads.length} Files)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Filename</th><th class="p-2">Timestamp</th><th class="p-2">Size</th><th class="p-2">Category</th></tr>${uploadRows}</table>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Sub-modules handler
+        // Fully Operational Sub-Modules Handler for Fuel, Maintenance, GPS & Dispatch, and Fleet Expenses
         function openSubModule(title) {
             const modal = document.getElementById('subModuleModal');
             const content = document.getElementById('subModuleContent');
@@ -583,8 +529,11 @@
 
             const vehicles = db.vehicles || [];
             const drivers = db.drivers || [];
+            const fuelLogs = db.fuelLogs || [];
+            const maintenanceLogs = db.maintenanceLogs || [];
+            const dispatchLogs = db.dispatchLogs || [];
+            const expenseLogs = db.expenseLogs || [];
             const transshipments = db.transshipments || [];
-            const uploads = db.uploads || [];
 
             if (title === 'Dashboard') {
                 content.innerHTML = `
@@ -593,7 +542,7 @@
                         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Active Fleet Units</p><h4 class="text-2xl font-bold text-white mt-1">${vehicles.length}</h4></div>
                         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-400 mt-1">${drivers.length}</h4></div>
                         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Pending Transshipments</p><h4 class="text-2xl font-bold text-emerald-400 mt-1">${transshipments.filter(t => t.status && t.status.includes('Pending')).length}</h4></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Uploaded Photos</p><h4 class="text-2xl font-bold text-purple-400 mt-1">${uploads.length}</h4></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Fuel Logs</p><h4 class="text-2xl font-bold text-amber-400 mt-1">${fuelLogs.length}</h4></div>
                     </div>
                 `;
             } else if (title === 'Vehicle Management') {
@@ -608,6 +557,30 @@
                     <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="addDriverPrompt()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Driver</button></div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>${rows}</table></div>
                 `;
+            } else if (title === 'Fuel Monitoring') {
+                let rows = fuelLogs.map(f => `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-sky-400">${f.unit}</td><td class="p-3">${f.liters}</td><td class="p-3 font-medium text-emerald-400">${f.cost}</td><td class="p-3">${f.station}</td><td class="p-3">${f.date}</td></tr>`).join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring & Diesel Consumption</h3><button onclick="addFuelPrompt()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>${rows}</table></div>
+                `;
+            } else if (title === 'Maintenance') {
+                let rows = maintenanceLogs.map(m => `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-sky-400">${m.unit}</td><td class="p-3">${m.issue}</td><td class="p-3 font-medium text-rose-400">${m.cost}</td><td class="p-3">${m.status}</td><td class="p-3">${m.date}</td></tr>`).join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance & Repairs</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Issue / Repair Item</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>${rows}</table></div>
+                `;
+            } else if (title === 'GPS & Dispatch') {
+                let rows = dispatchLogs.map(d => `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-sky-400">${d.unit}</td><td class="p-3">${d.route}</td><td class="p-3">${d.driver}</td><td class="p-3 text-emerald-400 font-semibold">${d.status}</td></tr>`).join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch Monitoring</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Telemetry Status</th></tr>${rows}</table></div>
+                `;
+            } else if (title === 'Fleet Expenses') {
+                let rows = expenseLogs.map(e => `<tr class="border-b border-slate-800"><td class="p-3 font-semibold text-sky-400">${e.trip}</td><td class="p-3">${e.fuel}</td><td class="p-3">${e.tolls}</td><td class="p-3">${e.maintenance}</td><td class="p-3 font-bold text-emerald-400">${e.total}</td></tr>`).join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses & Profitability</h3><button onclick="addExpensePrompt()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>${rows}</table></div>
+                `;
             } else {
                 content.innerHTML = `<h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-folder-open text-sky-400 mr-2"></i> ${title}</h3><p class="text-xs text-slate-300">Module operational and synced with local database storage.</p>`;
             }
@@ -615,6 +588,7 @@
 
         function closeSubModule() { document.getElementById('subModuleModal').classList.add('hidden'); }
 
+        // Interactive Prompts for Adding Records across Fuel, Maintenance, Dispatch, Expenses
         function addVehiclePrompt() {
             const id = prompt("Enter Unit ID (e.g. SKV-104):");
             const model = prompt("Enter Vehicle Model:");
@@ -635,6 +609,121 @@
                 saveDB();
                 openSubModule('Driver Management');
             }
+        }
+
+        function addFuelPrompt() {
+            const unit = prompt("Enter Unit ID (e.g. SKV-101):");
+            const liters = prompt("Enter Fuel Volume (e.g. 100 L):");
+            const cost = prompt("Enter Total Cost (e.g. ₱6,500):");
+            const station = prompt("Enter Fuel Station & Location (e.g. Shell NLEX):");
+            if(unit && liters && cost) {
+                if(!db.fuelLogs) db.fuelLogs = [];
+                db.fuelLogs.push({ unit, liters, cost, station: station || "Petron Station", date: new Date().toISOString().substring(0, 10) });
+                saveDB();
+                openSubModule('Fuel Monitoring');
+            }
+        }
+
+        function addMaintenancePrompt() {
+            const unit = prompt("Enter Unit ID (e.g. SKV-103):");
+            const issue = prompt("Enter Maintenance Issue / Repair Description:");
+            const cost = prompt("Enter Repair Cost (e.g. ₱4,500):");
+            if(unit && issue) {
+                if(!db.maintenanceLogs) db.maintenanceLogs = [];
+                db.maintenanceLogs.push({ unit, issue, cost: cost || "₱0", status: "In Shop", date: new Date().toISOString().substring(0, 10) });
+                saveDB();
+                openSubModule('Maintenance');
+            }
+        }
+
+        function addDispatchPrompt() {
+            const unit = prompt("Enter Unit ID (e.g. SKV-101):");
+            const route = prompt("Enter Route (e.g. Manila Port → Clark Depot):");
+            const driver = prompt("Enter Assigned Driver:");
+            if(unit && route) {
+                if(!db.dispatchLogs) db.dispatchLogs = [];
+                db.dispatchLogs.push({ unit, route, driver: driver || "Assigned Driver", status: "In Transit" });
+                saveDB();
+                openSubModule('GPS & Dispatch');
+            }
+        }
+
+        function addExpensePrompt() {
+            const trip = prompt("Enter Trip ID (e.g. Trip #403):");
+            const fuel = prompt("Enter Fuel Cost (e.g. ₱5,000):");
+            const tolls = prompt("Enter Toll Fees (e.g. ₱850):");
+            const maint = prompt("Enter Maintenance Cost (e.g. ₱0):");
+            const total = prompt("Enter Total Cost (e.g. ₱5,850):");
+            if(trip && total) {
+                if(!db.expenseLogs) db.expenseLogs = [];
+                db.expenseLogs.push({ trip, fuel: fuel || "₱0", tolls: tolls || "₱0", maintenance: maint || "₱0", total });
+                saveDB();
+                openSubModule('Fleet Expenses');
+            }
+        }
+
+        function openExtractionReport() {
+            const modal = document.getElementById('subModuleModal');
+            const content = document.getElementById('subModuleContent');
+            modal.classList.remove('hidden');
+
+            const vehicles = db.vehicles || [];
+            const drivers = db.drivers || [];
+            const fuelLogs = db.fuelLogs || [];
+            const maintenanceLogs = db.maintenanceLogs || [];
+            const dispatchLogs = db.dispatchLogs || [];
+            const expenseLogs = db.expenseLogs || [];
+            const transshipments = db.transshipments || [];
+            const uploads = db.uploads || [];
+
+            content.innerHTML = `
+                <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Philippine Fleet Extraction & Audit Report</h3>
+                        <p class="text-xs text-slate-400">Aggregated inventory, fuel, maintenance, GPS telemetry, expenses, and photos.</p>
+                    </div>
+                    <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+                        <i class="fa-solid fa-print mr-1"></i> Print / Export Report
+                    </button>
+                </div>
+
+                <div class="space-y-6 text-xs">
+                    <div>
+                        <h4 class="font-bold text-sm text-sky-400 mb-2">1. Fleet Masterlist (${vehicles.length} Units)</h4>
+                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Driver</th></tr>${vehicles.map(v=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2 text-sky-400">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('')}</table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-sm text-amber-400 mb-2">2. Fuel Monitoring Logs (${fuelLogs.length} Records)</h4>
+                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit</th><th class="p-2">Volume</th><th class="p-2">Cost</th><th class="p-2">Station</th><th class="p-2">Date</th></tr>${fuelLogs.map(f=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${f.unit}</td><td class="p-2">${f.liters}</td><td class="p-2 text-emerald-400">${f.cost}</td><td class="p-2">${f.station}</td><td class="p-2">${f.date}</td></tr>`).join('')}</table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-sm text-rose-400 mb-2">3. Maintenance Logs (${maintenanceLogs.length} Records)</h4>
+                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit</th><th class="p-2">Issue</th><th class="p-2">Cost</th><th class="p-2">Status</th><th class="p-2">Date</th></tr>${maintenanceLogs.map(m=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${m.unit}</td><td class="p-2">${m.issue}</td><td class="p-2 text-rose-400">${m.cost}</td><td class="p-2">${m.status}</td><td class="p-2">${m.date}</td></tr>`).join('')}</table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-sm text-emerald-400 mb-2">4. GPS & Dispatch Logs (${dispatchLogs.length} Records)</h4>
+                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit</th><th class="p-2">Route</th><th class="p-2">Driver</th><th class="p-2">Status</th></tr>${dispatchLogs.map(d=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${d.unit}</td><td class="p-2">${d.route}</td><td class="p-2">${d.driver}</td><td class="p-2 text-emerald-400">${d.status}</td></tr>`).join('')}</table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-sm text-teal-400 mb-2">5. Fleet Expense Logs (${expenseLogs.length} Records)</h4>
+                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Trip</th><th class="p-2">Fuel</th><th class="p-2">Tolls</th><th class="p-2">Maintenance</th><th class="p-2">Total</th></tr>${expenseLogs.map(e=>`<tr class="border-b border-slate-800"><td class="p-2 font-semibold">${e.trip}</td><td class="p-2">${e.fuel}</td><td class="p-2">${e.tolls}</td><td class="p-2">${e.maintenance}</td><td class="p-2 font-bold text-emerald-400">${e.total}</td></tr>`).join('')}</table>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderTransshipmentTable() {
