@@ -320,7 +320,7 @@
             </div>
         </section>
 
-        <!-- VIEW 5: EMPTY CONTAINER YARD MANAGEMENT (Integrated Yard App) -->
+        <!-- VIEW 5: EMPTY CONTAINER YARD MANAGEMENT -->
         <section id="viewYard" class="w-full max-w-7xl mx-auto hidden py-4 text-slate-900">
             <div class="flex justify-between items-center mb-6 bg-slate-900 p-4 rounded-2xl text-white">
                 <div>
@@ -332,12 +332,12 @@
                 </div>
                 <!-- Yard Nav Tabs -->
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn bg-amber-600 text-white">Yard Dashboard</button>
-                    <button onclick="switchYardTab('yardInventory')" id="yBtn2" class="btn secondary">Inventory</button>
-                    <button onclick="switchYardTab('yardGateIn')" id="yBtn3" class="btn secondary">Gate-In</button>
-                    <button onclick="switchYardTab('yardGateOut')" id="yBtn4" class="btn secondary">Gate-Out</button>
-                    <button onclick="switchYardTab('yardReports')" id="yBtn5" class="btn secondary">Reports</button>
-                    <button onclick="switchYardTab('yardBackup')" id="yBtn6" class="btn secondary">Backup</button>
+                    <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Yard Dashboard</button>
+                    <button onclick="switchYardTab('yardInventory')" id="yBtn2" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Inventory</button>
+                    <button onclick="switchYardTab('yardGateIn')" id="yBtn3" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Gate-In</button>
+                    <button onclick="switchYardTab('yardGateOut')" id="yBtn4" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Gate-Out</button>
+                    <button onclick="switchYardTab('yardReports')" id="yBtn5" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Reports</button>
+                    <button onclick="switchYardTab('yardBackup')" id="yBtn6" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Backup</button>
                 </div>
             </div>
 
@@ -350,7 +350,7 @@
                     <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">DAMAGED / HOLD</div><div class="num text-3xl font-extrabold text-rose-600 my-1" id="yardDamaged">0</div><div class="hint text-slate-500 text-xs">Requires attention</div></div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Recent Yard Movements</h3><button class="btn secondary" onclick="switchYardTab('yardInventory')">View Inventory</button></div>
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Recent Yard Movements</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="switchYardTab('yardInventory')">View Inventory</button></div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Truck / Plate</th><th class="p-3">EIR / Reference</th></tr></thead><tbody id="yardRecentBody" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
@@ -362,7 +362,7 @@
                         <h3 class="font-bold text-base text-slate-800">Container Masterlist</h3>
                         <div class="flex gap-2">
                             <input id="yardSearchInput" class="px-3 py-2 border rounded-lg text-xs w-64" placeholder="Search container, line, status..." oninput="renderYardInventory()">
-                            <button class="btn bg-amber-600 text-white" onclick="switchYardTab('yardGateIn')">+ Add Gate-In</button>
+                            <button class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg text-xs font-semibold" onclick="switchYardTab('yardGateIn')">+ Add Gate-In</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Container No.</th><th class="p-3">Size / Type</th><th class="p-3">Shipping Line</th><th class="p-3">Status</th><th class="p-3">Yard Location</th><th class="p-3">Gate-In Date</th><th class="p-3">Actions</th></tr></thead><tbody id="yardInventoryRows" class="divide-y divide-slate-100"></tbody></table></div>
@@ -390,7 +390,7 @@
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
                         </div>
-                        <div class="flex gap-2 pt-2"><button type="submit" class="btn bg-amber-600 text-white">Save Gate-In</button><button type="reset" class="btn secondary">Clear Form</button></div>
+                        <div class="flex gap-2 pt-2"><button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Save Gate-In</button><button type="reset" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-semibold">Clear Form</button></div>
                     </form>
                 </div>
             </div>
@@ -409,7 +409,7 @@
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
                         </div>
-                        <button type="submit" class="btn bg-amber-600 text-white">Confirm Gate-Out</button>
+                        <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Confirm Gate-Out</button>
                     </form>
                 </div>
             </div>
@@ -423,11 +423,11 @@
                     <div class="card bg-white p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">MOVEMENTS LOGGED</div><div class="text-2xl font-bold my-1" id="yardRptMoves">0</div></div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border mb-6">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Stock by Shipping Line</h3><button class="btn secondary" onclick="exportYardCSV()">Export Inventory CSV</button></div>
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Stock by Shipping Line</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardCSV()">Export Inventory CSV</button></div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Shipping Line</th><th class="p-3">On-Hand</th><th class="p-3">Available</th><th class="p-3">Reserved</th><th class="p-3">Damaged / Hold</th></tr></thead><tbody id="yardLineRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History</h3><button class="btn secondary" onclick="exportYardMovements()">Export Movements CSV</button></div>
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button></div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Driver</th><th class="p-3">Customer</th><th class="p-3">EIR / Ref.</th><th class="p-3">Remarks</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
@@ -438,14 +438,14 @@
                     <h3 class="font-bold text-base text-slate-800 mb-2">Data Backup</h3>
                     <p class="text-xs text-slate-500 mb-4">Download a complete JSON backup of your yard inventory and movement history.</p>
                     <div class="flex gap-2">
-                        <button class="btn bg-amber-600 text-white" onclick="backupYardData()">Download Yard Backup</button>
-                        <label class="btn secondary cursor-pointer inline-flex items-center">Restore Backup<input type="file" id="yardRestoreFile" accept=".json,application/json" hidden onchange="restoreYardData(event)"></label>
+                        <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-semibold" onclick="backupYardData()">Download Yard Backup</button>
+                        <label class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center">Restore Backup<input type="file" id="yardRestoreFile" accept=".json,application/json" hidden onchange="restoreYardData(event)"></label>
                     </div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
                     <h3 class="font-bold text-base text-slate-800 mb-2">Clear Local Yard Records</h3>
                     <p class="text-xs text-slate-500 mb-4">Permanently clear saved yard records from this browser.</p>
-                    <button class="btn bg-rose-100 text-rose-700" onclick="clearYardData()">Clear All Yard Data</button>
+                    <button class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-4 py-2 rounded-lg text-xs font-semibold" onclick="clearYardData()">Clear All Yard Data</button>
                 </div>
             </div>
         </section>
@@ -489,50 +489,63 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC WITH SAFE STORAGE PARSING -->
     <script>
-        // Fleet & General Database State
-        let db = JSON.parse(localStorage.getItem('skymover_ph_db')) || {
-            vehicles: [
-                { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" },
-                { id: "SKV-102", model: "HINO Profia Tractor Head", status: "Active", driver: "Roberto Santos" },
-                { id: "SKV-103", model: "FUSO Super Great", status: "Maintenance", driver: "Unassigned" }
-            ],
-            drivers: [
-                { name: "Juan Dela Cruz", license: "N02-12-345678", status: "On Trip", rating: "4.9 ★" },
-                { name: "Roberto Santos", license: "N01-99-876543", status: "Available", rating: "4.8 ★" }
-            ],
-            fuelLogs: [
-                { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" }
-            ],
-            maintenanceLogs: [
-                { unit: "SKV-103", issue: "Brake Pad Replacement & Hydraulic Check", date: "2026-11-10", cost: "₱8,500", status: "In Shop" }
-            ],
-            dispatchLogs: [
-                { unit: "SKV-101", route: "Manila Port → Valenzuela Depot", status: "In Transit (NLEX KM 24)", driver: "Juan Dela Cruz" }
-            ],
-            expenseLogs: [
-                { trip: "Trip #401", fuel: "₱7,800", tolls: "₱1,250", maintenance: "₱0", total: "₱9,050" }
-            ],
-            transshipments: [
-                { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" }
-            ],
-            uploads: [
-                { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof" }
-            ]
-        };
+        // Robust Safe LocalStorage Loaders
+        let db;
+        try {
+            db = JSON.parse(localStorage.getItem('skymover_ph_db'));
+        } catch(e) { db = null; }
 
-        // Yard Database State
+        if (!db || typeof db !== 'object') {
+            db = {
+                vehicles: [
+                    { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" },
+                    { id: "SKV-102", model: "HINO Profia Tractor Head", status: "Active", driver: "Roberto Santos" },
+                    { id: "SKV-103", model: "FUSO Super Great", status: "Maintenance", driver: "Unassigned" }
+                ],
+                drivers: [
+                    { name: "Juan Dela Cruz", license: "N02-12-345678", status: "On Trip", rating: "4.9 ★" },
+                    { name: "Roberto Santos", license: "N01-99-876543", status: "Available", rating: "4.8 ★" }
+                ],
+                fuelLogs: [
+                    { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" }
+                ],
+                maintenanceLogs: [
+                    { unit: "SKV-103", issue: "Brake Pad Replacement & Hydraulic Check", date: "2026-11-10", cost: "₱8,500", status: "In Shop" }
+                ],
+                dispatchLogs: [
+                    { unit: "SKV-101", route: "Manila Port → Valenzuela Depot", status: "In Transit (NLEX KM 24)", driver: "Juan Dela Cruz" }
+                ],
+                expenseLogs: [
+                    { trip: "Trip #401", fuel: "₱7,800", tolls: "₱1,250", maintenance: "₱0", total: "₱9,050" }
+                ],
+                transshipments: [
+                    { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" }
+                ],
+                uploads: [
+                    { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof" }
+                ]
+            };
+        }
+
         const YARD_KEY = 'skymover_empty_yard_v1';
-        let yardDb = JSON.parse(localStorage.getItem(YARD_KEY)) || {
-            containers: [
-                { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean" }
-            ],
-            movements: [
-                { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean" }
-            ],
-            yard: "SKYMOVER Empty Container Yard"
-        };
+        let yardDb;
+        try {
+            yardDb = JSON.parse(localStorage.getItem(YARD_KEY));
+        } catch(e) { yardDb = null; }
+
+        if (!yardDb || typeof yardDb !== 'object') {
+            yardDb = {
+                containers: [
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean" }
+                ],
+                movements: [
+                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean" }
+                ],
+                yard: "SKYMOVER Empty Container Yard"
+            };
+        }
 
         function saveDB() {
             localStorage.setItem('skymover_ph_db', JSON.stringify(db));
@@ -570,7 +583,8 @@
 
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
-            document.getElementById('langLabel').innerText = currentLang === 'en' ? 'Chinese/English' : '中文/英文';
+            const labelEl = document.getElementById('langLabel');
+            if (labelEl) labelEl.innerText = currentLang === 'en' ? 'Chinese/English' : '中文/英文';
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[currentLang][key]) {
@@ -580,24 +594,30 @@
         }
 
         function switchView(viewName) {
-            document.getElementById('viewLanding').classList.add('hidden');
-            document.getElementById('viewBackend').classList.add('hidden');
-            document.getElementById('viewDriver').classList.add('hidden');
-            document.getElementById('viewHub').classList.add('hidden');
-            document.getElementById('viewYard').classList.add('hidden');
+            const landing = document.getElementById('viewLanding');
+            const backend = document.getElementById('viewBackend');
+            const driver = document.getElementById('viewDriver');
+            const hub = document.getElementById('viewHub');
+            const yard = document.getElementById('viewYard');
 
-            if (viewName === 'landing') {
-                document.getElementById('viewLanding').classList.remove('hidden');
-            } else if (viewName === 'backend') {
-                document.getElementById('viewBackend').classList.remove('hidden');
+            if (landing) landing.classList.add('hidden');
+            if (backend) backend.classList.add('hidden');
+            if (driver) driver.classList.add('hidden');
+            if (hub) hub.classList.add('hidden');
+            if (yard) yard.classList.add('hidden');
+
+            if (viewName === 'landing' && landing) {
+                landing.classList.remove('hidden');
+            } else if (viewName === 'backend' && backend) {
+                backend.classList.remove('hidden');
                 switchAiTab('brain');
-            } else if (viewName === 'driver') {
-                document.getElementById('viewDriver').classList.remove('hidden');
-            } else if (viewName === 'hub') {
-                document.getElementById('viewHub').classList.remove('hidden');
+            } else if (viewName === 'driver' && driver) {
+                driver.classList.remove('hidden');
+            } else if (viewName === 'hub' && hub) {
+                hub.classList.remove('hidden');
                 renderTransshipmentTable();
-            } else if (viewName === 'yard') {
-                document.getElementById('viewYard').classList.remove('hidden');
+            } else if (viewName === 'yard' && yard) {
+                yard.classList.remove('hidden');
                 refreshYard();
             }
         }
@@ -608,14 +628,18 @@
         function openYardPortal() { switchView('yard'); }
 
         function switchAiTab(tab) {
-            document.getElementById('tabBrainBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
-            document.getElementById('tabLensBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
-            document.getElementById('tabTrackBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+            const btnBrain = document.getElementById('tabBrainBtn');
+            const btnLens = document.getElementById('tabLensBtn');
+            const btnTrack = document.getElementById('tabTrackBtn');
+            if(btnBrain) btnBrain.className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+            if(btnLens) btnLens.className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+            if(btnTrack) btnTrack.className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
             
             const container = document.getElementById('aiContainer');
+            if(!container) return;
 
             if(tab === 'brain') {
-                document.getElementById('tabBrainBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
+                if(btnBrain) btnBrain.className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
                 container.innerHTML = `
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="w-full lg:w-1/2">
@@ -635,7 +659,7 @@
                     </div>
                 `;
             } else if(tab === 'lens') {
-                document.getElementById('tabLensBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
+                if(btnLens) btnLens.className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
                 container.innerHTML = `
                     <div>
                         <h3 class="text-xl font-bold text-blue-400 mb-2 flex items-center">
@@ -651,7 +675,7 @@
                     </div>
                 `;
             } else if(tab === 'track') {
-                document.getElementById('tabTrackBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
+                if(btnTrack) btnTrack.className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
                 container.innerHTML = `
                     <div>
                         <h3 class="text-xl font-bold text-emerald-400 mb-2 flex items-center">
@@ -671,6 +695,7 @@
 
         function runAiAnalysis() {
             const log = document.getElementById('aiOutputLog');
+            if(!log) return;
             log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...\n";
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...\n"; }, 400);
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
@@ -687,14 +712,15 @@
                     type: 'Delivery Proof'
                 });
                 saveDB();
-                document.getElementById('uploadSuccessMsg').classList.remove('hidden');
+                const msg = document.getElementById('uploadSuccessMsg');
+                if(msg) msg.classList.remove('hidden');
             }
         }
 
-        // Sub-Modules Handler for Fleet Operations
         function openSubModule(title) {
             const modal = document.getElementById('subModuleModal');
             const content = document.getElementById('subModuleContent');
+            if(!modal || !content) return;
             modal.classList.remove('hidden');
 
             const vehicles = db.vehicles || [];
@@ -754,7 +780,10 @@
             }
         }
 
-        function closeSubModule() { document.getElementById('subModuleModal').classList.add('hidden'); }
+        function closeSubModule() {
+            const modal = document.getElementById('subModuleModal');
+            if(modal) modal.classList.add('hidden');
+        }
 
         function addVehiclePrompt() {
             const id = prompt("Enter Unit ID (e.g. SKV-104):");
@@ -832,14 +861,10 @@
         function openExtractionReport() {
             const modal = document.getElementById('subModuleModal');
             const content = document.getElementById('subModuleContent');
+            if(!modal || !content) return;
             modal.classList.remove('hidden');
 
             const vehicles = db.vehicles || [];
-            const drivers = db.drivers || [];
-            const fuelLogs = db.fuelLogs || [];
-            const maintenanceLogs = db.maintenanceLogs || [];
-            const dispatchLogs = db.dispatchLogs || [];
-            const expenseLogs = db.expenseLogs || [];
             const yardStock = yardDb.containers.filter(c => c.status !== 'Released');
 
             content.innerHTML = `
@@ -863,9 +888,9 @@
             `;
         }
 
-        // Transshipment Hub Logic
         function renderTransshipmentTable() {
             const tbody = document.getElementById('transshipmentTableBody');
+            if(!tbody) return;
             const transshipments = db.transshipments || [];
             tbody.innerHTML = transshipments.map((t, idx) => `
                 <tr class="hover:bg-slate-900/40 transition">
@@ -884,14 +909,25 @@
             `).join('');
         }
 
-        function openNewTransshipmentModal() { document.getElementById('transModal').classList.remove('hidden'); }
-        function closeNewTransshipmentModal() { document.getElementById('transModal').classList.add('hidden'); }
+        function openNewTransshipmentModal() {
+            const m = document.getElementById('transModal');
+            if(m) m.classList.remove('hidden');
+        }
+        function closeNewTransshipmentModal() {
+            const m = document.getElementById('transModal');
+            if(m) m.classList.add('hidden');
+        }
 
         function handleTransSubmit(e) {
             e.preventDefault();
-            const origin = document.getElementById('transOrigin').value;
-            const container = document.getElementById('transContainer').value;
-            const commission = '₱' + Number(document.getElementById('transCommission').value).toLocaleString();
+            const originEl = document.getElementById('transOrigin');
+            const containerEl = document.getElementById('transContainer');
+            const commEl = document.getElementById('transCommission');
+            if(!originEl || !containerEl || !commEl) return;
+
+            const origin = originEl.value;
+            const container = containerEl.value;
+            const commission = '₱' + Number(commEl.value).toLocaleString();
             
             if(!db.transshipments) db.transshipments = [];
             db.transshipments.push({
@@ -904,7 +940,8 @@
             saveDB();
             closeNewTransshipmentModal();
             renderTransshipmentTable();
-            document.getElementById('transForm').reset();
+            const form = document.getElementById('transForm');
+            if(form) form.reset();
         }
 
         function acceptTransshipment(idx) {
@@ -932,33 +969,41 @@
         // --- EMPTY YARD APP LOGIC ---
         function switchYardTab(tabId) {
             document.querySelectorAll('.yard-tab').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
+            const target = document.getElementById(tabId);
+            if(target) target.classList.remove('hidden');
+            
             ['yBtn1','yBtn2','yBtn3','yBtn4','yBtn5','yBtn6'].forEach((id, idx) => {
                 let btn = document.getElementById(id);
                 if(btn) {
-                    btn.className = 'btn secondary';
+                    btn.className = 'btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200';
                     if(['yardDashboard','yardInventory','yardGateIn','yardGateOut','yardReports','yardBackup'][idx] === tabId) {
-                        btn.className = 'btn bg-amber-600 text-white';
+                        btn.className = 'btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white';
                     }
                 }
             });
             refreshYard();
         }
 
-        function liveYard() { return yardDb.containers.filter(c => c.status !== 'Released'); }
+        function liveYard() { return (yardDb.containers || []).filter(c => c.status !== 'Released'); }
         function yardLoc(c) { return [c.block && 'Block '+c.block, c.bay && 'Bay/Row '+c.bay, c.tier && 'Tier '+c.tier].filter(Boolean).join(' • ') || '—'; }
         function stamp(v) { return v ? new Date(v).toLocaleString() : '—'; }
 
         function refreshYard() {
             let a = liveYard();
-            document.getElementById('yardTotal').textContent = a.length;
-            document.getElementById('yardAvailable').textContent = a.filter(c => c.status === 'Available' && c.condition === 'Good').length;
-            document.getElementById('yardReserved').textContent = a.filter(c => c.status === 'Reserved').length;
-            document.getElementById('yardDamaged').textContent = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
+            const yt = document.getElementById('yardTotal');
+            const ya = document.getElementById('yardAvailable');
+            const yr = document.getElementById('yardReserved');
+            const yd = document.getElementById('yardDamaged');
+            if(yt) yt.textContent = a.length;
+            if(ya) ya.textContent = a.filter(c => c.status === 'Available' && c.condition === 'Good').length;
+            if(yr) yr.textContent = a.filter(c => c.status === 'Reserved').length;
+            if(yd) yd.textContent = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
 
-            // Recent movements
-            let r = yardDb.movements.slice(-8).reverse();
-            document.getElementById('yardRecentBody').innerHTML = r.length ? r.map(m => `<tr><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.eir||'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No movements recorded yet.</td></tr>';
+            let r = (yardDb.movements || []).slice(-8).reverse();
+            const yrb = document.getElementById('yardRecentBody');
+            if(yrb) {
+                yrb.innerHTML = r.length ? r.map(m => `<tr><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.eir||'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No movements recorded yet.</td></tr>';
+            }
 
             renderYardInventory();
             renderYardOutSelect();
@@ -966,19 +1011,23 @@
         }
 
         function renderYardInventory() {
-            let q = (document.getElementById('yardSearchInput')?.value || '').toLowerCase();
+            const searchInput = document.getElementById('yardSearchInput');
+            let q = (searchInput ? searchInput.value : '').toLowerCase();
             let a = liveYard().filter(c => [c.number, c.line, c.status, c.size, c.plate].join(' ').toLowerCase().includes(q));
-            document.getElementById('yardInventoryRows').innerHTML = a.length ? a.map(c => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-3 font-bold font-mono">${c.number}</td>
-                    <td class="p-3">${c.size} ${c.type}</td>
-                    <td class="p-3">${c.line}</td>
-                    <td class="p-3"><span class="pill ${c.status}">${c.status}</span></td>
-                    <td class="p-3">${yardLoc(c)}</td>
-                    <td class="p-3">${stamp(c.date)}</td>
-                    <td class="p-3"><button class="btn secondary text-[11px] py-1 px-2" onclick="editYardStatus('${c.id}')">Status</button></td>
-                </tr>
-            `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">No matching containers in yard.</td></tr>';
+            const rows = document.getElementById('yardInventoryRows');
+            if(rows) {
+                rows.innerHTML = a.length ? a.map(c => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold font-mono">${c.number}</td>
+                        <td class="p-3">${c.size} ${c.type}</td>
+                        <td class="p-3">${c.line}</td>
+                        <td class="p-3"><span class="pill ${c.status}">${c.status}</span></td>
+                        <td class="p-3">${yardLoc(c)}</td>
+                        <td class="p-3">${stamp(c.date)}</td>
+                        <td class="p-3"><button class="bg-slate-200 hover:bg-slate-300 text-[11px] py-1 px-2 rounded font-semibold" onclick="editYardStatus('${c.id}')">Status</button></td>
+                    </tr>
+                `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">No matching containers in yard.</td></tr>';
+            }
         }
 
         function renderYardOutSelect() {
@@ -990,20 +1039,30 @@
 
         function renderYardReports() {
             let a = liveYard();
-            document.getElementById('yardRptGateIn').textContent = yardDb.movements.filter(m => m.kind === 'GATE-IN').length;
-            document.getElementById('yardRptGateOut').textContent = yardDb.movements.filter(m => m.kind === 'GATE-OUT').length;
-            document.getElementById('yardRptLines').textContent = new Set(a.map(c => c.line.toLowerCase())).size;
-            document.getElementById('yardRptMoves').textContent = yardDb.movements.length;
+            const r1 = document.getElementById('yardRptGateIn');
+            const r2 = document.getElementById('yardRptGateOut');
+            const r3 = document.getElementById('yardRptLines');
+            const r4 = document.getElementById('yardRptMoves');
+            if(r1) r1.textContent = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN').length;
+            if(r2) r2.textContent = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT').length;
+            if(r3) r3.textContent = new Set(a.map(c => c.line.toLowerCase())).size;
+            if(r4) r4.textContent = (yardDb.movements || []).length;
 
             let lines = [...new Set(a.map(c => c.line))].sort();
-            document.getElementById('yardLineRows').innerHTML = lines.length ? lines.map(l => {
-                let x = a.filter(c => c.line === l);
-                return `<tr class="border-b"><td class="p-3 font-medium">${l}</td><td class="p-3">${x.length}</td><td class="p-3">${x.filter(c => c.status==='Available'&&c.condition==='Good').length}</td><td class="p-3">${x.filter(c => c.status==='Reserved').length}</td><td class="p-3">${x.filter(c => ['Damaged','For Inspection'].includes(c.condition)||c.status==='Hold').length}</td></tr>`;
-            }).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No stock records.</td></tr>';
+            const lineRows = document.getElementById('yardLineRows');
+            if(lineRows) {
+                lineRows.innerHTML = lines.length ? lines.map(l => {
+                    let x = a.filter(c => c.line === l);
+                    return `<tr class="border-b"><td class="p-3 font-medium">${l}</td><td class="p-3">${x.length}</td><td class="p-3">${x.filter(c => c.status==='Available'&&c.condition==='Good').length}</td><td class="p-3">${x.filter(c => c.status==='Reserved').length}</td><td class="p-3">${x.filter(c => ['Damaged','For Inspection'].includes(c.condition)||c.status==='Hold').length}</td></tr>`;
+                }).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No stock records.</td></tr>';
+            }
 
-            document.getElementById('yardMovementRows').innerHTML = yardDb.movements.length ? yardDb.movements.slice().reverse().map(m => `
-                <tr class="border-b"><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.driver||'—'}</td><td class="p-3">${m.customer||'—'}</td><td class="p-3">${m.eir||'—'}</td><td class="p-3">${m.remarks||'—'}</td></tr>
-            `).join('') : '<tr><td colspan="8" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
+            const moveRows = document.getElementById('yardMovementRows');
+            if(moveRows) {
+                moveRows.innerHTML = (yardDb.movements || []).length ? yardDb.movements.slice().reverse().map(m => `
+                    <tr class="border-b"><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.driver||'—'}</td><td class="p-3">${m.customer||'—'}</td><td class="p-3">${m.eir||'—'}</td><td class="p-3">${m.remarks||'—'}</td></tr>
+                `).join('') : '<tr><td colspan="8" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
+            }
         }
 
         function handleYardGateIn(e) {
@@ -1013,8 +1072,10 @@
             if(yardDb.containers.some(c => c.number.toUpperCase() === f.number && c.status !== 'Released')) {
                 return alert('This container is already recorded inside the yard.');
             }
-            let c = {...f, id: 'yd-' + Math.random().toString(36.substring(2, 9))};
+            let c = {...f, id: 'yd-' + Math.random().toString(36).substring(2, 9)};
             if(c.condition !== 'Good') c.status = 'Hold';
+            if(!yardDb.containers) yardDb.containers = [];
+            if(!yardDb.movements) yardDb.movements = [];
             yardDb.containers.push(c);
             yardDb.movements.push({kind: 'GATE-IN', date: c.date, number: c.number, plate: c.plate, driver: c.driver, eir: c.eir, remarks: c.remarks});
             saveYardDB();
@@ -1030,6 +1091,7 @@
             if(!c) return alert('Select a valid container.');
             if(!confirm('Confirm gate-out for ' + c.number + '?')) return;
             c.status = 'Released';
+            if(!yardDb.movements) yardDb.movements = [];
             yardDb.movements.push({kind: 'GATE-OUT', date: f.date, number: c.number, plate: f.plate, driver: f.driver, customer: f.customer, eir: f.eir, remarks: f.remarks});
             saveYardDB();
             e.target.reset();
@@ -1039,6 +1101,7 @@
 
         function editYardStatus(id) {
             let c = yardDb.containers.find(x => x.id === id);
+            if(!c) return;
             let s = prompt('Enter new status: Available, Reserved, or Hold', c.status);
             if(s === null) return;
             let m = {available:'Available', reserved:'Reserved', hold:'Hold'}[s.trim().toLowerCase()];
@@ -1083,7 +1146,7 @@
         }
 
         function exportYardMovements() {
-            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Remarks'], ...yardDb.movements.map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
         }
 
         function clearYardData() {
@@ -1093,10 +1156,14 @@
             alert('Yard records cleared.');
         }
 
-        // Set default datetime inputs for yard
-        document.querySelectorAll('#yardGateInForm input[type=datetime-local], #yardGateOutForm input[type=datetime-local]').forEach(x => {
-            let d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-            x.value = d.toISOString().slice(0, 16);
+        // Initialize datetime defaults on load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[type=datetime-local]').forEach(x => {
+                if(!x.value) {
+                    let d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    x.value = d.toISOString().slice(0, 16);
+                }
+            });
         });
     </script>
 </body>
