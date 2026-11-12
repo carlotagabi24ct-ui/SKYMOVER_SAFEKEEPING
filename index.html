@@ -422,7 +422,8 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer</label><input name="customer" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount</label><input type="number" id="vanOutAmount" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" oninput="calculateTotals()"></div>
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
 
