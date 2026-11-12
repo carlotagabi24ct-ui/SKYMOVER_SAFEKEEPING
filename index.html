@@ -388,7 +388,7 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Block</label><select name="block" class="p-2 border rounded-lg w-full"><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Bay</label><select name="bay" class="p-2 border rounded-lg w-full"><option>BAY-1</option><option>BAY-2</option><option>BAY-3</option><option>BAY-4</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Row</label><select name="row" class="p-2 border rounded-lg w-full"><option>GROUND</option><option>2ND ROW</option><option>3RD ROW</option><option>4TH ROW</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount</label><input type="number" name="vanInAmount" value="#,##0.00" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount</label><input type="number" name="vanInAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van In Status Payment</label><select name="vanInStats" class="p-2 border rounded-lg w-full"><option>PAID</option><option>UNPAID</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Tier</label><input name="tier" class="p-2 border rounded-lg w-full" placeholder="1"></div>
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
@@ -424,7 +424,7 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount</label><input type="number" name="vanOutAmount" value="#,##0.00" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount</label><input type="number" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
 
@@ -432,10 +432,10 @@
                             <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
                                 <label class="font-semibold text-slate-700 mb-2 block"><i class="fa-solid fa-camera mr-1 text-amber-600"></i> Upload Delivery Proof / Photos (Gate-Out)</label>
                                 <div class="flex flex-col sm:flex-row items-center gap-4">
-                                    <input type="file" id="gateInPhotoInput" accept="image/*" multiple onchange="handleGateInPhotoPreview(event)" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
+                                    <input type="file" id="gateOutPhotoInput" accept="image/*" multiple onchange="handleGateOutPhotoPreview(event)" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
                                     <span class="text-[11px] text-slate-500">Attach container inspection photo, EIR receipt, or damage snapshot.</span>
                                 </div>
-                                <div id="gateInPhotoPreviewContainer" class="flex flex-wrap gap-3 mt-3"></div>
+                                <div id="gateOutPhotoPreviewContainer" class="flex flex-wrap gap-3 mt-3"></div>
                             </div>
                         </div>
                         <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Confirm Gate-Out</button>
@@ -522,6 +522,7 @@
     <script>
         // Temporary staging array for Gate-In uploaded photo data URLs
         let stagedGateInPhotos = [];
+        let stagedGateOutPhotos = [];
 
         function handleGateInPhotoPreview(e) {
             const files = e.target.files;
@@ -539,7 +540,31 @@
                         date: new Date().toISOString()
                     });
                     
-                    // Render preview thumbnail
+                    const thumb = document.createElement('div');
+                    thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm';
+                    thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
+                    container.appendChild(thumb);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleGateOutPhotoPreview(e) {
+            const files = e.target.files;
+            const container = document.getElementById('gateOutPhotoPreviewContainer');
+            if (!container) return;
+            
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Data = event.target.result;
+                    stagedGateOutPhotos.push({
+                        name: file.name,
+                        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                        dataUrl: base64Data,
+                        date: new Date().toISOString()
+                    });
+                    
                     const thumb = document.createElement('div');
                     thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm';
                     thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
@@ -602,7 +627,7 @@
         if (!yardDb || typeof yardDb !== 'object') {
             yardDb = {
                 containers: [
-                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean", photos: [] }
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean", vanInAmount: "1500", vanInStats: "PAID", photos: [] }
                 ],
                 movements: [
                     { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean", photos: [] }
@@ -955,7 +980,7 @@
                 <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
                     <div>
                         <h4 class="font-bold text-sm text-sky-800 mb-2">1. Empty Yard Stock On-Hand (${yardStock.length} Containers)</h4>
-                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
+                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Van In Status</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2 font-semibold ${c.vanInStats==='UNPAID'?'text-rose-600':'text-emerald-600'}">${c.vanInStats||'PAID'}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
                     </div>
                     <div>
                         <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-In Delivery Proof / Photos (${allPhotos.length} Attached)</h4>
@@ -1113,7 +1138,10 @@
                         </td>
                         <td class="p-3">${c.size} ${c.type}</td>
                         <td class="p-3">${c.line}</td>
-                        <td class="p-3"><span class="pill ${c.status}">${c.status}</span></td>
+                        <td class="p-3">
+                            <span class="pill ${c.status}">${c.status}</span>
+                            ${c.vanInStats === 'UNPAID' ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded">UNPAID</span>' : ''}
+                        </td>
                         <td class="p-3">${yardLoc(c)}</td>
                         <td class="p-3">${stamp(c.date)}</td>
                         <td class="p-3"><button class="bg-slate-200 hover:bg-slate-300 text-[11px] py-1 px-2 rounded font-semibold" onclick="editYardStatus('${c.id}')">Status</button></td>
@@ -1125,7 +1153,8 @@
         function renderYardOutSelect() {
             const sel = document.getElementById('yardOutContainer');
             if(sel) {
-                sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => `<option value="${c.id}">${c.number} — ${c.size} — ${c.line} (${c.status})</option>`).join('');
+                // Modified selection: If vanInStats is UNPAID, we can optionally filter or flag it, but the strict validation check is handled upon submission.
+                sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => `<option value="${c.id}">${c.number} — ${c.size} — ${c.line} (${c.status}) ${c.vanInStats === 'UNPAID' ? '⚠️ [UNPAID]' : ''}</option>`).join('');
             }
         }
 
@@ -1181,11 +1210,12 @@
                 driver: c.driver, 
                 eir: c.eir, 
                 remarks: c.remarks,
+                vanInStats: c.vanInStats,
+                vanInAmount: c.vanInAmount,
                 photos: [...stagedGateInPhotos]
             });
             saveYardDB();
             
-            // Reset form and staged photos
             e.target.reset();
             clearGateInPhotos();
             
@@ -1193,18 +1223,41 @@
             switchYardTab('yardInventory');
         }
 
+        // --- UPDATED GATE-OUT LOGIC FOR UNPAID / PAID CHECK ---
         function handleYardGateOut(e) {
             e.preventDefault();
             let f = Object.fromEntries(new FormData(e.target));
             let c = yardDb.containers.find(x => x.id === f.container);
             if(!c) return alert('Select a valid container.');
+
+            // REQUIREMENT CHECK: If Van In Amount is saved as UNPAID, reflect/block Gate-Out; if PAID, no issue.
+            if(c.vanInStats && c.vanInStats.toUpperCase() === 'UNPAID') {
+                alert(`⚠️ Cannot Proceed with Gate-Out!\n\nContainer ${c.number} has an UNPAID Van In status (Amount: ₱${c.vanInAmount || '0.00'}). Please settle the balance to PAID before releasing.`);
+                return; // Blocks reflection / gate-out submission
+            }
+
             if(!confirm('Confirm gate-out for ' + c.number + '?')) return;
             c.status = 'Released';
             if(!yardDb.movements) yardDb.movements = [];
-            yardDb.movements.push({kind: 'GATE-OUT', date: f.date, number: c.number, plate: f.plate, driver: f.driver, customer: f.customer, eir: f.eir, remarks: f.remarks});
+            yardDb.movements.push({
+                kind: 'GATE-OUT', 
+                date: f.date, 
+                number: c.number, 
+                plate: f.plate, 
+                driver: f.driver, 
+                customer: f.customer, 
+                eir: f.eir, 
+                vanOutAmount: f.vanOutAmount,
+                remarks: f.remarks,
+                photos: [...stagedGateOutPhotos]
+            });
             saveYardDB();
             e.target.reset();
-            alert('Yard Gate-Out recorded.');
+            stagedGateOutPhotos = [];
+            const photoContainer = document.getElementById('gateOutPhotoPreviewContainer');
+            if(photoContainer) photoContainer.innerHTML = '';
+            
+            alert('Yard Gate-Out successfully recorded.');
             switchYardTab('yardInventory');
         }
 
@@ -1251,11 +1304,11 @@
         }
 
         function exportYardCSV() {
-            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Block','Bay','Tier','Gate-In Date','Truck Plate','Driver','EIR','Remarks','Photos Attached'], ...liveYard().map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.block, c.bay, c.tier, c.date, c.plate, c.driver, c.eir, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
+            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Van In Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Truck Plate','Driver','EIR','Remarks','Photos Attached'], ...liveYard().map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.vanInAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.plate, c.driver, c.eir, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
         }
 
         function exportYardMovements() {
-            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Van Out Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.vanOutAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
         }
 
         function clearYardData() {
