@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skymover Transportation - Philippine Container Fleet Smart Management Platform</title>
+    <title>Skymover Transportation & Empty Container Yard Management Platform</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome for icons -->
@@ -20,6 +20,11 @@
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(16px);
         }
+        .pill { display: inline-block; border-radius: 20px; padding: 3px 8px; font-size: 11px; font-weight: 700; background: #edf2f7; color: #1d2b3a; }
+        .Available { background: #e6f5ee; color: #14734d; }
+        .Reserved { background: #fff4dc; color: #946200; }
+        .Hold, .Damaged { background: #ffebe8; color: #b33225; }
+        .Released { background: #eaf1fb; color: #315f98; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -32,13 +37,13 @@
             </div>
             <div>
                 <h1 class="font-bold tracking-wider text-sm text-sky-400">SKYMOVER</h1>
-                <p class="text-[10px] text-slate-400 tracking-widest uppercase">Philippine Fleet Platform</p>
+                <p class="text-[10px] text-slate-400 tracking-widest uppercase">Unified Fleet & Yard Platform</p>
             </div>
         </div>
 
         <div class="flex items-center space-x-4">
             <button onclick="switchView('landing')" id="navHomeBtn" class="text-xs font-medium text-slate-300 hover:text-sky-400 transition hidden md:inline-block">
-                <i class="fa-solid fa-house mr-1"></i> Home
+                <i class="fa-solid fa-house mr-1"></i> Home Portals
             </button>
             <button onclick="toggleLanguage()" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-full text-xs font-medium border border-slate-700 shadow-sm transition">
                 <i class="fa-solid fa-globe text-sky-400"></i>
@@ -60,19 +65,20 @@
                 SKYMOVER TRANSPORTATION
             </h2>
             <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-12 font-light" data-i18n="mainSubtitle">
-                Philippine Container Fleet Smart Management Platform
+                Philippine Container Fleet & Empty Container Yard Management Platform
             </p>
 
-            <!-- 3 Portal Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <!-- 4 Portal Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                
                 <!-- Card 1: Management Backend -->
-                <div onclick="openBackendModule('Dashboard')" class="glass-card rounded-2xl p-8 text-left hover:border-sky-500/60 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                <div onclick="openBackendModule('Dashboard')" class="glass-card rounded-2xl p-6 text-left hover:border-sky-500/60 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 mb-6 group-hover:scale-110 transition">
                             <i class="fa-solid fa-desktop text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-sky-400 transition" data-i18n="card1Title">Management Backend</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed mb-6" data-i18n="card1Desc">Scheduling, Finance, and Reporting</p>
+                        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-sky-400 transition" data-i18n="card1Title">Management Backend</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-6" data-i18n="card1Desc">Scheduling, Finance, and Fleet Analytics</p>
                     </div>
                     <div class="text-xs font-semibold text-sky-400 flex items-center space-x-2">
                         <span>Access Dashboard</span>
@@ -81,12 +87,12 @@
                 </div>
 
                 <!-- Card 2: Driver's Side -->
-                <div onclick="openDriverPortal()" class="glass-card rounded-2xl p-8 text-left hover:border-sky-500/60 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                <div onclick="openDriverPortal()" class="glass-card rounded-2xl p-6 text-left hover:border-sky-500/60 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition">
                             <i class="fa-solid fa-tablet-screen-button text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition" data-i18n="card2Title">Driver's side</h3>
+                        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition" data-i18n="card2Title">Driver's side</h3>
                         <p class="text-xs text-slate-400 leading-relaxed mb-6" data-i18n="card2Desc">Waybill, Photo, Navigation</p>
                     </div>
                     <div>
@@ -101,12 +107,12 @@
                 </div>
 
                 <!-- Card 3: Hub & Transshipment -->
-                <div onclick="openHubPortal()" class="glass-card rounded-2xl p-8 text-left hover:border-sky-500/60 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                <div onclick="openHubPortal()" class="glass-card rounded-2xl p-6 text-left hover:border-sky-500/60 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 transition">
                             <i class="fa-solid fa-handshake-angle text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition" data-i18n="card3Title">Transshipment Hub</h3>
+                        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-400 transition" data-i18n="card3Title">Transshipment Hub</h3>
                         <p class="text-xs text-slate-400 leading-relaxed mb-6" data-i18n="card3Desc">Waybill, Photograph, Commission & Terminal Acceptance</p>
                     </div>
                     <div class="text-xs font-semibold text-emerald-400 flex items-center space-x-2">
@@ -114,6 +120,22 @@
                         <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
                     </div>
                 </div>
+
+                <!-- Card 4: Empty Container Yard Management -->
+                <div onclick="openYardPortal()" class="glass-card rounded-2xl p-6 text-left hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between border-amber-500/30 bg-amber-950/10">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-6 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition">Empty Yard Management</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-6">Container Inventory, Gate-In, Gate-Out & Local Yard Reports</p>
+                    </div>
+                    <div class="text-xs font-semibold text-amber-400 flex items-center space-x-2">
+                        <span>Open Yard System</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -298,6 +320,136 @@
             </div>
         </section>
 
+        <!-- VIEW 5: EMPTY CONTAINER YARD MANAGEMENT (Integrated Yard App) -->
+        <section id="viewYard" class="w-full max-w-7xl mx-auto hidden py-4 text-slate-900">
+            <div class="flex justify-between items-center mb-6 bg-slate-900 p-4 rounded-2xl text-white">
+                <div>
+                    <button onclick="switchView('landing')" class="text-xs text-amber-400 hover:underline mb-1 inline-block">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Portals
+                    </button>
+                    <h2 class="text-2xl font-bold">SKYMOVER Empty Container Yard Management</h2>
+                    <p class="text-xs text-slate-400">Local stock control, Gate-In, Gate-Out, and yard records.</p>
+                </div>
+                <!-- Yard Nav Tabs -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn bg-amber-600 text-white">Yard Dashboard</button>
+                    <button onclick="switchYardTab('yardInventory')" id="yBtn2" class="btn secondary">Inventory</button>
+                    <button onclick="switchYardTab('yardGateIn')" id="yBtn3" class="btn secondary">Gate-In</button>
+                    <button onclick="switchYardTab('yardGateOut')" id="yBtn4" class="btn secondary">Gate-Out</button>
+                    <button onclick="switchYardTab('yardReports')" id="yBtn5" class="btn secondary">Reports</button>
+                    <button onclick="switchYardTab('yardBackup')" id="yBtn6" class="btn secondary">Backup</button>
+                </div>
+            </div>
+
+            <!-- Yard Tab 1: Dashboard -->
+            <div id="yardDashboard" class="yard-tab">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">TOTAL ON HAND</div><div class="num text-3xl font-extrabold text-slate-900 my-1" id="yardTotal">0</div><div class="hint text-slate-500 text-xs">Containers inside the yard</div></div>
+                    <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">AVAILABLE</div><div class="num text-3xl font-extrabold text-emerald-600 my-1" id="yardAvailable">0</div><div class="hint text-slate-500 text-xs">Ready for dispatch</div></div>
+                    <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">RESERVED</div><div class="num text-3xl font-extrabold text-amber-600 my-1" id="yardReserved">0</div><div class="hint text-slate-500 text-xs">Allocated to customers</div></div>
+                    <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">DAMAGED / HOLD</div><div class="num text-3xl font-extrabold text-rose-600 my-1" id="yardDamaged">0</div><div class="hint text-slate-500 text-xs">Requires attention</div></div>
+                </div>
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Recent Yard Movements</h3><button class="btn secondary" onclick="switchYardTab('yardInventory')">View Inventory</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Truck / Plate</th><th class="p-3">EIR / Reference</th></tr></thead><tbody id="yardRecentBody" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 2: Inventory -->
+            <div id="yardInventory" class="yard-tab hidden">
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <h3 class="font-bold text-base text-slate-800">Container Masterlist</h3>
+                        <div class="flex gap-2">
+                            <input id="yardSearchInput" class="px-3 py-2 border rounded-lg text-xs w-64" placeholder="Search container, line, status..." oninput="renderYardInventory()">
+                            <button class="btn bg-amber-600 text-white" onclick="switchYardTab('yardGateIn')">+ Add Gate-In</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Container No.</th><th class="p-3">Size / Type</th><th class="p-3">Shipping Line</th><th class="p-3">Status</th><th class="p-3">Yard Location</th><th class="p-3">Gate-In Date</th><th class="p-3">Actions</th></tr></thead><tbody id="yardInventoryRows" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 3: Gate-In -->
+            <div id="yardGateIn" class="yard-tab hidden">
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">Record Yard Gate-In Entry</h3>
+                    <form id="yardGateInForm" onsubmit="handleYardGateIn(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Number *</label><input name="number" required class="p-2 border rounded-lg w-full" placeholder="ABCD1234567"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Size *</label><select name="size" required class="p-2 border rounded-lg w-full"><option value="">Select size</option><option>20FT</option><option>40FT</option><option>40HC</option><option>45FT</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Type</label><select name="type" class="p-2 border rounded-lg w-full"><option>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option><option>Other</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Shipping Line *</label><input name="line" required class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Condition *</label><select name="condition" required class="p-2 border rounded-lg w-full"><option>Good</option><option>Damaged</option><option>For Inspection</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Initial Status</label><select name="status" class="p-2 border rounded-lg w-full"><option>Available</option><option>Reserved</option><option>Hold</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Block</label><input name="block" class="p-2 border rounded-lg w-full" placeholder="A"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Bay / Row</label><input name="bay" class="p-2 border rounded-lg w-full" placeholder="03 / 02"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Tier</label><input name="tier" class="p-2 border rounded-lg w-full" placeholder="1"></div>
+                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
+                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
+                        </div>
+                        <div class="flex gap-2 pt-2"><button type="submit" class="btn bg-amber-600 text-white">Save Gate-In</button><button type="reset" class="btn secondary">Clear Form</button></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Yard Tab 4: Gate-Out -->
+            <div id="yardGateOut" class="yard-tab hidden">
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">Container Gate-Out / Release</h3>
+                    <form id="yardGateOutForm" onsubmit="handleYardGateOut(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Container Number *</label><select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full"><option value="">Select container in yard</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer</label><input name="customer" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
+                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
+                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
+                        </div>
+                        <button type="submit" class="btn bg-amber-600 text-white">Confirm Gate-Out</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Yard Tab 5: Reports -->
+            <div id="yardReports" class="yard-tab hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card bg-white p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">GATE-IN RECORDS</div><div class="text-2xl font-bold my-1" id="yardRptGateIn">0</div></div>
+                    <div class="card bg-white p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">GATE-OUT RECORDS</div><div class="text-2xl font-bold my-1" id="yardRptGateOut">0</div></div>
+                    <div class="card bg-white p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">SHIPPING LINES</div><div class="text-2xl font-bold my-1" id="yardRptLines">0</div></div>
+                    <div class="card bg-white p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">MOVEMENTS LOGGED</div><div class="text-2xl font-bold my-1" id="yardRptMoves">0</div></div>
+                </div>
+                <div class="panel bg-white p-6 rounded-2xl shadow border mb-6">
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Stock by Shipping Line</h3><button class="btn secondary" onclick="exportYardCSV()">Export Inventory CSV</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Shipping Line</th><th class="p-3">On-Hand</th><th class="p-3">Available</th><th class="p-3">Reserved</th><th class="p-3">Damaged / Hold</th></tr></thead><tbody id="yardLineRows" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+                <div class="panel bg-white p-6 rounded-2xl shadow border">
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History</h3><button class="btn secondary" onclick="exportYardMovements()">Export Movements CSV</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Driver</th><th class="p-3">Customer</th><th class="p-3">EIR / Ref.</th><th class="p-3">Remarks</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 6: Backup -->
+            <div id="yardBackup" class="yard-tab hidden space-y-6">
+                <div class="panel bg-white p-6 rounded-2xl shadow border">
+                    <h3 class="font-bold text-base text-slate-800 mb-2">Data Backup</h3>
+                    <p class="text-xs text-slate-500 mb-4">Download a complete JSON backup of your yard inventory and movement history.</p>
+                    <div class="flex gap-2">
+                        <button class="btn bg-amber-600 text-white" onclick="backupYardData()">Download Yard Backup</button>
+                        <label class="btn secondary cursor-pointer inline-flex items-center">Restore Backup<input type="file" id="yardRestoreFile" accept=".json,application/json" hidden onchange="restoreYardData(event)"></label>
+                    </div>
+                </div>
+                <div class="panel bg-white p-6 rounded-2xl shadow border">
+                    <h3 class="font-bold text-base text-slate-800 mb-2">Clear Local Yard Records</h3>
+                    <p class="text-xs text-slate-500 mb-4">Permanently clear saved yard records from this browser.</p>
+                    <button class="btn bg-rose-100 text-rose-700" onclick="clearYardData()">Clear All Yard Data</button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- SUB-MODULE MODAL OVERLAY -->
@@ -333,12 +485,13 @@
 
     <!-- FOOTER -->
     <footer class="w-full text-center py-6 border-t border-slate-800 bg-slate-950/80 text-[11px] text-slate-500">
-        <p>Skymover Transport Corporation • Container shipping services in Manila, Philippines</p>
+        <p>Skymover Transport Corporation • Container shipping services & Empty Yard in Manila, Philippines</p>
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        // Fleet & General Database State
         let db = JSON.parse(localStorage.getItem('skymover_ph_db')) || {
             vehicles: [
                 { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" },
@@ -350,38 +503,50 @@
                 { name: "Roberto Santos", license: "N01-99-876543", status: "Available", rating: "4.8 ★" }
             ],
             fuelLogs: [
-                { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" },
-                { unit: "SKV-102", liters: "150 L", cost: "₱9,750", date: "2026-11-11", station: "Caltex SLEX" }
+                { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" }
             ],
             maintenanceLogs: [
                 { unit: "SKV-103", issue: "Brake Pad Replacement & Hydraulic Check", date: "2026-11-10", cost: "₱8,500", status: "In Shop" }
             ],
             dispatchLogs: [
-                { unit: "SKV-101", route: "Manila Port → Valenzuela Depot", status: "In Transit (NLEX KM 24)", driver: "Juan Dela Cruz" },
-                { unit: "SKV-102", route: "Batangas Terminal → Laguna Technopark", status: "Arrived", driver: "Roberto Santos" }
+                { unit: "SKV-101", route: "Manila Port → Valenzuela Depot", status: "In Transit (NLEX KM 24)", driver: "Juan Dela Cruz" }
             ],
             expenseLogs: [
-                { trip: "Trip #401", fuel: "₱7,800", tolls: "₱1,250", maintenance: "₱0", total: "₱9,050" },
-                { trip: "Trip #402", fuel: "₱9,750", tolls: "₱1,800", maintenance: "₱8,500", total: "₱20,050" }
+                { trip: "Trip #401", fuel: "₱7,800", tolls: "₱1,250", maintenance: "₱0", total: "₱9,050" }
             ],
             transshipments: [
-                { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" },
-                { id: "TR-9002", origin: "Batangas Container Terminal", container: "CMAU-554120-9", commission: "₱6,200", status: "Pending Hub Review" }
+                { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" }
             ],
             uploads: [
                 { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof" }
             ]
         };
 
+        // Yard Database State
+        const YARD_KEY = 'skymover_empty_yard_v1';
+        let yardDb = JSON.parse(localStorage.getItem(YARD_KEY)) || {
+            containers: [
+                { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean" }
+            ],
+            movements: [
+                { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean" }
+            ],
+            yard: "SKYMOVER Empty Container Yard"
+        };
+
         function saveDB() {
             localStorage.setItem('skymover_ph_db', JSON.stringify(db));
+        }
+        function saveYardDB() {
+            localStorage.setItem(YARD_KEY, JSON.stringify(yardDb));
+            refreshYard();
         }
 
         let currentLang = 'en';
         const translations = {
             en: {
                 mainTitle: "SKYMOVER TRANSPORTATION",
-                mainSubtitle: "Philippine Container Fleet Smart Management Platform",
+                mainSubtitle: "Philippine Container Fleet & Empty Container Yard Management Platform",
                 card1Title: "Management Backend",
                 card1Desc: "Scheduling, Finance, and Reporting",
                 card2Title: "Driver's side",
@@ -392,7 +557,7 @@
             },
             zh: {
                 mainTitle: "SKYMOVER 运输物流",
-                mainSubtitle: "菲律宾集装箱车队智能管理平台",
+                mainSubtitle: "菲律宾集装箱车队及空箱场站智能管理平台",
                 card1Title: "管理后台",
                 card1Desc: "调度、财务与报表",
                 card2Title: "司机端",
@@ -419,6 +584,7 @@
             document.getElementById('viewBackend').classList.add('hidden');
             document.getElementById('viewDriver').classList.add('hidden');
             document.getElementById('viewHub').classList.add('hidden');
+            document.getElementById('viewYard').classList.add('hidden');
 
             if (viewName === 'landing') {
                 document.getElementById('viewLanding').classList.remove('hidden');
@@ -430,12 +596,16 @@
             } else if (viewName === 'hub') {
                 document.getElementById('viewHub').classList.remove('hidden');
                 renderTransshipmentTable();
+            } else if (viewName === 'yard') {
+                document.getElementById('viewYard').classList.remove('hidden');
+                refreshYard();
             }
         }
 
         function openBackendModule(mod) { switchView('backend'); }
         function openDriverPortal() { switchView('driver'); }
         function openHubPortal() { switchView('hub'); }
+        function openYardPortal() { switchView('yard'); }
 
         function switchAiTab(tab) {
             document.getElementById('tabBrainBtn').className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
@@ -521,7 +691,7 @@
             }
         }
 
-        // Fully Operational Sub-Modules Handler for Fuel, Maintenance, GPS & Dispatch, and Fleet Expenses
+        // Sub-Modules Handler for Fleet Operations
         function openSubModule(title) {
             const modal = document.getElementById('subModuleModal');
             const content = document.getElementById('subModuleContent');
@@ -538,57 +708,54 @@
             if (title === 'Dashboard') {
                 content.innerHTML = `
                     <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & KPI Overview</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Active Fleet Units</p><h4 class="text-2xl font-bold text-white mt-1">${vehicles.length}</h4></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-400 mt-1">${drivers.length}</h4></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Pending Transshipments</p><h4 class="text-2xl font-bold text-emerald-400 mt-1">${transshipments.filter(t => t.status && t.status.includes('Pending')).length}</h4></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Fuel Logs</p><h4 class="text-2xl font-bold text-amber-400 mt-1">${fuelLogs.length}</h4></div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 text-slate-900">
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Fleet Units</p><h4 class="text-2xl font-bold text-slate-900 mt-1">${vehicles.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-600 mt-1">${drivers.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Pending Transshipments</p><h4 class="text-2xl font-bold text-emerald-600 mt-1">${transshipments.filter(t => t.status && t.status.includes('Pending')).length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Total Fuel Logs</p><h4 class="text-2xl font-bold text-amber-600 mt-1">${fuelLogs.length}</h4></div>
                     </div>
                 `;
             } else if (title === 'Vehicle Management') {
-                let rows = vehicles.map(v => `<tr class="border-b border-slate-800"><td class="p-3 font-medium">${v.id}</td><td class="p-3">${v.model}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-500/20 text-sky-400">${v.status}</span></td><td class="p-3">${v.driver}</td></tr>`).join('');
+                let rows = vehicles.map(v => `<tr class="border-b"><td class="p-3 font-medium">${v.id}</td><td class="p-3">${v.model}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">${v.status}</span></td><td class="p-3">${v.driver}</td></tr>`).join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>${rows}</table></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>${rows}</table></div>
                 `;
             } else if (title === 'Driver Management') {
-                let rows = drivers.map(d => `<tr class="border-b border-slate-800"><td class="p-3 font-medium">${d.name}</td><td class="p-3 font-mono">${d.license}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-500/20 text-indigo-400">${d.status}</span></td><td class="p-3 text-amber-400">${d.rating}</td></tr>`).join('');
+                let rows = drivers.map(d => `<tr class="border-b"><td class="p-3 font-medium">${d.name}</td><td class="p-3 font-mono">${d.license}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">${d.status}</span></td><td class="p-3 text-amber-600">${d.rating}</td></tr>`).join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="addDriverPrompt()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Driver</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>${rows}</table></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="addDriverPrompt()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Driver</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>${rows}</table></div>
                 `;
             } else if (title === 'Fuel Monitoring') {
-                let rows = fuelLogs.map(f => `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-sky-400">${f.unit}</td><td class="p-3">${f.liters}</td><td class="p-3 font-medium text-emerald-400">${f.cost}</td><td class="p-3">${f.station}</td><td class="p-3">${f.date}</td></tr>`).join('');
+                let rows = fuelLogs.map(f => `<tr class="border-b"><td class="p-3 font-mono text-sky-600">${f.unit}</td><td class="p-3">${f.liters}</td><td class="p-3 font-medium text-emerald-600">${f.cost}</td><td class="p-3">${f.station}</td><td class="p-3">${f.date}</td></tr>`).join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring & Diesel Consumption</h3><button onclick="addFuelPrompt()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>${rows}</table></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3><button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>${rows}</table></div>
                 `;
             } else if (title === 'Maintenance') {
-                let rows = maintenanceLogs.map(m => `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-sky-400">${m.unit}</td><td class="p-3">${m.issue}</td><td class="p-3 font-medium text-rose-400">${m.cost}</td><td class="p-3">${m.status}</td><td class="p-3">${m.date}</td></tr>`).join('');
+                let rows = maintenanceLogs.map(m => `<tr class="border-b"><td class="p-3 font-mono text-sky-600">${m.unit}</td><td class="p-3">${m.issue}</td><td class="p-3 font-medium text-rose-600">${m.cost}</td><td class="p-3">${m.status}</td><td class="p-3">${m.date}</td></tr>`).join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance & Repairs</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Issue / Repair Item</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>${rows}</table></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>${rows}</table></div>
                 `;
             } else if (title === 'GPS & Dispatch') {
-                let rows = dispatchLogs.map(d => `<tr class="border-b border-slate-800"><td class="p-3 font-mono text-sky-400">${d.unit}</td><td class="p-3">${d.route}</td><td class="p-3">${d.driver}</td><td class="p-3 text-emerald-400 font-semibold">${d.status}</td></tr>`).join('');
+                let rows = dispatchLogs.map(d => `<tr class="border-b"><td class="p-3 font-mono text-sky-600">${d.unit}</td><td class="p-3">${d.route}</td><td class="p-3">${d.driver}</td><td class="p-3 text-emerald-600 font-semibold">${d.status}</td></tr>`).join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch Monitoring</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Telemetry Status</th></tr>${rows}</table></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th></tr>${rows}</table></div>
                 `;
             } else if (title === 'Fleet Expenses') {
-                let rows = expenseLogs.map(e => `<tr class="border-b border-slate-800"><td class="p-3 font-semibold text-sky-400">${e.trip}</td><td class="p-3">${e.fuel}</td><td class="p-3">${e.tolls}</td><td class="p-3">${e.maintenance}</td><td class="p-3 font-bold text-emerald-400">${e.total}</td></tr>`).join('');
+                let rows = expenseLogs.map(e => `<tr class="border-b"><td class="p-3 font-semibold text-sky-600">${e.trip}</td><td class="p-3">${e.fuel}</td><td class="p-3">${e.tolls}</td><td class="p-3">${e.maintenance}</td><td class="p-3 font-bold text-emerald-600">${e.total}</td></tr>`).join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses & Profitability</h3><button onclick="addExpensePrompt()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>${rows}</table></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3><button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>${rows}</table></div>
                 `;
-            } else {
-                content.innerHTML = `<h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-folder-open text-sky-400 mr-2"></i> ${title}</h3><p class="text-xs text-slate-300">Module operational and synced with local database storage.</p>`;
             }
         }
 
         function closeSubModule() { document.getElementById('subModuleModal').classList.add('hidden'); }
 
-        // Interactive Prompts for Adding Records across Fuel, Maintenance, Dispatch, Expenses
         function addVehiclePrompt() {
             const id = prompt("Enter Unit ID (e.g. SKV-104):");
             const model = prompt("Enter Vehicle Model:");
@@ -673,59 +840,30 @@
             const maintenanceLogs = db.maintenanceLogs || [];
             const dispatchLogs = db.dispatchLogs || [];
             const expenseLogs = db.expenseLogs || [];
-            const transshipments = db.transshipments || [];
-            const uploads = db.uploads || [];
+            const yardStock = yardDb.containers.filter(c => c.status !== 'Released');
 
             content.innerHTML = `
-                <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
                     <div>
-                        <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Philippine Fleet Extraction & Audit Report</h3>
-                        <p class="text-xs text-slate-400">Aggregated inventory, fuel, maintenance, GPS telemetry, expenses, and photos.</p>
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Fleet & Yard Audit Report</h3>
+                        <p class="text-xs text-slate-400">Aggregated fleet inventory, yard stock, fuel, maintenance, and expense audits.</p>
                     </div>
-                    <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
-                        <i class="fa-solid fa-print mr-1"></i> Print / Export Report
-                    </button>
+                    <button onclick="window.print()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print / Export</button>
                 </div>
-
-                <div class="space-y-6 text-xs">
+                <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
                     <div>
-                        <h4 class="font-bold text-sm text-sky-400 mb-2">1. Fleet Masterlist (${vehicles.length} Units)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Driver</th></tr>${vehicles.map(v=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2 text-sky-400">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('')}</table>
-                        </div>
+                        <h4 class="font-bold text-sm text-sky-800 mb-2">1. Empty Yard Stock On-Hand (${yardStock.length} Containers)</h4>
+                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
                     </div>
-
                     <div>
-                        <h4 class="font-bold text-sm text-amber-400 mb-2">2. Fuel Monitoring Logs (${fuelLogs.length} Records)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit</th><th class="p-2">Volume</th><th class="p-2">Cost</th><th class="p-2">Station</th><th class="p-2">Date</th></tr>${fuelLogs.map(f=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${f.unit}</td><td class="p-2">${f.liters}</td><td class="p-2 text-emerald-400">${f.cost}</td><td class="p-2">${f.station}</td><td class="p-2">${f.date}</td></tr>`).join('')}</table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-sm text-rose-400 mb-2">3. Maintenance Logs (${maintenanceLogs.length} Records)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit</th><th class="p-2">Issue</th><th class="p-2">Cost</th><th class="p-2">Status</th><th class="p-2">Date</th></tr>${maintenanceLogs.map(m=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${m.unit}</td><td class="p-2">${m.issue}</td><td class="p-2 text-rose-400">${m.cost}</td><td class="p-2">${m.status}</td><td class="p-2">${m.date}</td></tr>`).join('')}</table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-sm text-emerald-400 mb-2">4. GPS & Dispatch Logs (${dispatchLogs.length} Records)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit</th><th class="p-2">Route</th><th class="p-2">Driver</th><th class="p-2">Status</th></tr>${dispatchLogs.map(d=>`<tr class="border-b border-slate-800"><td class="p-2 font-mono">${d.unit}</td><td class="p-2">${d.route}</td><td class="p-2">${d.driver}</td><td class="p-2 text-emerald-400">${d.status}</td></tr>`).join('')}</table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-sm text-teal-400 mb-2">5. Fleet Expense Logs (${expenseLogs.length} Records)</h4>
-                        <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
-                            <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Trip</th><th class="p-2">Fuel</th><th class="p-2">Tolls</th><th class="p-2">Maintenance</th><th class="p-2">Total</th></tr>${expenseLogs.map(e=>`<tr class="border-b border-slate-800"><td class="p-2 font-semibold">${e.trip}</td><td class="p-2">${e.fuel}</td><td class="p-2">${e.tolls}</td><td class="p-2">${e.maintenance}</td><td class="p-2 font-bold text-emerald-400">${e.total}</td></tr>`).join('')}</table>
-                        </div>
+                        <h4 class="font-bold text-sm text-blue-800 mb-2">2. Fleet Vehicles (${vehicles.length} Units)</h4>
+                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Driver</th></tr>${vehicles.map(v=>`<tr class="border-b"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('')}</table>
                     </div>
                 </div>
             `;
         }
 
+        // Transshipment Hub Logic
         function renderTransshipmentTable() {
             const tbody = document.getElementById('transshipmentTableBody');
             const transshipments = db.transshipments || [];
@@ -738,9 +876,9 @@
                     <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700">${t.status}</span></td>
                     <td class="p-3 text-right">
                         ${t.status && t.status.includes('Pending') ? `
-                            <button onclick="acceptTransshipment(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-[11px] mr-1">Accept</button>
-                            <button onclick="rejectTransshipment(${idx})" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1 rounded text-[11px]">Reject</button>
-                        ` : `<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Hub Accepted</span>`}
+                            <button onclick="acceptTransshipment(${idx})" class="bg-emerald-600 text-white px-3 py-1 rounded text-[11px] mr-1">Accept</button>
+                            <button onclick="rejectTransshipment(${idx})" class="bg-rose-600 text-white px-3 py-1 rounded text-[11px]">Reject</button>
+                        ` : `<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Accepted</span>`}
                     </td>
                 </tr>
             `).join('');
@@ -781,7 +919,7 @@
             });
             saveDB();
             renderTransshipmentTable();
-            alert('Transshipment order accepted! Live dispatch queue & vehicle management list updated.');
+            alert('Transshipment order accepted and synced to fleet list.');
         }
 
         function rejectTransshipment(idx) {
@@ -790,6 +928,176 @@
             saveDB();
             renderTransshipmentTable();
         }
+
+        // --- EMPTY YARD APP LOGIC ---
+        function switchYardTab(tabId) {
+            document.querySelectorAll('.yard-tab').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            ['yBtn1','yBtn2','yBtn3','yBtn4','yBtn5','yBtn6'].forEach((id, idx) => {
+                let btn = document.getElementById(id);
+                if(btn) {
+                    btn.className = 'btn secondary';
+                    if(['yardDashboard','yardInventory','yardGateIn','yardGateOut','yardReports','yardBackup'][idx] === tabId) {
+                        btn.className = 'btn bg-amber-600 text-white';
+                    }
+                }
+            });
+            refreshYard();
+        }
+
+        function liveYard() { return yardDb.containers.filter(c => c.status !== 'Released'); }
+        function yardLoc(c) { return [c.block && 'Block '+c.block, c.bay && 'Bay/Row '+c.bay, c.tier && 'Tier '+c.tier].filter(Boolean).join(' • ') || '—'; }
+        function stamp(v) { return v ? new Date(v).toLocaleString() : '—'; }
+
+        function refreshYard() {
+            let a = liveYard();
+            document.getElementById('yardTotal').textContent = a.length;
+            document.getElementById('yardAvailable').textContent = a.filter(c => c.status === 'Available' && c.condition === 'Good').length;
+            document.getElementById('yardReserved').textContent = a.filter(c => c.status === 'Reserved').length;
+            document.getElementById('yardDamaged').textContent = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
+
+            // Recent movements
+            let r = yardDb.movements.slice(-8).reverse();
+            document.getElementById('yardRecentBody').innerHTML = r.length ? r.map(m => `<tr><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.eir||'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No movements recorded yet.</td></tr>';
+
+            renderYardInventory();
+            renderYardOutSelect();
+            renderYardReports();
+        }
+
+        function renderYardInventory() {
+            let q = (document.getElementById('yardSearchInput')?.value || '').toLowerCase();
+            let a = liveYard().filter(c => [c.number, c.line, c.status, c.size, c.plate].join(' ').toLowerCase().includes(q));
+            document.getElementById('yardInventoryRows').innerHTML = a.length ? a.map(c => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-bold font-mono">${c.number}</td>
+                    <td class="p-3">${c.size} ${c.type}</td>
+                    <td class="p-3">${c.line}</td>
+                    <td class="p-3"><span class="pill ${c.status}">${c.status}</span></td>
+                    <td class="p-3">${yardLoc(c)}</td>
+                    <td class="p-3">${stamp(c.date)}</td>
+                    <td class="p-3"><button class="btn secondary text-[11px] py-1 px-2" onclick="editYardStatus('${c.id}')">Status</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">No matching containers in yard.</td></tr>';
+        }
+
+        function renderYardOutSelect() {
+            const sel = document.getElementById('yardOutContainer');
+            if(sel) {
+                sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => `<option value="${c.id}">${c.number} — ${c.size} — ${c.line} (${c.status})</option>`).join('');
+            }
+        }
+
+        function renderYardReports() {
+            let a = liveYard();
+            document.getElementById('yardRptGateIn').textContent = yardDb.movements.filter(m => m.kind === 'GATE-IN').length;
+            document.getElementById('yardRptGateOut').textContent = yardDb.movements.filter(m => m.kind === 'GATE-OUT').length;
+            document.getElementById('yardRptLines').textContent = new Set(a.map(c => c.line.toLowerCase())).size;
+            document.getElementById('yardRptMoves').textContent = yardDb.movements.length;
+
+            let lines = [...new Set(a.map(c => c.line))].sort();
+            document.getElementById('yardLineRows').innerHTML = lines.length ? lines.map(l => {
+                let x = a.filter(c => c.line === l);
+                return `<tr class="border-b"><td class="p-3 font-medium">${l}</td><td class="p-3">${x.length}</td><td class="p-3">${x.filter(c => c.status==='Available'&&c.condition==='Good').length}</td><td class="p-3">${x.filter(c => c.status==='Reserved').length}</td><td class="p-3">${x.filter(c => ['Damaged','For Inspection'].includes(c.condition)||c.status==='Hold').length}</td></tr>`;
+            }).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No stock records.</td></tr>';
+
+            document.getElementById('yardMovementRows').innerHTML = yardDb.movements.length ? yardDb.movements.slice().reverse().map(m => `
+                <tr class="border-b"><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.driver||'—'}</td><td class="p-3">${m.customer||'—'}</td><td class="p-3">${m.eir||'—'}</td><td class="p-3">${m.remarks||'—'}</td></tr>
+            `).join('') : '<tr><td colspan="8" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
+        }
+
+        function handleYardGateIn(e) {
+            e.preventDefault();
+            let f = Object.fromEntries(new FormData(e.target));
+            f.number = f.number.trim().toUpperCase();
+            if(yardDb.containers.some(c => c.number.toUpperCase() === f.number && c.status !== 'Released')) {
+                return alert('This container is already recorded inside the yard.');
+            }
+            let c = {...f, id: 'yd-' + Math.random().toString(36.substring(2, 9))};
+            if(c.condition !== 'Good') c.status = 'Hold';
+            yardDb.containers.push(c);
+            yardDb.movements.push({kind: 'GATE-IN', date: c.date, number: c.number, plate: c.plate, driver: c.driver, eir: c.eir, remarks: c.remarks});
+            saveYardDB();
+            e.target.reset();
+            alert('Yard Gate-In saved successfully.');
+            switchYardTab('yardInventory');
+        }
+
+        function handleYardGateOut(e) {
+            e.preventDefault();
+            let f = Object.fromEntries(new FormData(e.target));
+            let c = yardDb.containers.find(x => x.id === f.container);
+            if(!c) return alert('Select a valid container.');
+            if(!confirm('Confirm gate-out for ' + c.number + '?')) return;
+            c.status = 'Released';
+            yardDb.movements.push({kind: 'GATE-OUT', date: f.date, number: c.number, plate: f.plate, driver: f.driver, customer: f.customer, eir: f.eir, remarks: f.remarks});
+            saveYardDB();
+            e.target.reset();
+            alert('Yard Gate-Out recorded.');
+            switchYardTab('yardInventory');
+        }
+
+        function editYardStatus(id) {
+            let c = yardDb.containers.find(x => x.id === id);
+            let s = prompt('Enter new status: Available, Reserved, or Hold', c.status);
+            if(s === null) return;
+            let m = {available:'Available', reserved:'Reserved', hold:'Hold'}[s.trim().toLowerCase()];
+            if(!m) return alert('Use Available, Reserved, or Hold.');
+            c.status = m;
+            saveYardDB();
+        }
+
+        function blobDownload(blob, name) {
+            let a = document.createElement('a'), u = URL.createObjectURL(blob);
+            a.href = u; a.download = name; a.click(); URL.revokeObjectURL(u);
+        }
+
+        function backupYardData() {
+            blobDownload(new Blob([JSON.stringify({...yardDb, backupCreated: new Date().toISOString()}, null, 2)], {type: 'application/json'}), 'SKYMOVER_Yard_Backup_' + new Date().toISOString().slice(0,10) + '.json');
+        }
+
+        function restoreYardData(e) {
+            let f = e.target.files[0]; if(!f) return;
+            let r = new FileReader();
+            r.onload = () => {
+                try {
+                    let d = JSON.parse(r.result);
+                    if(!Array.isArray(d.containers) || !Array.isArray(d.movements)) throw 0;
+                    if(!confirm('Restore yard backup? Current local yard records will be replaced.')) return;
+                    yardDb = d;
+                    saveYardDB();
+                    alert('Yard backup restored.');
+                } catch(x) { alert('Invalid backup file.'); }
+                e.target.value = '';
+            };
+            r.readAsText(f);
+        }
+
+        function csv(rows, name) {
+            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\r\n');
+            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
+        }
+
+        function exportYardCSV() {
+            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Block','Bay','Tier','Gate-In Date','Truck Plate','Driver','EIR','Remarks'], ...liveYard().map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.block, c.bay, c.tier, c.date, c.plate, c.driver, c.eir, c.remarks])], 'SKYMOVER_Yard_Inventory.csv');
+        }
+
+        function exportYardMovements() {
+            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Remarks'], ...yardDb.movements.map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+        }
+
+        function clearYardData() {
+            if(!confirm('Permanently clear ALL yard records? Download a backup first.')) return;
+            yardDb = {containers: [], movements: [], yard: yardDb.yard};
+            saveYardDB();
+            alert('Yard records cleared.');
+        }
+
+        // Set default datetime inputs for yard
+        document.querySelectorAll('#yardGateInForm input[type=datetime-local], #yardGateOutForm input[type=datetime-local]').forEach(x => {
+            let d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            x.value = d.toISOString().slice(0, 16);
+        });
     </script>
 </body>
 </html>
