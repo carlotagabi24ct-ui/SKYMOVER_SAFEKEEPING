@@ -139,7 +139,7 @@
             </div>
         </section>
 
-        <!-- VIEW 2: MANAGEMENT BACKEND HUB (8 Cards + LogiBRAIN/LENS/TRACK) -->
+        <!-- VIEW 2: MANAGEMENT BACKEND HUB -->
         <section id="viewBackend" class="w-full max-w-7xl mx-auto hidden py-4">
             
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-800 gap-4">
@@ -369,7 +369,7 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 3: Gate-In -->
+            <!-- Yard Tab 3: Gate-In with Delivery Proof / Photo Attachment -->
             <div id="yardGateIn" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-800 mb-4">Record Yard Gate-In Entry</h3>
@@ -379,7 +379,7 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Container Size *</label><select name="size" required class="p-2 border rounded-lg w-full"><option value="">Select size</option><option>20FT</option><option>40FT</option><option>40HC</option><option>45FT</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Container Type</label><select name="type" class="p-2 border rounded-lg w-full"><option>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option><option>Other</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Shipping Line *</label><select name="line" class="p-2 border rounded-lg w-full"><option>TS LINE</option><option>EVERGREEN</option><option>SINO TRANS</option><option>ASL</option><option>COSCO</option><option>ONE</option><option>M-SC</option><option>HMM</option><option>MAERKS</option><option>CMA-CGM</option><option>WAN-HAI</option><option>OOCL</option><option>ZIM LINE</option><option>PIL</option><option>SITC</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Name *</label><select name="name" class="p-2 border rounded-lg w-full"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Name *</label><select name="name" class="p-2 border rounded-lg w-full"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>    
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full"></div>
@@ -391,8 +391,22 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Tier</label><input name="tier" class="p-2 border rounded-lg w-full" placeholder="1"></div>
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
                             <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
+                            
+                            <!-- ATTACHMENT: UPLOAD DELIVERY PROOF / PHOTOS -->
+                            <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
+                                <label class="font-semibold text-slate-700 mb-2 block"><i class="fa-solid fa-camera mr-1 text-amber-600"></i> Upload Delivery Proof / Photos (Gate-In)</label>
+                                <div class="flex flex-col sm:flex-row items-center gap-4">
+                                    <input type="file" id="gateInPhotoInput" accept="image/*" multiple onchange="handleGateInPhotoPreview(event)" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
+                                    <span class="text-[11px] text-slate-500">Attach container inspection photo, EIR receipt, or damage snapshot.</span>
+                                </div>
+                                <div id="gateInPhotoPreviewContainer" class="flex flex-wrap gap-3 mt-3"></div>
+                            </div>
                         </div>
-                        <div class="flex gap-2 pt-2"><button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Save Gate-In</button><button type="reset" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-semibold">Clear Form</button></div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Save Gate-In with Photos</button>
+                            <button type="reset" onclick="clearGateInPhotos()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-semibold">Clear Form</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -491,8 +505,43 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC WITH SAFE STORAGE PARSING -->
+    <!-- JAVASCRIPT LOGIC WITH SAFE STORAGE PARSING & PHOTO ATTACHMENTS -->
     <script>
+        // Temporary staging array for Gate-In uploaded photo data URLs
+        let stagedGateInPhotos = [];
+
+        function handleGateInPhotoPreview(e) {
+            const files = e.target.files;
+            const container = document.getElementById('gateInPhotoPreviewContainer');
+            if (!container) return;
+            
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Data = event.target.result;
+                    stagedGateInPhotos.push({
+                        name: file.name,
+                        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                        dataUrl: base64Data,
+                        date: new Date().toISOString()
+                    });
+                    
+                    // Render preview thumbnail
+                    const thumb = document.createElement('div');
+                    thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm';
+                    thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
+                    container.appendChild(thumb);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearGateInPhotos() {
+            stagedGateInPhotos = [];
+            const container = document.getElementById('gateInPhotoPreviewContainer');
+            if (container) container.innerHTML = '';
+        }
+
         // Robust Safe LocalStorage Loaders
         let db;
         try {
@@ -540,10 +589,10 @@
         if (!yardDb || typeof yardDb !== 'object') {
             yardDb = {
                 containers: [
-                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean" }
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean", photos: [] }
                 ],
                 movements: [
-                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean" }
+                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean", photos: [] }
                 ],
                 yard: "SKYMOVER Empty Container Yard"
             };
@@ -706,16 +755,21 @@
         function handlePhotoUpload(e) {
             const file = e.target.files[0];
             if(file) {
-                if(!db.uploads) db.uploads = [];
-                db.uploads.push({
-                    name: file.name,
-                    date: new Date().toISOString().replace('T', ' ').substring(0, 16),
-                    size: (file.size / (1024*1024)).toFixed(1) + ' MB',
-                    type: 'Delivery Proof'
-                });
-                saveDB();
-                const msg = document.getElementById('uploadSuccessMsg');
-                if(msg) msg.classList.remove('hidden');
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if(!db.uploads) db.uploads = [];
+                    db.uploads.push({
+                        name: file.name,
+                        date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                        size: (file.size / (1024*1024)).toFixed(1) + ' MB',
+                        type: 'Delivery Proof',
+                        dataUrl: event.target.result
+                    });
+                    saveDB();
+                    const msg = document.getElementById('uploadSuccessMsg');
+                    if(msg) msg.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
             }
         }
 
@@ -868,12 +922,20 @@
 
             const vehicles = db.vehicles || [];
             const yardStock = yardDb.containers.filter(c => c.status !== 'Released');
+            const allPhotos = [];
+            if (yardDb.containers) {
+                yardDb.containers.forEach(c => {
+                    if (c.photos && c.photos.length > 0) {
+                        c.photos.forEach(p => allPhotos.push({...p, container: c.number}));
+                    }
+                });
+            }
 
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
                     <div>
                         <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Fleet & Yard Audit Report</h3>
-                        <p class="text-xs text-slate-400">Aggregated fleet inventory, yard stock, fuel, maintenance, and expense audits.</p>
+                        <p class="text-xs text-slate-400">Aggregated fleet inventory, yard stock, gate-in photo proofs, and expense audits.</p>
                     </div>
                     <button onclick="window.print()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print / Export</button>
                 </div>
@@ -883,7 +945,19 @@
                         <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
                     </div>
                     <div>
-                        <h4 class="font-bold text-sm text-blue-800 mb-2">2. Fleet Vehicles (${vehicles.length} Units)</h4>
+                        <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-In Delivery Proof / Photos (${allPhotos.length} Attached)</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            ${allPhotos.length ? allPhotos.map(p => `
+                                <div class="border rounded-lg p-2 bg-slate-50">
+                                    <img src="${p.dataUrl}" class="w-full h-24 object-cover rounded mb-1">
+                                    <div class="font-semibold text-[10px] truncate">Container: ${p.container}</div>
+                                    <div class="text-[9px] text-slate-500">${p.name}</div>
+                                </div>
+                            `).join('') : '<div class="text-slate-400 col-span-4">No gate-in photos attached yet.</div>'}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-blue-800 mb-2">3. Fleet Vehicles (${vehicles.length} Units)</h4>
                         <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Driver</th></tr>${vehicles.map(v=>`<tr class="border-b"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('')}</table>
                     </div>
                 </div>
@@ -1020,7 +1094,10 @@
             if(rows) {
                 rows.innerHTML = a.length ? a.map(c => `
                     <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold font-mono">${c.number}</td>
+                        <td class="p-3 font-bold font-mono">
+                            ${c.number}
+                            ${c.photos && c.photos.length ? `<span class="ml-1 text-amber-600" title="${c.photos.length} photo(s) attached"><i class="fa-solid fa-camera"></i></span>` : ''}
+                        </td>
                         <td class="p-3">${c.size} ${c.type}</td>
                         <td class="p-3">${c.line}</td>
                         <td class="p-3"><span class="pill ${c.status}">${c.status}</span></td>
@@ -1074,15 +1151,32 @@
             if(yardDb.containers.some(c => c.number.toUpperCase() === f.number && c.status !== 'Released')) {
                 return alert('This container is already recorded inside the yard.');
             }
-            let c = {...f, id: 'yd-' + Math.random().toString(36).substring(2, 9)};
+            let c = {
+                ...f, 
+                id: 'yd-' + Math.random().toString(36).substring(2, 9),
+                photos: [...stagedGateInPhotos]
+            };
             if(c.condition !== 'Good') c.status = 'Hold';
             if(!yardDb.containers) yardDb.containers = [];
             if(!yardDb.movements) yardDb.movements = [];
             yardDb.containers.push(c);
-            yardDb.movements.push({kind: 'GATE-IN', date: c.date, number: c.number, plate: c.plate, driver: c.driver, eir: c.eir, remarks: c.remarks});
+            yardDb.movements.push({
+                kind: 'GATE-IN', 
+                date: c.date, 
+                number: c.number, 
+                plate: c.plate, 
+                driver: c.driver, 
+                eir: c.eir, 
+                remarks: c.remarks,
+                photos: [...stagedGateInPhotos]
+            });
             saveYardDB();
+            
+            // Reset form and staged photos
             e.target.reset();
-            alert('Yard Gate-In saved successfully.');
+            clearGateInPhotos();
+            
+            alert('Yard Gate-In saved successfully with ' + c.photos.length + ' photo(s) attached.');
             switchYardTab('yardInventory');
         }
 
@@ -1144,7 +1238,7 @@
         }
 
         function exportYardCSV() {
-            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Block','Bay','Tier','Gate-In Date','Truck Plate','Driver','EIR','Remarks'], ...liveYard().map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.block, c.bay, c.tier, c.date, c.plate, c.driver, c.eir, c.remarks])], 'SKYMOVER_Yard_Inventory.csv');
+            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Block','Bay','Tier','Gate-In Date','Truck Plate','Driver','EIR','Remarks','Photos Attached'], ...liveYard().map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.block, c.bay, c.tier, c.date, c.plate, c.driver, c.eir, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
         }
 
         function exportYardMovements() {
