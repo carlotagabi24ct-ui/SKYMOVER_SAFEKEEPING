@@ -339,6 +339,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        // Initialize or load robust database state from LocalStorage
         let db = JSON.parse(localStorage.getItem('skymover_db')) || {
             vehicles: [
                 { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" },
@@ -357,6 +358,11 @@
                 { name: "Container_Inspection_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof" }
             ]
         };
+
+        // Ensure safety check if arrays are ever missing from legacy storage
+        if (!db.vehicles) db.vehicles = [];
+        if (!db.transshipments) db.transshipments = [];
+        if (!db.uploads) db.uploads = [];
 
         function saveDB() {
             localStorage.setItem('skymover_db', JSON.stringify(db));
@@ -495,6 +501,7 @@
         function handlePhotoUpload(e) {
             const file = e.target.files[0];
             if(file) {
+                if(!db.uploads) db.uploads = [];
                 db.uploads.push({
                     name: file.name,
                     date: new Date().toISOString().replace('T', ' ').substring(0, 16),
@@ -506,15 +513,22 @@
             }
         }
 
-        // Open Extraction Report Modal
+        // Open Extraction Report Modal with Safe Fallbacks
         function openExtractionReport() {
             const modal = document.getElementById('subModuleModal');
             const content = document.getElementById('subModuleContent');
             modal.classList.remove('hidden');
 
-            let vehicleRows = db.vehicles.map(v => `<tr class="border-b border-slate-800"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2 text-sky-400">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('');
-            let transRows = db.transshipments.map(t => `<tr class="border-b border-slate-800"><td class="p-2 font-mono text-sky-400">${t.id}</td><td class="p-2">${t.origin}</td><td class="p-2">${t.container}</td><td class="p-2 text-emerald-400">${t.commission}</td><td class="p-2">${t.status}</td></tr>`).join('');
-            let uploadRows = db.uploads.map(u => `<tr class="border-b border-slate-800"><td class="p-2 font-medium text-purple-300"><i class="fa-solid fa-image mr-1"></i> ${u.name}</td><td class="p-2">${u.date}</td><td class="p-2">${u.size}</td><td class="p-2">${u.type}</td></tr>`).join('');
+            // Ensure arrays exist before mapping
+            const vehicles = db.vehicles || [];
+            const transshipments = db.transshipments || [];
+            const uploads = db.uploads || [];
+
+            let vehicleRows = vehicles.length > 0 ? vehicles.map(v => `<tr class="border-b border-slate-800"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2 text-sky-400">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('') : `<tr><td colspan="4" class="p-3 text-center text-slate-500">No vehicles recorded.</td></tr>`;
+            
+            let transRows = transshipments.length > 0 ? transshipments.map(t => `<tr class="border-b border-slate-800"><td class="p-2 font-mono text-sky-400">${t.id}</td><td class="p-2">${t.origin}</td><td class="p-2">${t.container}</td><td class="p-2 text-emerald-400">${t.commission}</td><td class="p-2">${t.status}</td></tr>`).join('') : `<tr><td colspan="5" class="p-3 text-center text-slate-500">No transshipment orders recorded.</td></tr>`;
+            
+            let uploadRows = uploads.length > 0 ? uploads.map(u => `<tr class="border-b border-slate-800"><td class="p-2 font-medium text-purple-300"><i class="fa-solid fa-image mr-1"></i> ${u.name}</td><td class="p-2">${u.date}</td><td class="p-2">${u.size}</td><td class="p-2">${u.type}</td></tr>`).join('') : `<tr><td colspan="4" class="p-3 text-center text-slate-500">No photos uploaded yet.</td></tr>`;
 
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
@@ -529,21 +543,21 @@
 
                 <div class="space-y-6 text-xs">
                     <div>
-                        <h4 class="font-bold text-sm text-sky-400 mb-2">1. Active Fleet Masterlist & Status (${db.vehicles.length} Units)</h4>
+                        <h4 class="font-bold text-sm text-sky-400 mb-2">1. Active Fleet Masterlist & Status (${vehicles.length} Units)</h4>
                         <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
                             <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Assigned Driver</th></tr>${vehicleRows}</table>
                         </div>
                     </div>
 
                     <div>
-                        <h4 class="font-bold text-sm text-emerald-400 mb-2">2. Transshipment & Hub Acceptance Records (${db.transshipments.length} Orders)</h4>
+                        <h4 class="font-bold text-sm text-emerald-400 mb-2">2. Transshipment & Hub Acceptance Records (${transshipments.length} Orders)</h4>
                         <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
                             <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Order ID</th><th class="p-2">Origin</th><th class="p-2">Container</th><th class="p-2">Commission</th><th class="p-2">Status</th></tr>${transRows}</table>
                         </div>
                     </div>
 
                     <div>
-                        <h4 class="font-bold text-sm text-purple-400 mb-2">3. Uploaded Driver & Delivery Proof Photographs (${db.uploads.length} Files)</h4>
+                        <h4 class="font-bold text-sm text-purple-400 mb-2">3. Uploaded Driver & Delivery Proof Photographs (${uploads.length} Files)</h4>
                         <div class="overflow-x-auto bg-slate-900/60 rounded-xl p-3 border border-slate-800">
                             <table class="w-full text-left"><tr class="text-slate-400 border-b border-slate-800 pb-2"><th class="p-2">Filename</th><th class="p-2">Timestamp</th><th class="p-2">Size</th><th class="p-2">Category</th></tr>${uploadRows}</table>
                         </div>
@@ -557,17 +571,21 @@
             const content = document.getElementById('subModuleContent');
             modal.classList.remove('hidden');
 
+            const vehicles = db.vehicles || [];
+            const transshipments = db.transshipments || [];
+            const uploads = db.uploads || [];
+
             if (title === 'Dashboard') {
                 content.innerHTML = `
                     <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & KPI Overview</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Active Fleet Units</p><h4 class="text-2xl font-bold text-white mt-1">${db.vehicles.length}</h4></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Pending Transshipments</p><h4 class="text-2xl font-bold text-emerald-400 mt-1">${db.transshipments.filter(t => t.status.includes('Pending')).length}</h4></div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Uploaded Photos</p><h4 class="text-2xl font-bold text-purple-400 mt-1">${db.uploads.length}</h4></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Active Fleet Units</p><h4 class="text-2xl font-bold text-white mt-1">${vehicles.length}</h4></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Pending Transshipments</p><h4 class="text-2xl font-bold text-emerald-400 mt-1">${transshipments.filter(t => t.status && t.status.includes('Pending')).length}</h4></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Uploaded Photos</p><h4 class="text-2xl font-bold text-purple-400 mt-1">${uploads.length}</h4></div>
                     </div>
                 `;
             } else if (title === 'Vehicle Management') {
-                let rows = db.vehicles.map(v => `<tr class="border-b border-slate-800"><td class="p-3 font-medium">${v.id}</td><td class="p-3">${v.model}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-500/20 text-sky-400">${v.status}</span></td><td class="p-3">${v.driver}</td></tr>`).join('');
+                let rows = vehicles.map(v => `<tr class="border-b border-slate-800"><td class="p-3 font-medium">${v.id}</td><td class="p-3">${v.model}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-500/20 text-sky-400">${v.status}</span></td><td class="p-3">${v.driver}</td></tr>`).join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><tr class="border-b border-slate-800 text-slate-400"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>${rows}</table></div>
@@ -583,6 +601,7 @@
             const id = prompt("Enter Unit ID (e.g. SKV-104):");
             const model = prompt("Enter Vehicle Model:");
             if(id && model) {
+                if(!db.vehicles) db.vehicles = [];
                 db.vehicles.push({ id, model, status: "Active", driver: "Unassigned" });
                 saveDB();
                 openSubModule('Vehicle Management');
@@ -591,7 +610,8 @@
 
         function renderTransshipmentTable() {
             const tbody = document.getElementById('transshipmentTableBody');
-            tbody.innerHTML = db.transshipments.map((t, idx) => `
+            const transshipments = db.transshipments || [];
+            tbody.innerHTML = transshipments.map((t, idx) => `
                 <tr class="hover:bg-slate-900/40 transition">
                     <td class="p-3 font-semibold text-sky-400">${t.id}</td>
                     <td class="p-3">${t.origin}</td>
@@ -599,7 +619,7 @@
                     <td class="p-3 font-medium text-emerald-400">${t.commission}</td>
                     <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700">${t.status}</span></td>
                     <td class="p-3 text-right">
-                        ${t.status.includes('Pending') ? `
+                        ${t.status && t.status.includes('Pending') ? `
                             <button onclick="acceptTransshipment(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-[11px] mr-1">Accept</button>
                             <button onclick="rejectTransshipment(${idx})" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1 rounded text-[11px]">Reject</button>
                         ` : `<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Hub Accepted</span>`}
@@ -617,6 +637,7 @@
             const container = document.getElementById('transContainer').value;
             const commission = '₱' + Number(document.getElementById('transCommission').value).toLocaleString();
             
+            if(!db.transshipments) db.transshipments = [];
             db.transshipments.push({
                 id: 'TR-' + Math.floor(1000 + Math.random() * 9000),
                 origin,
@@ -631,7 +652,9 @@
         }
 
         function acceptTransshipment(idx) {
+            if(!db.transshipments) db.transshipments = [];
             db.transshipments[idx].status = 'In Transit (Hub Accepted)';
+            if(!db.vehicles) db.vehicles = [];
             db.vehicles.push({
                 id: 'SKV-' + Math.floor(200 + Math.random() * 800),
                 model: 'Transshipment Unit (' + db.transshipments[idx].container + ')',
@@ -644,6 +667,7 @@
         }
 
         function rejectTransshipment(idx) {
+            if(!db.transshipments) db.transshipments = [];
             db.transshipments[idx].status = 'Rejected / Cancelled';
             saveDB();
             renderTransshipmentTable();
