@@ -551,7 +551,15 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Shipping Line</th><th class="p-3">On-Hand</th><th class="p-3">Available</th><th class="p-3">Reserved</th><th class="p-3">Damaged / Hold</th></tr></thead><tbody id="yardLineRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History & Billings (Gate-In to Gate-Out)</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button></div>
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <h3 class="font-bold text-base text-slate-800">Full Movement History & Billings (Gate-In to Gate-Out)</h3>
+                        <div class="flex gap-2">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow" onclick="exportFullDetailedReportCSV()">
+                                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export Full Detailed Report (Merged Gate-In & Gate-Out)
+                            </button>
+                            <button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Storage Days</th><th class="p-3">Van In / Out</th><th class="p-3">Total Amount</th><th class="p-3">EIR / Ref.</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
@@ -1094,7 +1102,10 @@
                         <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Gate-In & Gate-Out Extraction Report</h3>
                         <p class="text-xs text-slate-400">Complete merged details of Gate-In inputs with attachments and Gate-Out releases with proofs.</p>
                     </div>
-                    <button onclick="window.print()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print / Export</button>
+                    <div class="flex gap-2">
+                        <button onclick="exportFullDetailedReportCSV()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Export Merged CSV</button>
+                        <button onclick="window.print()" class="bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print</button>
+                    </div>
                 </div>
                 <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
                     <!-- SECTION 1: GATE-IN INPUTS & ATTACHED PHOTOS -->
@@ -1611,6 +1622,97 @@
 
         function exportYardMovements() {
             csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+        }
+
+        // MERGED GATE-IN AND GATE-OUT FULL DETAILED REPORT EXPORT
+        function exportFullDetailedReportCSV() {
+            let mergedRows = [];
+            // Map each container or movement to combine gate-in and gate-out details
+            let containers = yardDb.containers || [];
+            let movements = yardDb.movements || [];
+
+            // We can build a comprehensive map per container number
+            let containerMap = {};
+            containers.forEach(c => {
+                containerMap[c.number] = {
+                    number: c.number,
+                    size: c.size,
+                    type: c.type,
+                    line: c.line,
+                    condition: c.condition,
+                    status: c.status,
+                    block: c.block,
+                    bay: c.bay,
+                    tier: c.tier,
+                    gateInDate: c.date,
+                    gateOutDate: c.gateOutDate,
+                    vanInAmount: c.vanInAmount,
+                    vanOutAmount: c.vanOutAmount,
+                    totalAmount: c.totalAmount,
+                    vanInStats: c.vanInStats,
+                    remarks: c.remarks,
+                    photosCount: c.photos ? c.photos.length : 0
+                };
+            });
+
+            // Also check movements
+            movements.forEach(m => {
+                if(!containerMap[m.number]) {
+                    containerMap[m.number] = {
+                        number: m.number,
+                        size: '—',
+                        type: '—',
+                        line: '—',
+                        condition: '—',
+                        status: '—',
+                        block: '—',
+                        bay: '—',
+                        tier: '—',
+                        gateInDate: m.kind === 'GATE-IN' ? m.date : '—',
+                        gateOutDate: m.kind === 'GATE-OUT' ? m.date : '—',
+                        vanInAmount: m.vanInAmount || '0',
+                        vanOutAmount: m.vanOutAmount || '0',
+                        totalAmount: m.totalAmount || '0',
+                        vanInStats: m.vanInStats || '—',
+                        remarks: m.remarks || '',
+                        photosCount: m.photos ? m.photos.length : 0
+                    };
+                } else {
+                    if(m.kind === 'GATE-IN' && (!containerMap[m.number].gateInDate || containerMap[m.number].gateInDate === '—')) {
+                        containerMap[m.number].gateInDate = m.date;
+                    }
+                    if(m.kind === 'GATE-OUT' && (!containerMap[m.number].gateOutDate || containerMap[m.number].gateOutDate === '—')) {
+                        containerMap[m.number].gateOutDate = m.date;
+                    }
+                }
+            });
+
+            let headers = [
+                'Container No', 'Size', 'Type', 'Shipping Line', 'Condition', 'Current Status',
+                'Yard Location (Block/Bay/Tier)', 'Gate-In Date & Time', 'Gate-Out Date & Time',
+                'Van In Amount (₱)', 'Van Out Amount (₱)', 'Total Amount Billing (₱)',
+                'Van In Payment Status', 'Storage Days', 'Attached Photos Count', 'Remarks'
+            ];
+
+            let dataRows = Object.values(containerMap).map(item => {
+                // calculate storage days if both dates exist
+                let storageDays = '—';
+                if(item.gateInDate && item.gateOutDate && item.gateInDate !== '—' && item.gateOutDate !== '—') {
+                    let d1 = new Date(item.gateInDate);
+                    let d2 = new Date(item.gateOutDate);
+                    let diff = d2 - d1;
+                    if(diff > 0) storageDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    else storageDays = 0;
+                }
+                return [
+                    item.number, item.size, item.type, item.line, item.condition, item.status,
+                    [item.block && 'Block '+item.block, item.bay && 'Bay '+item.bay, item.tier && 'Tier '+item.tier].filter(Boolean).join(' / ') || '—',
+                    item.gateInDate, item.gateOutDate, item.vanInAmount || '0', item.vanOutAmount || '0', item.totalAmount || '0',
+                    item.vanInStats || '—', storageDays, item.photosCount, item.remarks || ''
+                ];
+            });
+
+            csv([headers, ...dataRows], 'SKYMOVER_Full_Detailed_Report_Merged_GateIn_GateOut.csv');
         }
 
         function exportRevenueCSV() {
