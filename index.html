@@ -920,8 +920,10 @@
         function runAiAnalysis() {
             const log = document.getElementById('aiOutputLog');
             if(!log) return;
-            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...\n";
-            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...\n"; }, 400);
+            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...
+";
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...
+"; }, 400);
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
         }
 
@@ -1530,7 +1532,9 @@
             const totalAmountStr = document.getElementById('calcTotalAmount').value.replace(/,/g, '');
             const totalAmountNum = parseFloat(totalAmountStr) || 0;
 
-            if(!confirm(`Confirm gate-out for ${c.number}?\nStorage Days: ${storageDays}\nTotal Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
+            if(!confirm(`Confirm gate-out for ${c.number}?
+Storage Days: ${storageDays}
+Total Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
             
             c.status = 'Released';
             c.gateOutDate = f.date;
@@ -1612,8 +1616,9 @@
         }
 
         function csv(rows, name) {
-            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
-            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
+            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('
+');
+            blobDownload(new Blob(['﻿' + t], {type: 'text/csv;charset=utf-8'}), name);
         }
 
         function exportYardCSV() {
@@ -1627,11 +1632,9 @@
         // MERGED GATE-IN AND GATE-OUT FULL DETAILED REPORT EXPORT
         function exportFullDetailedReportCSV() {
             let mergedRows = [];
-            // Map each container or movement to combine gate-in and gate-out details
             let containers = yardDb.containers || [];
             let movements = yardDb.movements || [];
 
-            // We can build a comprehensive map per container number
             let containerMap = {};
             containers.forEach(c => {
                 containerMap[c.number] = {
@@ -1655,7 +1658,6 @@
                 };
             });
 
-            // Also check movements
             movements.forEach(m => {
                 if(!containerMap[m.number]) {
                     containerMap[m.number] = {
@@ -1695,7 +1697,6 @@
             ];
 
             let dataRows = Object.values(containerMap).map(item => {
-                // calculate storage days if both dates exist
                 let storageDays = '—';
                 if(item.gateInDate && item.gateOutDate && item.gateInDate !== '—' && item.gateOutDate !== '—') {
                     let d1 = new Date(item.gateInDate);
@@ -1730,7 +1731,6 @@
             alert('Yard records cleared.');
         }
 
-        // Initialize datetime defaults on load
         window.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('input[type=datetime-local]').forEach(x => {
                 if(!x.value) {
