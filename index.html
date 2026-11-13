@@ -58,8 +58,14 @@
         
         <!-- VIEW 1: LANDING PORTAL -->
         <section id="viewLanding" class="w-full max-w-6xl mx-auto text-center py-8">
-            <div class="w-20 h-20 mx-auto mb-6 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-3 border border-sky-200 transform hover:scale-105 transition duration-300">
-                <i class="fa-solid fa-boxes-stacked text-4xl text-sky-600"></i>
+            <div class="w-20 h-20 mx-auto mb-6 bg-slate-900 rounded-2xl shadow-2xl flex items-center justify-center p-3 border border-amber-500/40 transform hover:scale-105 transition duration-300">
+                <svg class="w-10 h-10 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    <line x1="7.5" y1="9.5" x2="7.5" y2="17.5"></line>
+                    <line x1="16.5" y1="9.5" x2="16.5" y2="17.5"></line>
+                </svg>
             </div>
             
             <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-3" data-i18n="mainTitle">
@@ -126,7 +132,11 @@
                 <div onclick="openYardPortal()" class="glass-card rounded-2xl p-6 text-left hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 cursor-pointer group flex flex-col justify-between border-amber-500/30 bg-amber-950/10">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-6 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                            <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
                         </div>
                         <h3 class="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition">Empty Yard Management</h3>
                         <p class="text-xs text-slate-400 leading-relaxed mb-6">Container Inventory, Gate-In, Gate-Out & Local Yard Reports</p>
@@ -1075,45 +1085,70 @@
             if(!modal || !content) return;
             modal.classList.remove('hidden');
 
-            const vehicles = db.vehicles || [];
-            const yardStock = yardDb.containers.filter(c => c.status !== 'Released');
-            const allPhotos = [];
-            if (yardDb.containers) {
-                yardDb.containers.forEach(c => {
-                    if (c.photos && c.photos.length > 0) {
-                        c.photos.forEach(p => allPhotos.push({...p, container: c.number}));
-                    }
-                });
-            }
+            const gateInMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN');
+            const gateOutMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT');
 
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
                     <div>
-                        <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Fleet & Yard Audit Report</h3>
-                        <p class="text-xs text-slate-400">Aggregated fleet inventory, yard stock, gate-in/out photo proofs, and expense audits.</p>
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Gate-In & Gate-Out Extraction Report</h3>
+                        <p class="text-xs text-slate-400">Complete merged details of Gate-In inputs with attachments and Gate-Out releases with proofs.</p>
                     </div>
                     <button onclick="window.print()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print / Export</button>
                 </div>
                 <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
+                    <!-- SECTION 1: GATE-IN INPUTS & ATTACHED PHOTOS -->
                     <div>
-                        <h4 class="font-bold text-sm text-sky-800 mb-2">1. Empty Yard Stock On-Hand (${yardStock.length} Containers)</h4>
-                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Gate-In</th><th class="p-2">Gate-Out</th><th class="p-2">Van In/Out</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2">${stamp(c.date)}</td><td class="p-2">${c.gateOutDate||'—'}</td><td class="p-2">In: ₱${c.vanInAmount||0}<br>Out: ₱${c.vanOutAmount||0}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-In / Gate-Out Delivery Proof / Photos (${allPhotos.length} Attached)</h4>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            ${allPhotos.length ? allPhotos.map(p => `
-                                <div class="border rounded-lg p-2 bg-slate-50">
-                                    <img src="${p.dataUrl}" class="w-full h-24 object-cover rounded mb-1">
-                                    <div class="font-semibold text-[10px] truncate">Container: ${p.container}</div>
-                                    <div class="text-[9px] text-slate-500">${p.name}</div>
+                        <h4 class="font-bold text-sm text-sky-800 mb-2">1. Gate-In Inputs & Attached Photos / Documents (${gateInMovements.length} Records)</h4>
+                        <div class="space-y-4">
+                            ${gateInMovements.length ? gateInMovements.map((m, idx) => `
+                                <div class="border rounded-xl p-4 bg-slate-50">
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
+                                        <div><span class="text-slate-500 block text-[10px]">Date & Time:</span>${stamp(m.date)}</div>
+                                        <div><span class="text-slate-500 block text-[10px]">Truck Plate / Driver:</span>${m.plate} / ${m.driver || '—'}</div>
+                                        <div><span class="text-slate-500 block text-[10px]">EIR / Ref:</span>${m.eir || '—'}</div>
+                                    </div>
+                                    <div class="text-[11px] mb-3"><span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'} | <span class="text-slate-500">Van In Amount:</span> ₱${m.vanInAmount || '0'}</div>
+                                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-In Photos (${m.photos ? m.photos.length : 0}):</div>
+                                    <div class="flex flex-wrap gap-3">
+                                        ${m.photos && m.photos.length ? m.photos.map(p => `
+                                            <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
+                                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
+                                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
+                                            </div>
+                                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-In entry.</span>'}
+                                    </div>
                                 </div>
-                            `).join('') : '<div class="text-slate-400 col-span-4">No gate-in/out photos attached yet.</div>'}
+                            `).join('') : '<div class="text-slate-400 p-2">No Gate-In records found.</div>'}
                         </div>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-blue-800 mb-2">3. Fleet Vehicles (${vehicles.length} Units)</h4>
-                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Unit ID</th><th class="p-2">Model</th><th class="p-2">Status</th><th class="p-2">Driver</th></tr>${vehicles.map(v=>`<tr class="border-b"><td class="p-2 font-mono">${v.id}</td><td class="p-2">${v.model}</td><td class="p-2">${v.status}</td><td class="p-2">${v.driver}</td></tr>`).join('')}</table>
+
+                    <!-- SECTION 2: GATE-OUT INPUTS & ATTACHED PHOTOS -->
+                    <div class="pt-4 border-t border-slate-200">
+                        <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-Out Inputs & Attached Photos / Documents (${gateOutMovements.length} Records)</h4>
+                        <div class="space-y-4">
+                            ${gateOutMovements.length ? gateOutMovements.map((m, idx) => `
+                                <div class="border rounded-xl p-4 bg-slate-50">
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
+                                        <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
+                                        <div><span class="text-slate-500 block text-[10px]">Customer / Plate:</span>${m.customer || '—'} / ${m.plate}</div>
+                                        <div><span class="text-slate-500 block text-[10px]">Total Billing:</span><strong class="text-emerald-600">₱${m.totalAmount || '0.00'}</strong></div>
+                                    </div>
+                                    <div class="text-[11px] mb-3"><span class="text-slate-500">Storage Days:</span> ${m.storageDays || 0} days | <span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
+                                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-Out Photos (${m.photos ? m.photos.length : 0}):</div>
+                                    <div class="flex flex-wrap gap-3">
+                                        ${m.photos && m.photos.length ? m.photos.map(p => `
+                                            <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
+                                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
+                                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
+                                            </div>
+                                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-Out release.</span>'}
+                                    </div>
+                                </div>
+                            `).join('') : '<div class="text-slate-400 p-2">No Gate-Out records found.</div>'}
+                        </div>
                     </div>
                 </div>
             `;
