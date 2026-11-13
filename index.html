@@ -59,7 +59,7 @@
         <!-- VIEW 1: LANDING PORTAL -->
         <section id="viewLanding" class="w-full max-w-6xl mx-auto text-center py-8">
             <div class="w-20 h-20 mx-auto mb-6 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-3 border border-sky-200 transform hover:scale-105 transition duration-300">
-                <i class="fa-solid fa-container-storage text-4xl text-sky-600"></i>
+                <i class="fa-solid fa-boxes-stacked text-4xl text-sky-600"></i>
             </div>
             
             <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-3" data-i18n="mainTitle">
@@ -902,10 +902,8 @@
         function runAiAnalysis() {
             const log = document.getElementById('aiOutputLog');
             if(!log) return;
-            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...
-";
-            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...
-"; }, 400);
+            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...\n";
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...\n"; }, 400);
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
         }
 
@@ -1486,9 +1484,7 @@
             const totalAmountStr = document.getElementById('calcTotalAmount').value.replace(/,/g, '');
             const totalAmountNum = parseFloat(totalAmountStr) || 0;
 
-            if(!confirm(`Confirm gate-out for ${c.number}?
-Storage Days: ${storageDays}
-Total Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
+            if(!confirm(`Confirm gate-out for ${c.number}?\nStorage Days: ${storageDays}\nTotal Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
             
             c.status = 'Released';
             c.gateOutDate = f.date;
@@ -1570,9 +1566,8 @@ Total Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) 
         }
 
         function csv(rows, name) {
-            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('
-');
-            blobDownload(new Blob(['﻿' + t], {type: 'text/csv;charset=utf-8'}), name);
+            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
         }
 
         function exportYardCSV() {
