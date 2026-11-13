@@ -59,7 +59,7 @@
         <!-- VIEW 1: LANDING PORTAL -->
         <section id="viewLanding" class="w-full max-w-6xl mx-auto text-center py-8">
             <div class="w-20 h-20 mx-auto mb-6 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-3 border border-sky-200 transform hover:scale-105 transition duration-300">
-                <i class="fa-solid fa-warehouse text-4xl text-sky-600"></i>
+                <i class="fa-solid fa-container-storage text-4xl text-sky-600"></i>
             </div>
             
             <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-3" data-i18n="mainTitle">
@@ -352,9 +352,17 @@
                     <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">RESERVED</div><div class="num text-3xl font-extrabold text-amber-600 my-1" id="yardReserved">0</div><div class="hint text-slate-500 text-xs">Allocated to customers</div></div>
                     <div class="card bg-white p-5 rounded-xl shadow border border-slate-200"><div class="label text-slate-500 text-xs font-semibold">DAMAGED / HOLD</div><div class="num text-3xl font-extrabold text-rose-600 my-1" id="yardDamaged">0</div><div class="hint text-slate-500 text-xs">Requires attention</div></div>
                 </div>
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200 mb-6">
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Gate-In & Gate-Out Summary Overview</h3><button class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded text-xs font-semibold" onclick="switchYardTab('yardReports')">View Full Reports</button></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="text-xs font-semibold text-slate-500">Total Gate-In Inputs Recorded</span><div class="text-2xl font-bold text-slate-800 mt-1" id="dashGateInCount">0</div></div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="text-xs font-semibold text-slate-500">Total Gate-Out Releases Recorded</span><div class="text-2xl font-bold text-slate-800 mt-1" id="dashGateOutCount">0</div></div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="text-xs font-semibold text-slate-500">Total Revenue Generated</span><div class="text-2xl font-bold text-emerald-600 mt-1" id="dashTotalRev">₱0.00</div></div>
+                    </div>
+                </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Recent Yard Movements</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="switchYardTab('yardInventory')">View Inventory</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Truck / Plate</th><th class="p-3">EIR / Reference</th></tr></thead><tbody id="yardRecentBody" class="divide-y divide-slate-100"></tbody></table></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Truck / Plate</th><th class="p-3">EIR / Reference</th><th class="p-3">Van In/Out Amt</th></tr></thead><tbody id="yardRecentBody" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
 
@@ -362,13 +370,13 @@
             <div id="yardInventory" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
-                        <h3 class="font-bold text-base text-slate-800">Container Masterlist</h3>
+                        <h3 class="font-bold text-base text-slate-800">Container Masterlist & Gate-In/Out Details</h3>
                         <div class="flex gap-2">
                             <input id="yardSearchInput" class="px-3 py-2 border rounded-lg text-xs w-64" placeholder="Search container, line, status..." oninput="renderYardInventory()">
                             <button class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg text-xs font-semibold" onclick="switchYardTab('yardGateIn')">+ Add Gate-In</button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Container No.</th><th class="p-3">Size / Type</th><th class="p-3">Shipping Line</th><th class="p-3">Status</th><th class="p-3">Yard Location</th><th class="p-3">Gate-In Date</th><th class="p-3">Actions</th></tr></thead><tbody id="yardInventoryRows" class="divide-y divide-slate-100"></tbody></table></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Container No.</th><th class="p-3">Size / Type</th><th class="p-3">Shipping Line</th><th class="p-3">Status</th><th class="p-3">Yard Location</th><th class="p-3">Gate-In Date</th><th class="p-3">Gate-Out Date</th><th class="p-3">Van In / Out (₱)</th><th class="p-3">Actions</th></tr></thead><tbody id="yardInventoryRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
 
@@ -479,8 +487,8 @@
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <div class="flex justify-between items-center mb-4">
                         <div>
-                            <h3 class="font-bold text-base text-slate-800">Yard Revenue History</h3>
-                            <p class="text-xs text-slate-500">Track all collected gate-in, gate-out, and storage fees.</p>
+                            <h3 class="font-bold text-base text-slate-800">Yard Revenue History (Gate-In, Gate-Out & Storage)</h3>
+                            <p class="text-xs text-slate-500">Track all collected gate-in, gate-out, and storage fees with complete transaction breakdown.</p>
                         </div>
                         <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold" onclick="exportRevenueCSV()">Export Revenue CSV</button>
                     </div>
@@ -533,8 +541,8 @@
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Shipping Line</th><th class="p-3">On-Hand</th><th class="p-3">Available</th><th class="p-3">Reserved</th><th class="p-3">Damaged / Hold</th></tr></thead><tbody id="yardLineRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
-                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History & Billings</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Storage Days</th><th class="p-3">Total Amount</th><th class="p-3">EIR / Ref.</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Full Movement History & Billings (Gate-In to Gate-Out)</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Storage Days</th><th class="p-3">Van In / Out</th><th class="p-3">Total Amount</th><th class="p-3">EIR / Ref.</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
                 </div>
             </div>
 
@@ -730,10 +738,10 @@
         if (!yardDb || typeof yardDb !== 'object') {
             yardDb = {
                 containers: [
-                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", remarks: "Clean", vanInAmount: "1500", vanInStats: "PAID", photos: [] }
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", gateOutDate: "—", remarks: "Clean", vanInAmount: "1500", vanOutAmount: "0", totalAmount: "1500", vanInStats: "PAID", photos: [] }
                 ],
                 movements: [
-                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean", photos: [] }
+                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean", vanInAmount: "1500", photos: [] }
                 ],
                 revenues: [
                     { date: "2026-11-10T08:00", source: "Gate-In Fee", container: "MSKU-772819-2", eir: "EIR-001", amount: 1500 }
@@ -894,8 +902,10 @@
         function runAiAnalysis() {
             const log = document.getElementById('aiOutputLog');
             if(!log) return;
-            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...\n";
-            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...\n"; }, 400);
+            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...
+";
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...
+"; }, 400);
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
         }
 
@@ -1082,17 +1092,17 @@
                 <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
                     <div>
                         <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Fleet & Yard Audit Report</h3>
-                        <p class="text-xs text-slate-400">Aggregated fleet inventory, yard stock, gate-in photo proofs, and expense audits.</p>
+                        <p class="text-xs text-slate-400">Aggregated fleet inventory, yard stock, gate-in/out photo proofs, and expense audits.</p>
                     </div>
                     <button onclick="window.print()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print / Export</button>
                 </div>
                 <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
                     <div>
                         <h4 class="font-bold text-sm text-sky-800 mb-2">1. Empty Yard Stock On-Hand (${yardStock.length} Containers)</h4>
-                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Van In Status</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2 font-semibold ${c.vanInStats==='UNPAID'?'text-rose-600':'text-emerald-600'}">${c.vanInStats||'PAID'}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
+                        <table class="w-full text-left bg-slate-50 p-2 rounded"><tr class="border-b font-semibold"><th class="p-2">Container No</th><th class="p-2">Size</th><th class="p-2">Line</th><th class="p-2">Gate-In</th><th class="p-2">Gate-Out</th><th class="p-2">Van In/Out</th><th class="p-2">Status</th></tr>${yardStock.map(c=>`<tr class="border-b"><td class="p-2 font-mono">${c.number}</td><td class="p-2">${c.size}</td><td class="p-2">${c.line}</td><td class="p-2">${stamp(c.date)}</td><td class="p-2">${c.gateOutDate||'—'}</td><td class="p-2">In: ₱${c.vanInAmount||0}<br>Out: ₱${c.vanOutAmount||0}</td><td class="p-2">${c.status}</td></tr>`).join('')}</table>
                     </div>
                     <div>
-                        <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-In Delivery Proof / Photos (${allPhotos.length} Attached)</h4>
+                        <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-In / Gate-Out Delivery Proof / Photos (${allPhotos.length} Attached)</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             ${allPhotos.length ? allPhotos.map(p => `
                                 <div class="border rounded-lg p-2 bg-slate-50">
@@ -1100,7 +1110,7 @@
                                     <div class="font-semibold text-[10px] truncate">Container: ${p.container}</div>
                                     <div class="text-[9px] text-slate-500">${p.name}</div>
                                 </div>
-                            `).join('') : '<div class="text-slate-400 col-span-4">No gate-in photos attached yet.</div>'}
+                            `).join('') : '<div class="text-slate-400 col-span-4">No gate-in/out photos attached yet.</div>'}
                         </div>
                     </div>
                     <div>
@@ -1222,10 +1232,21 @@
             if(yr) yr.textContent = a.filter(c => c.status === 'Reserved').length;
             if(yd) yd.textContent = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
 
+            const gateInCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN').length;
+            const gateOutCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT').length;
+            const totalRev = (yardDb.revenues || []).reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
+
+            const dGIn = document.getElementById('dashGateInCount');
+            const dGOut = document.getElementById('dashGateOutCount');
+            const dRev = document.getElementById('dashTotalRev');
+            if(dGIn) dGIn.textContent = gateInCnt;
+            if(dGOut) dGOut.textContent = gateOutCnt;
+            if(dRev) dRev.textContent = '₱' + totalRev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
             let r = (yardDb.movements || []).slice(-8).reverse();
             const yrb = document.getElementById('yardRecentBody');
             if(yrb) {
-                yrb.innerHTML = r.length ? r.map(m => `<tr><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.eir||'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No movements recorded yet.</td></tr>';
+                yrb.innerHTML = r.length ? r.map(m => `<tr><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.eir||'—'}</td><td class="p-3">₱${m.vanInAmount || m.totalAmount || 0}</td></tr>`).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No movements recorded yet.</td></tr>';
             }
 
             renderYardInventory();
@@ -1238,10 +1259,11 @@
         function renderYardInventory() {
             const searchInput = document.getElementById('yardSearchInput');
             let q = (searchInput ? searchInput.value : '').toLowerCase();
-            let a = liveYard().filter(c => [c.number, c.line, c.status, c.size, c.plate].join(' ').toLowerCase().includes(q));
+            let allConts = yardDb.containers || [];
+            let filtered = allConts.filter(c => [c.number, c.line, c.status, c.size, c.plate].join(' ').toLowerCase().includes(q));
             const rows = document.getElementById('yardInventoryRows');
             if(rows) {
-                rows.innerHTML = a.length ? a.map(c => `
+                rows.innerHTML = filtered.length ? filtered.map(c => `
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-bold font-mono">
                             ${c.number}
@@ -1255,9 +1277,11 @@
                         </td>
                         <td class="p-3">${yardLoc(c)}</td>
                         <td class="p-3">${stamp(c.date)}</td>
+                        <td class="p-3">${c.gateOutDate || '—'}</td>
+                        <td class="p-3 font-mono text-[11px]">In: ₱${c.vanInAmount||0}<br>Out: ₱${c.vanOutAmount||0}</td>
                         <td class="p-3"><button class="bg-slate-200 hover:bg-slate-300 text-[11px] py-1 px-2 rounded font-semibold" onclick="editYardStatus('${c.id}')">Status</button></td>
                     </tr>
-                `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">No matching containers in yard.</td></tr>';
+                `).join('') : '<tr><td colspan="9" class="p-4 text-center text-slate-400">No matching containers found.</td></tr>';
             }
         }
 
@@ -1390,10 +1414,11 @@
                         <td class="p-3 font-mono">${m.number}</td>
                         <td class="p-3">${m.plate}</td>
                         <td class="p-3 font-bold">${m.storageDays !== undefined ? m.storageDays + ' days' : '—'}</td>
+                        <td class="p-3 font-mono">In: ₱${m.vanInAmount||0}<br>Out: ₱${m.vanOutAmount||0}</td>
                         <td class="p-3 font-bold text-emerald-600">${m.totalAmount ? '₱' + m.totalAmount : '—'}</td>
                         <td class="p-3">${m.eir||'—'}</td>
                     </tr>
-                `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
+                `).join('') : '<tr><td colspan="8" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
             }
         }
 
@@ -1407,6 +1432,9 @@
             let c = {
                 ...f, 
                 id: 'yd-' + Math.random().toString(36).substring(2, 9),
+                gateOutDate: '—',
+                vanOutAmount: '0',
+                totalAmount: f.vanInAmount || '0',
                 photos: [...stagedGateInPhotos]
             };
             if(c.condition !== 'Good') c.status = 'Hold';
@@ -1440,7 +1468,6 @@
             }
 
             saveYardDB();
-            
             e.target.reset();
             clearGateInPhotos();
             
@@ -1459,9 +1486,15 @@
             const totalAmountStr = document.getElementById('calcTotalAmount').value.replace(/,/g, '');
             const totalAmountNum = parseFloat(totalAmountStr) || 0;
 
-            if(!confirm(`Confirm gate-out for ${c.number}?\nStorage Days: ${storageDays}\nTotal Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
+            if(!confirm(`Confirm gate-out for ${c.number}?
+Storage Days: ${storageDays}
+Total Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
             
             c.status = 'Released';
+            c.gateOutDate = f.date;
+            c.vanOutAmount = f.vanOutAmount || '0';
+            c.totalAmount = document.getElementById('calcTotalAmount').value;
+
             if(!yardDb.movements) yardDb.movements = [];
             if(!yardDb.revenues) yardDb.revenues = [];
 
@@ -1473,7 +1506,8 @@
                 driver: f.driver, 
                 customer: f.customer, 
                 eir: f.eir, 
-                vanOutAmount: f.vanOutAmount,
+                vanInAmount: c.vanInAmount || '0',
+                vanOutAmount: f.vanOutAmount || '0',
                 storageDays: storageDays,
                 totalAmount: document.getElementById('calcTotalAmount').value,
                 remarks: f.remarks,
@@ -1536,12 +1570,13 @@
         }
 
         function csv(rows, name) {
-            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\r\n');
-            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
+            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('
+');
+            blobDownload(new Blob(['﻿' + t], {type: 'text/csv;charset=utf-8'}), name);
         }
 
         function exportYardCSV() {
-            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Van In Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Truck Plate','Driver','EIR','Remarks','Photos Attached'], ...liveYard().map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.vanInAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.plate, c.driver, c.eir, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
+            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Van In Amount','Van Out Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Gate-Out Date','Truck Plate','Driver','EIR','Remarks','Photos Attached'], ...(yardDb.containers || []).map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.vanInAmount, c.vanOutAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.gateOutDate, c.plate, c.driver, c.eir, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
         }
 
         function exportYardMovements() {
