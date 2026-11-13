@@ -435,7 +435,7 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount (₱)</label><input type="number" id="calcVanOutAmount" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full" oninput="recalculateTotals()"></div>
                             
                             <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee Type</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Dry Van</option><option>Reefer Van</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" class="p-2 border rounded-lg w-full"><option>450</option><option>500</option><option>800</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" id="calcStorageAmount" class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"><option>450</option><option>500</option><option>800</option></select></div>
                             
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time (Read-only)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" id="calcGateOutDate" type="datetime-local" required class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"></div>
@@ -464,7 +464,10 @@
                                 <div id="gateOutPhotoPreviewContainer" class="flex flex-wrap justify-center gap-3 mt-4"></div>
                             </div>
                         </div>
-                        <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Confirm Gate-Out</button>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Confirm Gate-Out</button>
+                            <button type="reset" onclick="clearGateOutPhotos()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-semibold">Clear Form</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -544,7 +547,7 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC WITH AUTO STORAGE DAYS & TOTAL CALCULATION -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
@@ -623,6 +626,12 @@
         function clearGateInPhotos() {
             stagedGateInPhotos = [];
             const container = document.getElementById('gateInPhotoPreviewContainer');
+            if (container) container.innerHTML = '';
+        }
+
+        function clearGateOutPhotos() {
+            stagedGateOutPhotos = [];
+            const container = document.getElementById('gateOutPhotoPreviewContainer');
             if (container) container.innerHTML = '';
         }
 
@@ -1231,13 +1240,11 @@
                 const dOut = new Date(gateOutVal);
                 const diffTime = dOut - dIn;
                 if(diffTime > 0) {
-                    // Convert ms to full or fractional days, minimum 1 day if released after gate-in
                     storageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 }
             }
             document.getElementById('calcStorageDays').value = storageDays;
 
-            // Total Amount Summation Formula: Van In Amount + Van Out Amount + (Storage Amount * Storage Days)
             const totalAmount = vanIn + vanOut + (storageRate * storageDays);
             document.getElementById('calcTotalAmount').value = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
@@ -1315,17 +1322,12 @@
             switchYardTab('yardInventory');
         }
 
-        // Gate-Out logic with Storage Days & Total Amount Computation
+        // Gate-Out logic with Storage Days & Total Amount Computation (Unpaid block removed)
         function handleYardGateOut(e) {
             e.preventDefault();
             let f = Object.fromEntries(new FormData(e.target));
             let c = yardDb.containers.find(x => x.id === f.container);
             if(!c) return alert('Select a valid container.');
-
-            if(c.vanInStats && c.vanInStats.toUpperCase() === 'UNPAID') {
-                alert(`⚠️ Cannot Proceed with Gate-Out!\n\nContainer ${c.number} has an UNPAID Van In status (Amount: ₱${c.vanInAmount || '0.00'}). Please settle the balance to PAID before releasing.`);
-                return; 
-            }
 
             const storageDays = parseInt(document.getElementById('calcStorageDays').value) || 0;
             const totalAmount = document.getElementById('calcTotalAmount').value;
@@ -1350,9 +1352,7 @@
             });
             saveYardDB();
             e.target.reset();
-            stagedGateOutPhotos = [];
-            const photoContainer = document.getElementById('gateOutPhotoPreviewContainer');
-            if(photoContainer) photoContainer.innerHTML = '';
+            clearGateOutPhotos();
             
             alert('Yard Gate-Out successfully recorded.');
             switchYardTab('yardInventory');
