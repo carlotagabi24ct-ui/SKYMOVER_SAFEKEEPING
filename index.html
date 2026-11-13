@@ -435,7 +435,7 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount (₱)</label><input type="number" id="calcVanOutAmount" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full" oninput="recalculateTotals()"></div>
                             
                             <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee Type</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Dry Van</option><option>Reefer Van</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" class="p-2 border rounded-lg w-full"><option>"450"</option><option>500</option><option>800</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" class="p-2 border rounded-lg w-full"><option>450</option><option>500</option><option>800</option></select></div>
                             
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time (Read-only)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" id="calcGateOutDate" type="datetime-local" required class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"></div>
