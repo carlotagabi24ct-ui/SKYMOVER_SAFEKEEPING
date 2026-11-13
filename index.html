@@ -329,16 +329,18 @@
                         <i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Portals
                     </button>
                     <h2 class="text-2xl font-bold">SKYMOVER Empty Container Yard Management</h2>
-                    <p class="text-xs text-slate-400">Local stock control, Gate-In, Gate-Out, and yard records.</p>
+                    <p class="text-xs text-slate-400">Local stock control, Gate-In, Gate-Out, Financials, and Database Logs.</p>
                 </div>
                 <!-- Yard Nav Tabs -->
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Yard Dashboard</button>
+                    <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Dashboard</button>
                     <button onclick="switchYardTab('yardInventory')" id="yBtn2" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Inventory</button>
                     <button onclick="switchYardTab('yardGateIn')" id="yBtn3" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Gate-In</button>
                     <button onclick="switchYardTab('yardGateOut')" id="yBtn4" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Gate-Out</button>
-                    <button onclick="switchYardTab('yardReports')" id="yBtn5" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Reports</button>
-                    <button onclick="switchYardTab('yardBackup')" id="yBtn6" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Backup</button>
+                    <button onclick="switchYardTab('yardRevenue')" id="yBtn5" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Revenue</button>
+                    <button onclick="switchYardTab('yardExpenses')" id="yBtn6" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Expenses</button>
+                    <button onclick="switchYardTab('yardReports')" id="yBtn7" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Reports</button>
+                    <button onclick="switchYardTab('yardBackup')" id="yBtn8" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Backup</button>
                 </div>
             </div>
 
@@ -472,7 +474,53 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 5: Reports -->
+            <!-- Yard Tab 5: Revenue History -->
+            <div id="yardRevenue" class="yard-tab hidden">
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800">Yard Revenue History</h3>
+                            <p class="text-xs text-slate-500">Track all collected gate-in, gate-out, and storage fees.</p>
+                        </div>
+                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold" onclick="exportRevenueCSV()">Export Revenue CSV</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="card bg-emerald-50 p-4 rounded-xl border border-emerald-200"><div class="text-xs font-semibold text-emerald-800">TOTAL REVENUE COLLECTED</div><div class="text-2xl font-extrabold text-emerald-700 my-1" id="totalRevenueDisplay">₱0.00</div></div>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Source Type</th><th class="p-3">Container No.</th><th class="p-3">Reference / EIR</th><th class="p-3 text-right">Amount (₱)</th></tr></thead><tbody id="revenueTableBody" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 6: Expenses History -->
+            <div id="yardExpenses" class="yard-tab hidden">
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200 mb-6">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">Log Yard Operating Expense</h3>
+                    <form id="yardExpenseForm" onsubmit="handleYardExpenseSubmit(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Expense Category *</label><select name="category" required class="p-2 border rounded-lg w-full"><option>Crane & Handling Equipment</option><option>Yard Maintenance & Repairs</option><option>Security & Personnel</option><option>Utilities (Water/Electricity)</option><option>Administrative & Permits</option><option>Other</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Description / Vendor *</label><input name="description" required class="p-2 border rounded-lg w-full" placeholder="e.g. Forklift fuel / repair"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Amount (₱) *</label><input type="number" step="any" name="amount" required class="p-2 border rounded-lg w-full" placeholder="0.00"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Date *</label><input type="datetime-local" name="date" id="expenseDateInput" required class="p-2 border rounded-lg w-full"></div>
+                        </div>
+                        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-semibold">Record Expense</button>
+                    </form>
+                </div>
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800">Yard Expense Logs</h3>
+                            <p class="text-xs text-slate-500">Monitor all yard operational expenses and outflows.</p>
+                        </div>
+                        <button class="bg-slate-200 hover:bg-slate-300 px-3 py-2 rounded-lg text-xs font-semibold" onclick="exportExpensesCSV()">Export Expenses CSV</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="card bg-rose-50 p-4 rounded-xl border border-rose-200"><div class="text-xs font-semibold text-rose-800">TOTAL EXPENSES INCURRED</div><div class="text-2xl font-extrabold text-rose-700 my-1" id="totalExpenseDisplay">₱0.00</div></div>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Category</th><th class="p-3">Description</th><th class="p-3 text-right">Amount (₱)</th></tr></thead><tbody id="expenseTableBody" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 7: Reports -->
             <div id="yardReports" class="yard-tab hidden">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div class="card bg-white p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">GATE-IN RECORDS</div><div class="text-2xl font-bold my-1" id="yardRptGateIn">0</div></div>
@@ -490,11 +538,11 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 6: Backup -->
+            <!-- Yard Tab 8: Backup -->
             <div id="yardBackup" class="yard-tab hidden space-y-6">
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
                     <h3 class="font-bold text-base text-slate-800 mb-2">Data Backup</h3>
-                    <p class="text-xs text-slate-500 mb-4">Download a complete JSON backup of your yard inventory and movement history.</p>
+                    <p class="text-xs text-slate-500 mb-4">Download a complete JSON backup of your yard inventory, revenues, expenses, and movement history.</p>
                     <div class="flex gap-2">
                         <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-semibold" onclick="backupYardData()">Download Yard Backup</button>
                         <label class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center">Restore Backup<input type="file" id="yardRestoreFile" accept=".json,application/json" hidden onchange="restoreYardData(event)"></label>
@@ -502,7 +550,7 @@
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
                     <h3 class="font-bold text-base text-slate-800 mb-2">Clear Local Yard Records</h3>
-                    <p class="text-xs text-slate-500 mb-4">Permanently clear saved yard records from this browser.</p>
+                    <p class="text-xs text-slate-500 mb-4">Permanently clear saved yard records from this browser database.</p>
                     <button class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-4 py-2 rounded-lg text-xs font-semibold" onclick="clearYardData()">Clear All Yard Data</button>
                 </div>
             </div>
@@ -686,6 +734,12 @@
                 ],
                 movements: [
                     { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean", photos: [] }
+                ],
+                revenues: [
+                    { date: "2026-11-10T08:00", source: "Gate-In Fee", container: "MSKU-772819-2", eir: "EIR-001", amount: 1500 }
+                ],
+                expenses: [
+                    { date: "2026-11-10T09:00", category: "Crane & Handling Equipment", description: "Initial Reach Stacker Fuel", amount: 3500 }
                 ],
                 yard: "SKYMOVER Empty Container Yard"
             };
@@ -1141,11 +1195,11 @@
             const target = document.getElementById(tabId);
             if(target) target.classList.remove('hidden');
             
-            ['yBtn1','yBtn2','yBtn3','yBtn4','yBtn5','yBtn6'].forEach((id, idx) => {
+            ['yBtn1','yBtn2','yBtn3','yBtn4','yBtn5','yBtn6','yBtn7','yBtn8'].forEach((id, idx) => {
                 let btn = document.getElementById(id);
                 if(btn) {
                     btn.className = 'btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200';
-                    if(['yardDashboard','yardInventory','yardGateIn','yardGateOut','yardReports','yardBackup'][idx] === tabId) {
+                    if(['yardDashboard','yardInventory','yardGateIn','yardGateOut','yardRevenue','yardExpenses','yardReports','yardBackup'][idx] === tabId) {
                         btn.className = 'btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white';
                     }
                 }
@@ -1176,6 +1230,8 @@
 
             renderYardInventory();
             renderYardOutSelect();
+            renderYardRevenue();
+            renderYardExpenses();
             renderYardReports();
         }
 
@@ -1249,6 +1305,62 @@
             document.getElementById('calcTotalAmount').value = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
+        function renderYardRevenue() {
+            const tbody = document.getElementById('revenueTableBody');
+            const totalDisp = document.getElementById('totalRevenueDisplay');
+            if(!tbody) return;
+
+            const revs = yardDb.revenues || [];
+            let total = revs.reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
+            if(totalDisp) totalDisp.textContent = '₱' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            tbody.innerHTML = revs.length ? revs.slice().reverse().map(r => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="p-3">${stamp(r.date)}</td>
+                    <td class="p-3 font-semibold text-emerald-700">${r.source}</td>
+                    <td class="p-3 font-mono">${r.container || '—'}</td>
+                    <td class="p-3">${r.eir || '—'}</td>
+                    <td class="p-3 text-right font-bold text-emerald-600">₱${Number(r.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No revenue records found.</td></tr>';
+        }
+
+        function renderYardExpenses() {
+            const tbody = document.getElementById('expenseTableBody');
+            const totalDisp = document.getElementById('totalExpenseDisplay');
+            if(!tbody) return;
+
+            const exps = yardDb.expenses || [];
+            let total = exps.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
+            if(totalDisp) totalDisp.textContent = '₱' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            tbody.innerHTML = exps.length ? exps.slice().reverse().map(e => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="p-3">${stamp(e.date)}</td>
+                    <td class="p-3 font-semibold text-slate-700">${e.category}</td>
+                    <td class="p-3">${e.description}</td>
+                    <td class="p-3 text-right font-bold text-rose-600">₱${Number(e.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-400">No expense records found.</td></tr>';
+        }
+
+        function handleYardExpenseSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form));
+            if(!yardDb.expenses) yardDb.expenses = [];
+            yardDb.expenses.push({
+                date: data.date,
+                category: data.category,
+                description: data.description,
+                amount: parseFloat(data.amount) || 0
+            });
+            saveYardDB();
+            form.reset();
+            alert('Yard expense successfully recorded.');
+            renderYardExpenses();
+        }
+
         function renderYardReports() {
             let a = liveYard();
             const r1 = document.getElementById('yardRptGateIn');
@@ -1300,6 +1412,8 @@
             if(c.condition !== 'Good') c.status = 'Hold';
             if(!yardDb.containers) yardDb.containers = [];
             if(!yardDb.movements) yardDb.movements = [];
+            if(!yardDb.revenues) yardDb.revenues = [];
+
             yardDb.containers.push(c);
             yardDb.movements.push({
                 kind: 'GATE-IN', 
@@ -1313,6 +1427,18 @@
                 vanInAmount: c.vanInAmount,
                 photos: [...stagedGateInPhotos]
             });
+
+            const vanInAmt = parseFloat(c.vanInAmount) || 0;
+            if(vanInAmt > 0) {
+                yardDb.revenues.push({
+                    date: c.date,
+                    source: 'Gate-In Fee (Van In)',
+                    container: c.number,
+                    eir: c.eir || '—',
+                    amount: vanInAmt
+                });
+            }
+
             saveYardDB();
             
             e.target.reset();
@@ -1322,7 +1448,7 @@
             switchYardTab('yardInventory');
         }
 
-        // Gate-Out logic with Storage Days & Total Amount Computation (Unpaid block removed)
+        // Gate-Out logic with Storage Days & Total Amount Computation
         function handleYardGateOut(e) {
             e.preventDefault();
             let f = Object.fromEntries(new FormData(e.target));
@@ -1330,12 +1456,15 @@
             if(!c) return alert('Select a valid container.');
 
             const storageDays = parseInt(document.getElementById('calcStorageDays').value) || 0;
-            const totalAmount = document.getElementById('calcTotalAmount').value;
+            const totalAmountStr = document.getElementById('calcTotalAmount').value.replace(/,/g, '');
+            const totalAmountNum = parseFloat(totalAmountStr) || 0;
 
-            if(!confirm(`Confirm gate-out for ${c.number}?\nStorage Days: ${storageDays}\nTotal Billing Amount: ₱${totalAmount}`)) return;
+            if(!confirm(`Confirm gate-out for ${c.number}?\nStorage Days: ${storageDays}\nTotal Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
             
             c.status = 'Released';
             if(!yardDb.movements) yardDb.movements = [];
+            if(!yardDb.revenues) yardDb.revenues = [];
+
             yardDb.movements.push({
                 kind: 'GATE-OUT', 
                 date: f.date, 
@@ -1346,15 +1475,26 @@
                 eir: f.eir, 
                 vanOutAmount: f.vanOutAmount,
                 storageDays: storageDays,
-                totalAmount: totalAmount,
+                totalAmount: document.getElementById('calcTotalAmount').value,
                 remarks: f.remarks,
                 photos: [...stagedGateOutPhotos]
             });
+
+            if(totalAmountNum > 0) {
+                yardDb.revenues.push({
+                    date: f.date,
+                    source: 'Gate-Out & Storage Billing',
+                    container: c.number,
+                    eir: f.eir,
+                    amount: totalAmountNum
+                });
+            }
+
             saveYardDB();
             e.target.reset();
             clearGateOutPhotos();
             
-            alert('Yard Gate-Out successfully recorded.');
+            alert('Yard Gate-Out successfully recorded and revenue logged.');
             switchYardTab('yardInventory');
         }
 
@@ -1408,9 +1548,17 @@
             csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
         }
 
+        function exportRevenueCSV() {
+            csv([['Date','Source','Container No','EIR','Amount (PHP)'], ...(yardDb.revenues || []).map(r => [r.date, r.source, r.container, r.eir, r.amount])], 'SKYMOVER_Yard_Revenues.csv');
+        }
+
+        function exportExpensesCSV() {
+            csv([['Date','Category','Description','Amount (PHP)'], ...(yardDb.expenses || []).map(e => [e.date, e.category, e.description, e.amount])], 'SKYMOVER_Yard_Expenses.csv');
+        }
+
         function clearYardData() {
             if(!confirm('Permanently clear ALL yard records? Download a backup first.')) return;
-            yardDb = {containers: [], movements: [], yard: yardDb.yard};
+            yardDb = {containers: [], movements: [], revenues: [], expenses: [], yard: yardDb.yard};
             saveYardDB();
             alert('Yard records cleared.');
         }
