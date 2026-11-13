@@ -687,9 +687,9 @@
                     thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white flex items-center justify-center';
                     
                     if(file.type.startsWith('image/')) {
-                        thumb.innerHTML = `<img src="${base64Data}" class="w-full h-full object-cover">`;
+                        thumb.innerHTML = '<img src="' + base64Data + '" class="w-full h-full object-cover">';
                     } else {
-                        thumb.innerHTML = `<div class="text-[9px] font-bold text-slate-700 text-center p-1 truncate">${file.name}</div>`;
+                        thumb.innerHTML = '<div class="text-[9px] font-bold text-slate-700 text-center p-1 truncate">' + file.name + '</div>';
                     }
                     previewContainer.appendChild(thumb);
                 };
@@ -920,10 +920,8 @@
         function runAiAnalysis() {
             const log = document.getElementById('aiOutputLog');
             if(!log) return;
-            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...
-";
-            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...
-"; }, 400);
+            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...\n";
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...\n"; }, 400);
             setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
         }
 
@@ -973,40 +971,40 @@
                     </div>
                 `;
             } else if (title === 'Vehicle Management') {
-                let rows = vehicles.map(v => `<tr class="border-b"><td class="p-3 font-medium">${v.id}</td><td class="p-3">${v.model}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">${v.status}</span></td><td class="p-3">${v.driver}</td></tr>`).join('');
+                let rows = vehicles.map(v => '<tr class="border-b"><td class="p-3 font-medium">' + v.id + '</td><td class="p-3">' + v.model + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">' + v.status + '</span></td><td class="p-3">' + v.driver + '</td></tr>').join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>${rows}</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Driver Management') {
-                let rows = drivers.map(d => `<tr class="border-b"><td class="p-3 font-medium">${d.name}</td><td class="p-3 font-mono">${d.license}</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">${d.status}</span></td><td class="p-3 text-amber-600">${d.rating}</td></tr>`).join('');
+                let rows = drivers.map(d => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td></tr>').join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="addDriverPrompt()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Driver</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>${rows}</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fuel Monitoring') {
-                let rows = fuelLogs.map(f => `<tr class="border-b"><td class="p-3 font-mono text-sky-600">${f.unit}</td><td class="p-3">${f.liters}</td><td class="p-3 font-medium text-emerald-600">${f.cost}</td><td class="p-3">${f.station}</td><td class="p-3">${f.date}</td></tr>`).join('');
+                let rows = fuelLogs.map(f => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + f.unit + '</td><td class="p-3">' + f.liters + '</td><td class="p-3 font-medium text-emerald-600">' + f.cost + '</td><td class="p-3">' + f.station + '</td><td class="p-3">' + f.date + '</td></tr>').join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3><button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>${rows}</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Maintenance') {
-                let rows = maintenanceLogs.map(m => `<tr class="border-b"><td class="p-3 font-mono text-sky-600">${m.unit}</td><td class="p-3">${m.issue}</td><td class="p-3 font-medium text-rose-600">${m.cost}</td><td class="p-3">${m.status}</td><td class="p-3">${m.date}</td></tr>`).join('');
+                let rows = maintenanceLogs.map(m => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + m.unit + '</td><td class="p-3">' + m.issue + '</td><td class="p-3 font-medium text-rose-600">' + m.cost + '</td><td class="p-3">' + m.status + '</td><td class="p-3">' + m.date + '</td></tr>').join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>${rows}</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'GPS & Dispatch') {
-                let rows = dispatchLogs.map(d => `<tr class="border-b"><td class="p-3 font-mono text-sky-600">${d.unit}</td><td class="p-3">${d.route}</td><td class="p-3">${d.driver}</td><td class="p-3 text-emerald-600 font-semibold">${d.status}</td></tr>`).join('');
+                let rows = dispatchLogs.map(d => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + d.unit + '</td><td class="p-3">' + d.route + '</td><td class="p-3">' + d.driver + '</td><td class="p-3 text-emerald-600 font-semibold">' + d.status + '</td></tr>').join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th></tr>${rows}</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fleet Expenses') {
-                let rows = expenseLogs.map(e => `<tr class="border-b"><td class="p-3 font-semibold text-sky-600">${e.trip}</td><td class="p-3">${e.fuel}</td><td class="p-3">${e.tolls}</td><td class="p-3">${e.maintenance}</td><td class="p-3 font-bold text-emerald-600">${e.total}</td></tr>`).join('');
+                let rows = expenseLogs.map(e => '<tr class="border-b"><td class="p-3 font-semibold text-sky-600">' + e.trip + '</td><td class="p-3">' + e.fuel + '</td><td class="p-3">' + e.tolls + '</td><td class="p-3">' + e.maintenance + '</td><td class="p-3 font-bold text-emerald-600">' + e.total + '</td></tr>').join('');
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3><button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>${rows}</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>` + rows + `</table></div>
                 `;
             }
         }
@@ -1098,6 +1096,48 @@
             const gateInMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN');
             const gateOutMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT');
 
+            let gateInHtml = gateInMovements.length ? gateInMovements.map(m => `
+                <div class="border rounded-xl p-4 bg-slate-50 mb-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">Date & Time:</span>${stamp(m.date)}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Truck Plate / Driver:</span>${m.plate} / ${m.driver || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">EIR / Ref:</span>${m.eir || '—'}</div>
+                    </div>
+                    <div class="text-[11px] mb-3"><span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'} | <span class="text-slate-500">Van In Amount:</span> ₱${m.vanInAmount || '0'}</div>
+                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-In Photos (${m.photos ? m.photos.length : 0}):</div>
+                    <div class="flex flex-wrap gap-3">
+                        ${m.photos && m.photos.length ? m.photos.map(p => `
+                            <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
+                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
+                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
+                            </div>
+                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-In entry.</span>'}
+                    </div>
+                </div>
+            `).join('') : '<div class="text-slate-400 p-2">No Gate-In records found.</div>';
+
+            let gateOutHtml = gateOutMovements.length ? gateOutMovements.map(m => `
+                <div class="border rounded-xl p-4 bg-slate-50 mb-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Customer / Plate:</span>${m.customer || '—'} / ${m.plate}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Total Billing:</span><strong class="text-emerald-600">₱${m.totalAmount || '0.00'}</strong></div>
+                    </div>
+                    <div class="text-[11px] mb-3"><span class="text-slate-500">Storage Days:</span> ${m.storageDays || 0} days | <span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
+                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-Out Photos (${m.photos ? m.photos.length : 0}):</div>
+                    <div class="flex flex-wrap gap-3">
+                        ${m.photos && m.photos.length ? m.photos.map(p => `
+                            <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
+                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
+                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
+                            </div>
+                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-Out release.</span>'}
+                    </div>
+                </div>
+            `).join('') : '<div class="text-slate-400 p-2">No Gate-Out records found.</div>';
+
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
                     <div>
@@ -1110,58 +1150,13 @@
                     </div>
                 </div>
                 <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
-                    <!-- SECTION 1: GATE-IN INPUTS & ATTACHED PHOTOS -->
                     <div>
                         <h4 class="font-bold text-sm text-sky-800 mb-2">1. Gate-In Inputs & Attached Photos / Documents (${gateInMovements.length} Records)</h4>
-                        <div class="space-y-4">
-                            ${gateInMovements.length ? gateInMovements.map((m, idx) => `
-                                <div class="border rounded-xl p-4 bg-slate-50">
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
-                                        <div><span class="text-slate-500 block text-[10px]">Date & Time:</span>${stamp(m.date)}</div>
-                                        <div><span class="text-slate-500 block text-[10px]">Truck Plate / Driver:</span>${m.plate} / ${m.driver || '—'}</div>
-                                        <div><span class="text-slate-500 block text-[10px]">EIR / Ref:</span>${m.eir || '—'}</div>
-                                    </div>
-                                    <div class="text-[11px] mb-3"><span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'} | <span class="text-slate-500">Van In Amount:</span> ₱${m.vanInAmount || '0'}</div>
-                                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-In Photos (${m.photos ? m.photos.length : 0}):</div>
-                                    <div class="flex flex-wrap gap-3">
-                                        ${m.photos && m.photos.length ? m.photos.map(p => `
-                                            <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
-                                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
-                                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
-                                            </div>
-                                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-In entry.</span>'}
-                                    </div>
-                                </div>
-                            `).join('') : '<div class="text-slate-400 p-2">No Gate-In records found.</div>'}
-                        </div>
+                        ${gateInHtml}
                     </div>
-
-                    <!-- SECTION 2: GATE-OUT INPUTS & ATTACHED PHOTOS -->
                     <div class="pt-4 border-t border-slate-200">
                         <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-Out Inputs & Attached Photos / Documents (${gateOutMovements.length} Records)</h4>
-                        <div class="space-y-4">
-                            ${gateOutMovements.length ? gateOutMovements.map((m, idx) => `
-                                <div class="border rounded-xl p-4 bg-slate-50">
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
-                                        <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
-                                        <div><span class="text-slate-500 block text-[10px]">Customer / Plate:</span>${m.customer || '—'} / ${m.plate}</div>
-                                        <div><span class="text-slate-500 block text-[10px]">Total Billing:</span><strong class="text-emerald-600">₱${m.totalAmount || '0.00'}</strong></div>
-                                    </div>
-                                    <div class="text-[11px] mb-3"><span class="text-slate-500">Storage Days:</span> ${m.storageDays || 0} days | <span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
-                                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-Out Photos (${m.photos ? m.photos.length : 0}):</div>
-                                    <div class="flex flex-wrap gap-3">
-                                        ${m.photos && m.photos.length ? m.photos.map(p => `
-                                            <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
-                                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
-                                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
-                                            </div>
-                                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-Out release.</span>'}
-                                    </div>
-                                </div>
-                            `).join('') : '<div class="text-slate-400 p-2">No Gate-Out records found.</div>'}
-                        </div>
+                        ${gateOutHtml}
                     </div>
                 </div>
             `;
@@ -1182,7 +1177,7 @@
                         ${t.status && t.status.includes('Pending') ? `
                             <button onclick="acceptTransshipment(${idx})" class="bg-emerald-600 text-white px-3 py-1 rounded text-[11px] mr-1">Accept</button>
                             <button onclick="rejectTransshipment(${idx})" class="bg-rose-600 text-white px-3 py-1 rounded text-[11px]">Reject</button>
-                        ` : `<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Accepted</span>`}
+                        ` : '<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Accepted</span>'}
                     </td>
                 </tr>
             `).join('');
@@ -1313,7 +1308,7 @@
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-bold font-mono">
                             ${c.number}
-                            ${c.photos && c.photos.length ? `<span class="ml-1 text-amber-600" title="${c.photos.length} photo(s) attached"><i class="fa-solid fa-camera"></i></span>` : ''}
+                            ${c.photos && c.photos.length ? '<span class="ml-1 text-amber-600" title="' + c.photos.length + ' photo(s) attached"><i class="fa-solid fa-camera"></i></span>' : ''}
                         </td>
                         <td class="p-3">${c.size} ${c.type}</td>
                         <td class="p-3">${c.line}</td>
@@ -1334,7 +1329,7 @@
         function renderYardOutSelect() {
             const sel = document.getElementById('yardOutContainer');
             if(sel) {
-                sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => `<option value="${c.id}">${c.number} — ${c.size} — ${c.line} (${c.status}) ${c.vanInStats === 'UNPAID' ? '⚠️ [UNPAID]' : ''}</option>`).join('');
+                sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => '<option value="' + c.id + '">' + c.number + ' — ' + c.size + ' — ' + c.line + ' (' + c.status + ') ' + (c.vanInStats === 'UNPAID' ? '⚠️ [UNPAID]' : '') + '</option>').join('');
             }
         }
 
@@ -1447,7 +1442,7 @@
             if(lineRows) {
                 lineRows.innerHTML = lines.length ? lines.map(l => {
                     let x = a.filter(c => c.line === l);
-                    return `<tr class="border-b"><td class="p-3 font-medium">${l}</td><td class="p-3">${x.length}</td><td class="p-3">${x.filter(c => c.status==='Available'&&c.condition==='Good').length}</td><td class="p-3">${x.filter(c => c.status==='Reserved').length}</td><td class="p-3">${x.filter(c => ['Damaged','For Inspection'].includes(c.condition)||c.status==='Hold').length}</td></tr>`;
+                    return '<tr class="border-b"><td class="p-3 font-medium">' + l + '</td><td class="p-3">' + x.length + '</td><td class="p-3">' + x.filter(c => c.status==='Available'&&c.condition==='Good').length + '</td><td class="p-3">' + x.filter(c => c.status==='Reserved').length + '</td><td class="p-3">' + x.filter(c => ['Damaged','For Inspection'].includes(c.condition)||c.status==='Hold').length + '</td></tr>';
                 }).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No stock records.</td></tr>';
             }
 
@@ -1532,9 +1527,7 @@
             const totalAmountStr = document.getElementById('calcTotalAmount').value.replace(/,/g, '');
             const totalAmountNum = parseFloat(totalAmountStr) || 0;
 
-            if(!confirm(`Confirm gate-out for ${c.number}?
-Storage Days: ${storageDays}
-Total Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) return;
+            if(!confirm('Confirm gate-out for ' + c.number + '?\nStorage Days: ' + storageDays + '\nTotal Billing Amount: ₱' + document.getElementById('calcTotalAmount').value)) return;
             
             c.status = 'Released';
             c.gateOutDate = f.date;
@@ -1616,9 +1609,8 @@ Total Billing Amount: ₱${document.getElementById('calcTotalAmount').value}`)) 
         }
 
         function csv(rows, name) {
-            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('
-');
-            blobDownload(new Blob(['﻿' + t], {type: 'text/csv;charset=utf-8'}), name);
+            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
         }
 
         function exportYardCSV() {
