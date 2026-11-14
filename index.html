@@ -25,7 +25,6 @@
         .Reserved { background: #fff4dc; color: #946200; }
         .Hold, .Damaged { background: #ffebe8; color: #b33225; }
         .Released { background: #eaf1fb; color: #315f98; }
-        .drag-over { border-color: #d97706 !important; background-color: rgba(251, 191, 36, 0.05); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -152,7 +151,6 @@
 
         <!-- VIEW 2: MANAGEMENT BACKEND HUB -->
         <section id="viewBackend" class="w-full max-w-7xl mx-auto hidden py-4">
-            
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-800 gap-4">
                 <div>
                     <button onclick="switchView('landing')" class="text-xs text-sky-400 hover:underline mb-2 inline-block">
@@ -162,7 +160,6 @@
                     <p class="text-xs text-slate-400">Operations, Fleet Analytics & Logistics Control</p>
                 </div>
                 
-                <!-- LogiBRAIN / LogiLENS / LogiTRACK Tabs -->
                 <div class="flex bg-slate-900 p-1.5 rounded-xl border border-slate-800">
                     <button onclick="switchAiTab('brain')" id="tabBrainBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow">LogiBRAIN</button>
                     <button onclick="switchAiTab('lens')" id="tabLensBtn" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">LogiLENS</button>
@@ -170,10 +167,8 @@
                 </div>
             </div>
 
-            <!-- AI Suite Content Area -->
             <div id="aiContainer" class="mb-8 p-6 rounded-2xl glass-card border border-sky-500/20"></div>
 
-            <!-- 8 Management Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div onclick="openSubModule('Dashboard')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
                     <div class="flex items-center space-x-3 mb-3">
@@ -245,7 +240,6 @@
                     </div>
                 </div>
 
-                <!-- Reports / Extraction Report Card -->
                 <div onclick="openExtractionReport()" class="glass-card p-5 rounded-xl hover:border-purple-500/60 transition cursor-pointer group border-purple-500/30 bg-purple-950/10">
                     <div class="flex items-center space-x-3 mb-3">
                         <div class="p-2.5 rounded-lg bg-purple-500/20 text-purple-300"><i class="fa-solid fa-file-arrow-down"></i></div>
@@ -341,7 +335,6 @@
                     <h2 class="text-2xl font-bold">SKYMOVER Empty Container Yard Management</h2>
                     <p class="text-xs text-slate-400">Local stock control, Gate-In, Gate-Out, Financials, and Database Logs.</p>
                 </div>
-                <!-- Yard Nav Tabs -->
                 <div class="flex flex-wrap gap-2">
                     <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Dashboard</button>
                     <button onclick="switchYardTab('yardInventory')" id="yBtn2" class="btn bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold">Inventory</button>
@@ -390,7 +383,7 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 3: Gate-In with Drag-and-Drop Photo Attachment -->
+            <!-- Yard Tab 3: Gate-In -->
             <div id="yardGateIn" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-800 mb-4">Record Yard Gate-In Entry</h3>
@@ -436,7 +429,7 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 4: Gate-Out with Auto Storage & Total Calculation -->
+            <!-- Yard Tab 4: Gate-Out -->
             <div id="yardGateOut" class="yard-tab hidden">
                 <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-800 mb-4">Container Gate-Out / Release</h3>
@@ -629,7 +622,6 @@
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
 
-        // Drag and Drop Handlers
         function handleDragOver(e, zoneId) {
             e.preventDefault();
             e.stopPropagation();
@@ -712,7 +704,6 @@
             if (container) container.innerHTML = '';
         }
 
-        // Robust Safe LocalStorage Loaders
         let db;
         try {
             db = JSON.parse(localStorage.getItem('skymover_ph_db'));
@@ -1255,7 +1246,6 @@
             renderTransshipmentTable();
         }
 
-        // --- EMPTY YARD APP LOGIC ---
         function switchYardTab(tabId) {
             document.querySelectorAll('.yard-tab').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(tabId);
@@ -1330,6 +1320,26 @@
                         <td class="p-3">
                             <span class="pill ${c.status}">${c.status}</span>
                             ${c.vanInStats === 'UNPAID' ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded">UNPAID</span>' : ''}
+                        </td>
+                        <td class="p-3">${yardLoc(c)}</td>
+                        <td class="p-3">${stamp(c.date)}</td>
+                        <td class="p-3">${stamp(c.gateOutDate)}</td>
+                        <td class="p-3 font-mono">In: ₱${c.vanInAmount || 0}<br>Out: ₱${c.vanOutAmount || 0}</td>
+                        <td class="p-3">
+                            <button class="text-sky-600 hover:underline mr-2" onclick="editYardStatus('${c.id}')">Status</button>
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="9" class="p-4 text-center text-slate-400">No containers found.</td></tr>';
+            }
+        }
+
+        function renderYardOutSelect() {
+            const sel = document.getElementById('yardOutContainer');
+            if(!sel) return;
+            let a = liveYard();
+            sel.innerHTML = '<option value="">Select container in yard</option>' + a.map(c => `<option value="${c.id}">${c.number} (${c.size} ${c.type} - ${c.line})</option>`).join('');
+        }
+
         let activeSelectedContainer = null;
 
         function onContainerSelectForGateOut() {
@@ -1368,10 +1378,8 @@
             }
             document.getElementById('calcStorageDays').value = storageDays;
 
-            // Compute gross billing: Van In + Van Out + (Storage Rate * Days)
             let grossAmount = vanIn + vanOut + (storageRate * storageDays);
             
-            // If active container's Van In was already paid during Gate-In, deduct Van In Amount from total to prevent double-counting revenue
             let finalTotal = grossAmount;
             const notice = document.getElementById('vanInDeductionNotice');
             if (activeSelectedContainer && activeSelectedContainer.vanInStats === 'PAID') {
@@ -1533,7 +1541,6 @@
             switchYardTab('yardInventory');
         }
 
-        // Gate-Out logic with Storage Days & Total Amount Computation
         function handleYardGateOut(e) {
             e.preventDefault();
             let f = Object.fromEntries(new FormData(e.target));
@@ -1640,97 +1647,40 @@
             csv([['Date','Movement','Container No','Trucking Name','Plate','Driver','Customer','EIR','Fee Type','Rate/Day','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.truckingName, m.plate, m.driver, m.customer, m.eir, m.fee, m.storageamount, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
         }
 
-        // MERGED GATE-IN AND GATE-OUT FULL DETAILED REPORT EXPORT (WITH ALL REQUESTED FIELDS)
         function exportFullDetailedReportCSV() {
-            let mergedRows = [];
+            let containerMap = {};
             let containers = yardDb.containers || [];
             let movements = yardDb.movements || [];
 
-            let containerMap = {};
             containers.forEach(c => {
                 containerMap[c.number] = {
-                    number: c.number,
-                    size: c.size,
-                    type: c.type,
-                    line: c.line,
-                    condition: c.condition,
-                    status: c.status,
-                    truckingName: c.truckingName || '—',
-                    plate: c.plate || '—',
-                    driver: c.driver || '—',
-                    eir: c.eir || '—',
-                    row: c.row || '—',
-                    block: c.block,
-                    bay: c.bay,
-                    tier: c.tier,
-                    gateInDate: c.date,
-                    gateOutDate: c.gateOutDate,
-                    releaseCustomer: '—',
-                    gateOutEir: '—',
-                    storageFeeType: '—',
-                    storageRatePerDay: '—',
-                    vanInAmount: c.vanInAmount,
-                    vanOutAmount: c.vanOutAmount,
-                    totalAmount: c.totalAmount,
-                    vanInStats: c.vanInStats,
-                    remarks: c.remarks,
-                    photosCount: c.photos ? c.photos.length : 0,
-                    photoNames: c.photos ? c.photos.map(p => p.name).join('; ') : ''
+                    number: c.number, size: c.size, type: c.type, line: c.line, condition: c.condition, status: c.status,
+                    truckingName: c.truckingName || '—', plate: c.plate || '—', driver: c.driver || '—', eir: c.eir || '—', row: c.row || '—',
+                    block: c.block, bay: c.bay, tier: c.tier, gateInDate: c.date, gateOutDate: c.gateOutDate,
+                    releaseCustomer: '—', gateOutEir: '—', storageFeeType: '—', storageRatePerDay: '—',
+                    vanInAmount: c.vanInAmount, vanOutAmount: c.vanOutAmount, totalAmount: c.totalAmount, vanInStats: c.vanInStats,
+                    remarks: c.remarks, photosCount: c.photos ? c.photos.length : 0, photoNames: c.photos ? c.photos.map(p => p.name).join('; ') : ''
                 };
             });
 
             movements.forEach(m => {
                 if(!containerMap[m.number]) {
                     containerMap[m.number] = {
-                        number: m.number,
-                        size: '—',
-                        type: '—',
-                        line: '—',
-                        condition: '—',
-                        status: '—',
-                        truckingName: m.truckingName || '—',
-                        plate: m.plate || '—',
-                        driver: m.driver || '—',
-                        eir: m.eir || '—',
-                        row: m.row || '—',
-                        block: '—',
-                        bay: '—',
-                        tier: '—',
-                        gateInDate: m.kind === 'GATE-IN' ? m.date : '—',
-                        gateOutDate: m.kind === 'GATE-OUT' ? m.date : '—',
-                        releaseCustomer: m.customer || '—',
-                        gateOutEir: m.kind === 'GATE-OUT' ? m.eir : '—',
-                        storageFeeType: m.fee || '—',
-                        storageRatePerDay: m.storageamount || '—',
-                        vanInAmount: m.vanInAmount || '0',
-                        vanOutAmount: m.vanOutAmount || '0',
-                        totalAmount: m.totalAmount || '0',
-                        vanInStats: m.vanInStats || '—',
-                        remarks: m.remarks || '',
-                        photosCount: m.photos ? m.photos.length : 0,
-                        photoNames: m.photos ? m.photos.map(p => p.name).join('; ') : ''
+                        number: m.number, size: '—', type: '—', line: '—', condition: '—', status: '—',
+                        truckingName: m.truckingName || '—', plate: m.plate || '—', driver: m.driver || '—', eir: m.eir || '—', row: m.row || '—',
+                        block: '—', bay: '—', tier: '—', gateInDate: m.kind === 'GATE-IN' ? m.date : '—', gateOutDate: m.kind === 'GATE-OUT' ? m.date : '—',
+                        releaseCustomer: m.customer || '—', gateOutEir: m.kind === 'GATE-OUT' ? m.eir : '—', storageFeeType: m.fee || '—', storageRatePerDay: m.storageamount || '—',
+                        vanInAmount: m.vanInAmount || '0', vanOutAmount: m.vanOutAmount || '0', totalAmount: m.totalAmount || '0', vanInStats: m.vanInStats || '—',
+                        remarks: m.remarks || '', photosCount: m.photos ? m.photos.length : 0, photoNames: m.photos ? m.photos.map(p => p.name).join('; ') : ''
                     };
                 } else {
                     if(m.kind === 'GATE-IN') {
                         if(!containerMap[m.number].gateInDate || containerMap[m.number].gateInDate === '—') containerMap[m.number].gateInDate = m.date;
-                        if(m.truckingName) containerMap[m.number].truckingName = m.truckingName;
-                        if(m.plate) containerMap[m.number].plate = m.plate;
-                        if(m.driver) containerMap[m.number].driver = m.driver;
-                        if(m.eir) containerMap[m.number].eir = m.eir;
-                        if(m.row) containerMap[m.number].row = m.row;
                     }
                     if(m.kind === 'GATE-OUT') {
                         if(!containerMap[m.number].gateOutDate || containerMap[m.number].gateOutDate === '—') containerMap[m.number].gateOutDate = m.date;
                         if(m.customer) containerMap[m.number].releaseCustomer = m.customer;
                         if(m.eir) containerMap[m.number].gateOutEir = m.eir;
-                        if(m.fee) containerMap[m.number].storageFeeType = m.fee;
-                        if(m.storageamount) containerMap[m.number].storageRatePerDay = m.storageamount;
-                    }
-                    if(m.photos && m.photos.length > 0) {
-                        containerMap[m.number].photosCount += m.photos.length;
-                        let existingNames = containerMap[m.number].photoNames;
-                        let newNames = m.photos.map(p => p.name).join('; ');
-                        containerMap[m.number].photoNames = existingNames ? existingNames + '; ' + newNames : newNames;
                     }
                 }
             });
