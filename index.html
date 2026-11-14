@@ -1123,7 +1123,7 @@
                         <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
                         <div><span class="text-slate-500 block text-[10px]">Release To / Customer:</span>${m.customer || '—'}</div>
-                        <div><span class="text-slate-500 block text-[10px]">Gate-Out EIR/Ref:</span>${m.eir || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Gate-Out EIR/Ref:</span><strong class="text-amber-700">${m.eir || '—'}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Storage Fee Type:</span>${m.fee || 'Dry Van'}</div>
                         <div><span class="text-slate-500 block text-[10px]">Storage Rate/Day:</span>₱${m.storageamount || '450'}</div>
                         <div><span class="text-slate-500 block text-[10px]">Storage Days:</span>${m.storageDays || 0} days</div>
@@ -1687,7 +1687,7 @@
                         number: m.number, size: '—', type: '—', line: '—', condition: '—', status: '—',
                         truckingName: m.truckingName || '—', plate: m.plate || '—', driver: m.driver || '—', eir: m.eir || '—', row: m.row || '—',
                         block: '—', bay: '—', tier: '—', gateInDate: m.kind === 'GATE-IN' ? m.date : '—', gateOutDate: m.kind === 'GATE-OUT' ? m.date : '—',
-                        releaseCustomer: m.customer || '—', gateOutEir: m.kind === 'GATE-OUT' ? m.eir : '—', storageFeeType: m.fee || '—', storageRatePerDay: m.storageamount || '—',
+                        releaseCustomer: m.customer || '—', gateOutEir: m.kind === 'GATE-OUT' ? (m.eir || '—') : '—', storageFeeType: m.fee || '—', storageRatePerDay: m.storageamount || '—',
                         vanInAmount: m.vanInAmount || '0', vanOutAmount: m.vanOutAmount || '0', totalAmount: m.totalAmount || '0', vanInStats: m.vanInStats || '—',
                         remarks: m.remarks || '', photosCount: m.photos ? m.photos.length : 0, photoNames: m.photos ? m.photos.map(p => p.name).join('; ') : ''
                     };
@@ -1699,6 +1699,8 @@
                         if(!containerMap[m.number].gateOutDate || containerMap[m.number].gateOutDate === '—') containerMap[m.number].gateOutDate = m.date;
                         if(m.customer) containerMap[m.number].releaseCustomer = m.customer;
                         if(m.eir) containerMap[m.number].gateOutEir = m.eir;
+                        if(m.fee) containerMap[m.number].storageFeeType = m.fee;
+                        if(m.storageamount) containerMap[m.number].storageRatePerDay = m.storageamount;
                     }
                 }
             });
