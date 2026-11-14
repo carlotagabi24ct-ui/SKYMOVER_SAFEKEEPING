@@ -1042,7 +1042,10 @@
 
             if (title === 'Dashboard') {
                 content.innerHTML = `
-                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & Unified KPI Overview</h3>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & Unified KPI Overview</h3>
+                        <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 text-slate-900">
                         <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Fleet Units</p><h4 class="text-2xl font-bold text-slate-900 mt-1">${vehicles.length}</h4></div>
                         <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-600 mt-1">${drivers.length}</h4></div>
@@ -1053,42 +1056,81 @@
             } else if (title === 'Vehicle Management') {
                 let rows = vehicles.length ? vehicles.map((v, idx) => '<tr class="border-b"><td class="p-3 font-medium">' + v.id + '</td><td class="p-3">' + v.model + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">' + v.status + '</span></td><td class="p-3">' + v.driver + '</td><td class="p-3 text-right"><button onclick="deleteVehicleItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No vehicles recorded.</td></tr>';
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button>
+                            <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Driver Management') {
                 let rows = drivers.length ? drivers.map((d, idx) => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td><td class="p-3 text-right"><button onclick="deleteDriverItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No drivers registered.</td></tr>';
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="openNewDriverRegistrationModal()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Register New Driver</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3>
+                        <div class="flex gap-2">
+                            <button onclick="openNewDriverRegistrationModal()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Register New Driver</button>
+                            <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fuel Monitoring') {
                 let rows = fuelLogs.length ? fuelLogs.map((f, idx) => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + f.unit + '</td><td class="p-3">' + f.liters + '</td><td class="p-3 font-medium text-emerald-600">' + f.cost + '</td><td class="p-3">' + f.station + '</td><td class="p-3">' + f.date + '</td><td class="p-3 text-right"><button onclick="deleteFuelItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No fuel fills logged.</td></tr>';
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3><button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button>
+                            <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Maintenance') {
                 let rows = maintenanceLogs.length ? maintenanceLogs.map((m, idx) => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + m.unit + '</td><td class="p-3">' + m.issue + '</td><td class="p-3 font-medium text-rose-600">' + m.cost + '</td><td class="p-3">' + m.status + '</td><td class="p-3">' + m.date + '</td><td class="p-3 text-right"><button onclick="deleteMaintenanceItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No maintenance tickets.</td></tr>';
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button>
+                            <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'GPS & Dispatch') {
                 let rows = dispatchLogs.length ? dispatchLogs.map((d, idx) => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + d.unit + '</td><td class="p-3">' + d.route + '</td><td class="p-3">' + d.driver + '</td><td class="p-3 text-emerald-600 font-semibold">' + d.status + '</td><td class="p-3 text-right"><button onclick="deleteDispatchItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No active dispatches.</td></tr>';
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button>
+                            <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fleet Expenses') {
                 let rows = expenseLogs.length ? expenseLogs.map((e, idx) => '<tr class="border-b"><td class="p-3 font-semibold text-sky-600">' + e.trip + '</td><td class="p-3">' + e.fuel + '</td><td class="p-3">' + e.tolls + '</td><td class="p-3">' + e.maintenance + '</td><td class="p-3 font-bold text-emerald-600">' + e.total + '</td><td class="p-3 text-right"><button onclick="deleteExpenseItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No trip expenses logged.</td></tr>';
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3><button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button>
+                            <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Data Backup') {
                 content.innerHTML = `
-                    <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-database text-amber-400 mr-2"></i> Management Backend Data Backup & Restore</h3>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-database text-amber-400 mr-2"></i> Management Backend Data Backup & Restore</h3>
+                        <button onclick="closeSubModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+                    </div>
                     <p class="text-xs text-slate-400 mb-6">Download a complete JSON snapshot of your entire Skymover Unified Fleet and Yard database, or restore from a previously exported backup file.</p>
                     
                     <div class="space-y-6 text-slate-900">
@@ -1112,9 +1154,10 @@
                             <p class="text-xs text-slate-500 mb-4">Permanently erase and reset all saved fleet, driver, fuel, maintenance, and dispatch logs in the Management Backend.</p>
                             <button onclick="clearBackendDataOnly()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow">Clear & Reset Backend Data</button>
                         </div>
-                    </div>
-                `;
-            }
+        function closeSubModule() {
+            const modal = document.getElementById('subModuleModal');
+            if(modal) modal.classList.add('hidden');
+        }
         }
 
         function deleteVehicleItem(idx) {
