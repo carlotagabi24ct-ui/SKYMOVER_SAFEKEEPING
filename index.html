@@ -208,23 +208,35 @@
                     <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">DAMAGED / HOLD</div><div class="text-3xl font-extrabold text-rose-700 my-1" id="yardDamaged">0</div></div>
                 </div>
 
-                <!-- YARD STATUS PIE CHART PANEL -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- YARD CHARTS PANEL (PIE CHART + BAR GRAPH) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
                         <div>
                             <h3 class="font-bold text-base text-slate-900 mb-1"><i class="fa-solid fa-chart-pie text-amber-600 mr-2"></i> Stock Status Distribution</h3>
                             <p class="text-xs text-slate-600">Visual ratio of available, reserved, and damaged/hold container units.</p>
                         </div>
-                        <div class="w-full h-56 relative my-auto py-2">
+                        <div class="w-full h-64 relative my-auto py-2">
                             <canvas id="yardStatusPieChart"></canvas>
                         </div>
                         <div class="text-[11px] text-slate-500 text-center font-medium">Updates dynamically in real time</div>
                     </div>
-                    <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 content-start">
-                        <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-IN (UNITS)</div><div class="text-2xl font-bold my-1 text-sky-700" id="dashGateInCount">0</div></div>
-                        <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-OUT (UNITS)</div><div class="text-2xl font-bold my-1 text-purple-700" id="dashGateOutCount">0</div></div>
-                        <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL REVENUE (PAID)</div><div class="text-2xl font-bold my-1 text-emerald-700" id="dashTotalRev">₱0.00</div></div>
+                    
+                    <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900 mb-1"><i class="fa-solid fa-chart-column text-sky-600 mr-2"></i> Yard Stock Count by Status</h3>
+                            <p class="text-xs text-slate-600">Comparative bar graph representation of active yard inventory categories.</p>
+                        </div>
+                        <div class="w-full h-64 relative my-auto py-2">
+                            <canvas id="yardStatusBarGraph"></canvas>
+                        </div>
+                        <div class="text-[11px] text-slate-500 text-center font-medium">Synced with current inventory database</div>
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-IN (UNITS)</div><div class="text-2xl font-bold my-1 text-sky-700" id="dashGateInCount">0</div></div>
+                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-OUT (UNITS)</div><div class="text-2xl font-bold my-1 text-purple-700" id="dashGateOutCount">0</div></div>
+                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL REVENUE (PAID)</div><div class="text-2xl font-bold my-1 text-emerald-700" id="dashTotalRev">₱0.00</div></div>
                 </div>
 
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
@@ -598,6 +610,7 @@
         let stagedGateOutPhotos = [];
         let trendChartInstance = null;
         let yardPieChartInstance = null;
+        let yardBarChartInstance = null;
         let supabaseClient = null;
 
         // HARDCODED SUPABASE CREDENTIALS & INITIALIZER
@@ -1411,8 +1424,9 @@
             if(yr) yr.textContent = countReserved;
             if(yd) yd.textContent = countDamaged;
 
-            // Render Yard Status Pie Chart
+            // Render Yard Charts (Pie Chart & Bar Graph)
             renderYardStatusPieChart(countAvailable, countReserved, countDamaged);
+            renderYardStatusBarGraph(countAvailable, countReserved, countDamaged, a.length);
 
             const gateInCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN').length;
             const gateOutCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT').length;
@@ -1453,9 +1467,9 @@
                     datasets: [{
                         data: [available, reserved, damaged],
                         backgroundColor: [
-                            'rgba(16, 185, 129, 0.85)', // Emerald
-                            'rgba(245, 158, 11, 0.85)', // Amber
-                            'rgba(244, 63, 94, 0.85)'   // Rose
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(245, 158, 11, 0.85)',
+                            'rgba(244, 63, 94, 0.85)'
                         ],
                         borderColor: [
                             'rgb(16, 185, 129)',
@@ -1472,6 +1486,58 @@
                         legend: {
                             position: 'bottom',
                             labels: { font: { size: 11, family: 'Inter', weight: 'bold' }, color: '#1e293b', boxWidth: 12 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderYardStatusBarGraph(available, reserved, damaged, total) {
+            const ctx = document.getElementById('yardStatusBarGraph');
+            if(!ctx) return;
+
+            if(yardBarChartInstance) {
+                yardBarChartInstance.destroy();
+            }
+
+            yardBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total On-Hand', 'Available', 'Reserved', 'Damaged / Hold'],
+                    datasets: [{
+                        label: 'Container Units',
+                        data: [total, available, reserved, damaged],
+                        backgroundColor: [
+                            'rgba(14, 165, 233, 0.85)',
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(245, 158, 11, 0.85)',
+                            'rgba(244, 63, 94, 0.85)'
+                        ],
+                        borderColor: [
+                            'rgb(14, 165, 233)',
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(244, 63, 94)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { font: { size: 10, family: 'Inter', weight: 'bold' }, color: '#1e293b', precision: 0 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, family: 'Inter', weight: 'bold' }, color: '#1e293b' }
                         }
                     }
                 }
@@ -1816,7 +1882,7 @@
             `;
 
             const opt = {
-                margin:      10,
+                margin:     10,
                 filename:    `Skymover_Financial_Statement_${targetMonth}.pdf`,
                 image:       { type: 'jpeg', quality: 0.98 },
                 html2canvas:   { scale: 2, useCORS: true },
