@@ -440,8 +440,8 @@
                                 <select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full" onchange="onContainerSelectForGateOut()"><option value="">Select container in yard</option></select>
                             </div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer *</label><input name="customer" required class="p-2 border rounded-lg w-full" placeholder="e.g. Acme Logistics Corp"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" id="gateOutPlate" required class="p-2 border rounded-lg w-full" placeholder="Reflected from Gate-In"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" id="gateOutDriver" class="p-2 border rounded-lg w-full" placeholder="Reflected from Gate-In"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
                             
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount (₱)</label><input type="number" id="calcVanInAmount" name="vanInAmount" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-semibold" value="0"></div>
@@ -466,7 +466,7 @@
                                 <input type="text" id="calcTotalAmount" name="totalAmount" readonly class="text-xl font-extrabold text-emerald-700 bg-transparent border-0 p-0 w-full font-mono" value="0.00">
                             </div>
 
-                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
+                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" id="gateOutRemarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
 
                             <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-OUT -->
                             <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateOutDropZone" 
@@ -1349,12 +1349,30 @@
             if(c) {
                 document.getElementById('calcGateInDisplay').value = c.date || '';
                 document.getElementById('calcVanInAmount').value = c.vanInAmount || 0;
+                
+                // Automatically populate corresponding fields from Gate-In record
+                const plateInput = document.getElementById('gateOutPlate');
+                const driverInput = document.getElementById('gateOutDriver');
+                const remarksInput = document.getElementById('gateOutRemarks');
+                
+                if(plateInput && c.plate) plateInput.value = c.plate;
+                if(driverInput && c.driver) driverInput.value = c.driver;
+                if(remarksInput && c.remarks) remarksInput.value = c.remarks;
+
                 recalculateTotals();
             } else {
                 document.getElementById('calcGateInDisplay').value = '';
                 document.getElementById('calcVanInAmount').value = 0;
                 document.getElementById('calcStorageDays').value = 0;
                 document.getElementById('calcTotalAmount').value = '0.00';
+                
+                const plateInput = document.getElementById('gateOutPlate');
+                const driverInput = document.getElementById('gateOutDriver');
+                const remarksInput = document.getElementById('gateOutRemarks');
+                if(plateInput) plateInput.value = '';
+                if(driverInput) driverInput.value = '';
+                if(remarksInput) remarksInput.value = '';
+
                 const notice = document.getElementById('vanInDeductionNotice');
                 if(notice) notice.classList.add('hidden');
             }
