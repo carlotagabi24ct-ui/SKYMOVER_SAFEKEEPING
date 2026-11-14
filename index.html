@@ -253,108 +253,6 @@
                 </div>
 
                 <div onclick="openExtractionReport()" class="glass-card p-5 rounded-xl hover:border-purple-500/60 transition cursor-pointer group border-purple-500/30 bg-purple-950/10">
-        <section id="viewBackend" class="w-full max-w-7xl mx-auto hidden py-4">
-            
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-800 gap-4">
-                <div>
-                    <button onclick="switchView('landing')" class="text-xs text-sky-400 hover:underline mb-2 inline-block">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Portals
-                    </button>
-                    <h2 class="text-2xl font-bold text-white">Management Backend Center</h2>
-                    <p class="text-xs text-slate-400">Operations, Fleet Analytics & Logistics Control</p>
-                </div>
-                
-                <div class="flex bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-                    <button onclick="switchAiTab('brain')" id="tabBrainBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow">LogiBRAIN</button>
-                    <button onclick="switchAiTab('lens')" id="tabLensBtn" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">LogiLENS</button>
-                    <button onclick="switchAiTab('track')" id="tabTrackBtn" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">LogiTRACK</button>
-                </div>
-            </div>
-
-            <div id="aiContainer" class="mb-8 p-6 rounded-2xl glass-card border border-sky-500/20"></div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div onclick="openSubModule('Dashboard')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-sky-500/10 text-sky-400"><i class="fa-solid fa-table-cells-large"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-sky-400 transition">Dashboard</h4>
-                            <p class="text-[11px] text-slate-400">Fleet overview & KPI monitoring</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('Vehicle Management')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-blue-500/10 text-blue-400"><i class="fa-solid fa-truck"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-blue-400 transition">Vehicle Management</h4>
-                            <p class="text-[11px] text-slate-400">Fleet masterlist and assignments</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('Driver Management')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-users"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-indigo-400 transition">Driver Management</h4>
-                            <p class="text-[11px] text-slate-400">Driver records and performance</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('Fuel Monitoring')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-amber-500/10 text-amber-400"><i class="fa-solid fa-gas-pump"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-amber-400 transition">Fuel Monitoring</h4>
-                            <p class="text-[11px] text-slate-400">Diesel consumption & expenses</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('Maintenance')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-rose-500/10 text-rose-400"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-rose-400 transition">Maintenance</h4>
-                            <p class="text-[11px] text-slate-400">Repairs and preventive maintenance</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('GPS & Dispatch')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-location-crosshairs"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-emerald-400 transition">GPS & Dispatch</h4>
-                            <p class="text-[11px] text-slate-400">Vehicle location & trip monitoring</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('Fleet Expenses')" class="glass-card p-5 rounded-xl hover:border-sky-500/60 transition cursor-pointer group">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-teal-500/10 text-teal-400"><i class="fa-solid fa-wallet"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-teal-400 transition">Fleet Expenses</h4>
-                            <p class="text-[11px] text-slate-400">Cost per trip and profitability</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openSubModule('Data Backup')" class="glass-card p-5 rounded-xl hover:border-amber-500/60 transition cursor-pointer group border-amber-500/30 bg-amber-950/10">
-                    <div class="flex items-center space-x-3 mb-3">
-                        <div class="p-2.5 rounded-lg bg-amber-500/20 text-amber-300"><i class="fa-solid fa-database"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm text-white group-hover:text-amber-300 transition">Data Backup & Restore</h4>
-                            <p class="text-[11px] text-amber-300/80">Export/import unified JSON backups</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="openExtractionReport()" class="glass-card p-5 rounded-xl hover:border-purple-500/60 transition cursor-pointer group border-purple-500/30 bg-purple-950/10">
                     <div class="flex items-center space-x-3 mb-3">
                         <div class="p-2.5 rounded-lg bg-purple-500/20 text-purple-300"><i class="fa-solid fa-file-arrow-down"></i></div>
                         <div>
@@ -982,12 +880,14 @@
             }
         }
 
+        function openBackendModule(mod) { switchView('backend'); }
+        function openDriverPortal() { switchView('driver'); }
+        function openHubPortal() { switchView('hub'); }
         function openYardPortal() { 
             switchView('yard'); 
             switchYardTab('yardDashboard'); 
         }
 
-        // Driver Portal Dynamic Refresh with Real DB Data
         function refreshDriverPortal() {
             const infoContainer = document.getElementById('driverActiveTripInfo');
             if(!infoContainer) return;
@@ -1946,6 +1846,27 @@
 
             let dataRows = Object.values(containerMap).map(item => {
                 let storageDays = '—';
+                if(item.gateInDate && item.gateOutDate && item.gateInDate !== '—' && item.gateOutDate !== '—') {
+                    let d1 = new Date(item.gateInDate);
+                    let d2 = new Date(item.gateOutDate);
+                    let diff = d2 - d1;
+                    if(diff > 0) storageDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    else storageDays = 0;
+                }
+                return [
+                    item.number, item.size, item.type, item.line, item.condition, item.status,
+                    item.truckingName, item.plate, item.driver, item.eir, item.row,
+                    [item.block && 'Block '+item.block, item.bay && 'Bay '+item.bay, item.tier && 'Tier '+item.tier].filter(Boolean).join(' / ') || '—',
+                    item.gateInDate, item.gateOutDate,
+                    item.releaseCustomer, item.gateOutEir, item.storageFeeType, item.storageRatePerDay,
+                    item.vanInAmount || '0', item.vanOutAmount || '0', item.totalAmount || '0',
+                    item.vanInStats || '—', storageDays, item.photosCount, item.photoNames || 'None', item.remarks || ''
+                ];
+            });
+
+            csv([headers, ...dataRows], 'SKYMOVER_Full_Detailed_Report_Merged_GateIn_GateOut.csv');
+        }
+
         function backupUnifiedEnterpriseData() {
             const unifiedData = {
                 managementBackend: db,
