@@ -305,7 +305,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <label class="font-semibold text-slate-600 mb-1 block">Container Number *</label>
-                                <select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full" onchange="onContainerSelectForGateOut()"><option value="">Select container in yard</option></select>
+                                <select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full" onchange="containerSelectedForGateOut()"><option value="">Select container in yard</option></select>
                             </div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer *</label><input name="customer" required class="p-2 border rounded-lg w-full" placeholder="e.g. Acme Logistics Corp"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" id="gateOutPlate" required class="p-2 border rounded-lg w-full" placeholder="Reflected from Gate-In"></div>
@@ -1786,11 +1786,11 @@
             `;
 
             const opt = {
-                margin:       10,
-                filename:     `Skymover_Financial_Statement_${targetMonth}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                margin:        10,
+                filename:      `Skymover_Financial_Statement_${targetMonth}.pdf`,
+                image:         { type: 'jpeg', quality: 0.98 },
+                html2canvas:   { scale: 2, useCORS: true },
+                jsPDF:         { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().from(container).set(opt).save();
