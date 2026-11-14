@@ -677,11 +677,11 @@
             <!-- Yard Tab 8: Backup -->
             <div id="yardBackup" class="yard-tab hidden space-y-6">
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
-                    <h3 class="font-bold text-base text-slate-800 mb-2">Data Backup</h3>
-                    <p class="text-xs text-slate-500 mb-4">Download a complete JSON backup of your yard inventory, revenues, expenses, and movement history.</p>
+                    <h3 class="font-bold text-base text-slate-800 mb-2">Unified Enterprise Backup (Management Backend & Empty Yard)</h3>
+                    <p class="text-xs text-slate-500 mb-4">Download a complete JSON snapshot of both your Management Backend database and your Empty Yard database together.</p>
                     <div class="flex gap-2">
-                        <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-semibold" onclick="backupYardData()">Download Yard Backup</button>
-                        <label class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center">Restore Backup<input type="file" id="yardRestoreFile" accept=".json,application/json" hidden onchange="restoreYardData(event)"></label>
+                        <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-semibold" onclick="backupUnifiedEnterpriseData()">Download Unified Backup</button>
+                        <label class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center">Restore Unified Backup<input type="file" id="unifiedRestoreFile" accept=".json,application/json" hidden onchange="restoreUnifiedEnterpriseData(event)"></label>
                     </div>
                 </div>
                 <div class="panel bg-white p-6 rounded-2xl shadow border">
@@ -982,10 +982,10 @@
             }
         }
 
-        function openBackendModule(mod) { switchView('backend'); }
-        function openDriverPortal() { switchView('driver'); }
-        function openHubPortal() { switchView('hub'); }
-        function openYardPortal() { switchView('yard'); }
+        function openYardPortal() { 
+            switchView('yard'); 
+            switchYardTab('yardDashboard'); 
+        }
 
         // Driver Portal Dynamic Refresh with Real DB Data
         function refreshDriverPortal() {
@@ -1946,33 +1946,33 @@
 
             let dataRows = Object.values(containerMap).map(item => {
                 let storageDays = '—';
-                if(item.gateInDate && item.gateOutDate && item.gateInDate !== '—' && item.gateOutDate !== '—') {
-                    let d1 = new Date(item.gateInDate);
-                    let d2 = new Date(item.gateOutDate);
-                    let diff = d2 - d1;
-                    if(diff > 0) storageDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                    else storageDays = 0;
-                }
-                return [
-                    item.number, item.size, item.type, item.line, item.condition, item.status,
-                    item.truckingName, item.plate, item.driver, item.eir, item.row,
-                    [item.block && 'Block '+item.block, item.bay && 'Bay '+item.bay, item.tier && 'Tier '+item.tier].filter(Boolean).join(' / ') || '—',
-                    item.gateInDate, item.gateOutDate,
-                    item.releaseCustomer, item.gateOutEir, item.storageFeeType, item.storageRatePerDay,
-                    item.vanInAmount || '0', item.vanOutAmount || '0', item.totalAmount || '0',
-                    item.vanInStats || '—', storageDays, item.photosCount, item.photoNames || 'None', item.remarks || ''
-                ];
-            });
-
-            csv([headers, ...dataRows], 'SKYMOVER_Full_Detailed_Report_Merged_GateIn_GateOut.csv');
+        function backupUnifiedEnterpriseData() {
+            const unifiedData = {
+                managementBackend: db,
+                emptyYard: yardDb,
+                exportedAt: new Date().toISOString()
+            };
+            blobDownload(new Blob([JSON.stringify(unifiedData, null, 2)], {type: 'application/json'}), 'SKYMOVER_Unified_Enterprise_Backup_' + new Date().toISOString().slice(0,10) + '.json');
         }
 
-        function exportRevenueCSV() {
-            csv([['Date','Source','Container No','EIR','Amount (PHP)'], ...(yardDb.revenues || []).map(r => [r.date, r.source, r.container, r.eir, r.amount])], 'SKYMOVER_Yard_Revenues.csv');
-        }
-
-        function exportExpensesCSV() {
-            csv([['Date','Category','Description','Amount (PHP)'], ...(yardDb.expenses || []).map(e => [e.date, e.category, e.description, e.amount])], 'SKYMOVER_Yard_Expenses.csv');
+        function restoreUnifiedEnterpriseData(e) {
+            let f = e.target.files[0]; if(!f) return;
+            let r = new FileReader();
+            r.onload = () => {
+                try {
+                    let d = JSON.parse(r.result);
+                    if(!d.managementBackend || !d.emptyYard) throw 0;
+                    if(!confirm('Restore unified enterprise backup? Current local Management Backend and Empty Yard records will be replaced.')) return;
+                    db = d.managementBackend;
+                    yardDb = d.emptyYard;
+                    saveDB();
+                    saveYardDB();
+                    alert('Unified Enterprise Backup successfully restored to both Management Backend and Empty Yard!');
+                    refreshYard();
+                } catch(x) { alert('Invalid Skymover backup file format.'); }
+                e.target.value = '';
+            };
+            r.readAsText(f);
         }
 
         function clearYardData() {
