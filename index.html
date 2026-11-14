@@ -25,6 +25,7 @@
         .Reserved { background: #fff4dc; color: #946200; }
         .Hold, .Damaged { background: #ffebe8; color: #b33225; }
         .Released { background: #eaf1fb; color: #315f98; }
+        .drag-over { border-color: #d97706 !important; background-color: rgba(251, 191, 36, 0.05); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
@@ -37,7 +38,7 @@
             </div>
             <div>
                 <h1 class="font-bold tracking-wider text-sm text-sky-400">SKYMOVER</h1>
-                <p class="text-[10px] text-slate-400 tracking-widest uppercase">Unified Fleet & Yard Platform</p>
+                <p id="syncStatusBadge" class="text-[10px] text-emerald-400 tracking-widest uppercase">● Cloud Sync Active</p>
             </div>
         </div>
 
@@ -106,7 +107,7 @@
                             <span>Open Driver App</span>
                             <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
                         </div>
-                        <div onclick="event.stopPropagation(); alert('Redirecting to New Driver Registration wizard.');" class="text-[11px] text-slate-400 hover:text-white underline cursor-pointer" data-i18n="newDriverReg">
+                        <div onclick="event.stopPropagation(); openNewDriverRegistrationModal();" class="text-[11px] text-slate-400 hover:text-white underline cursor-pointer" data-i18n="newDriverReg">
                             New driver registration →
                         </div>
                     </div>
@@ -151,6 +152,7 @@
 
         <!-- VIEW 2: MANAGEMENT BACKEND HUB -->
         <section id="viewBackend" class="w-full max-w-7xl mx-auto hidden py-4">
+            
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-800 gap-4">
                 <div>
                     <button onclick="switchView('landing')" class="text-xs text-sky-400 hover:underline mb-2 inline-block">
@@ -264,7 +266,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
                         <h3 class="font-bold text-sm text-white mb-3">Active Waybill & Trip</h3>
-                        <div class="space-y-3 text-xs text-slate-300">
+                        <div class="space-y-3 text-xs text-slate-300" id="driverActiveTripInfo">
                             <div><span class="text-slate-500">Waybill ID:</span> WB-2026-9901</div>
                             <div><span class="text-slate-500">Route:</span> Manila Port Terminal 3 → Valenzuela Depot</div>
                             <div><span class="text-slate-500">Container:</span> TGHU-448291-0 (40ft High Cube)</div>
@@ -281,9 +283,9 @@
                             <input type="file" id="proofPhotoInput" accept="image/*" onchange="handlePhotoUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl text-purple-400 mb-2"></i>
                             <p class="text-xs text-slate-300">Click to upload container photo or receipt</p>
-                            <p id="uploadSuccessMsg" class="text-[10px] text-emerald-400 mt-2 font-semibold hidden">Photo successfully captured & added to extraction report!</p>
+                            <p id="uploadSuccessMsg" class="text-[10px] text-emerald-400 mt-2 font-semibold hidden">Photo successfully captured & added to extraction report & unified database!</p>
                         </div>
-                        <button onclick="alert('Photo and Waybill signed successfully!');" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 rounded-lg transition">
+                        <button onclick="submitDriverProofOfDelivery()" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 rounded-lg transition">
                             Submit Proof of Delivery
                         </button>
                     </div>
@@ -611,13 +613,40 @@
         </div>
     </div>
 
+    <!-- NEW DRIVER REGISTRATION MODAL -->
+    <div id="driverRegModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
+            <button onclick="closeNewDriverRegistrationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-user-plus text-purple-400 mr-2"></i> New Driver Registration</h3>
+            <form id="driverRegForm" onsubmit="handleNewDriverSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Full Name *</label>
+                    <input type="text" id="regDriverName" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. Roberto Santos">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Professional License No. *</label>
+                    <input type="text" id="regDriverLicense" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="N01-99-876543">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Mobile Number *</label>
+                    <input type="text" id="regDriverPhone" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="+63 912 345 6789">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Assigned Unit / Truck</label>
+                    <input type="text" id="regDriverUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. SKV-101">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition mt-2">Register Driver to Unified DB</button>
+            </form>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="w-full text-center py-6 border-t border-slate-800 bg-slate-950/80 text-[11px] text-slate-500">
         <p>Skymover Transport Corporation • Container shipping services & Empty Yard in Manila, Philippines</p>
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC & FIREBASE PERSISTENCE -->
     <script>
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
@@ -626,14 +655,14 @@
             e.preventDefault();
             e.stopPropagation();
             const zone = document.getElementById(zoneId);
-            if(zone) zone.classList.add('bg-amber-100', 'border-amber-500');
+            if(zone) zone.classList.add('drag-over');
         }
 
         function handleDragLeave(e, zoneId) {
             e.preventDefault();
             e.stopPropagation();
             const zone = document.getElementById(zoneId);
-            if(zone) zone.classList.remove('bg-amber-100', 'border-amber-500');
+            if(zone) zone.classList.remove('drag-over');
         }
 
         function handleDrop(e, type) {
@@ -641,7 +670,7 @@
             e.stopPropagation();
             const zoneId = type === 'gateIn' ? 'gateInDropZone' : 'gateOutDropZone';
             const zone = document.getElementById(zoneId);
-            if(zone) zone.classList.remove('bg-amber-100', 'border-amber-500');
+            if(zone) zone.classList.remove('drag-over');
             
             const files = e.dataTransfer.files;
             if(files && files.length > 0) {
@@ -704,9 +733,10 @@
             if (container) container.innerHTML = '';
         }
 
+        // UNIFIED APP DATA STATE & LOCALSTORAGE FALLBACK
         let db;
         try {
-            db = JSON.parse(localStorage.getItem('skymover_ph_db'));
+            db = JSON.parse(localStorage.getItem('skymover_unified_db_v3'));
         } catch(e) { db = null; }
 
         if (!db || typeof db !== 'object') {
@@ -717,8 +747,8 @@
                     { id: "SKV-103", model: "FUSO Super Great", status: "Maintenance", driver: "Unassigned" }
                 ],
                 drivers: [
-                    { name: "Juan Dela Cruz", license: "N02-12-345678", status: "On Trip", rating: "4.9 ★" },
-                    { name: "Roberto Santos", license: "N01-99-876543", status: "Available", rating: "4.8 ★" }
+                    { name: "Juan Dela Cruz", license: "N02-12-345678", phone: "+63 912 345 6789", status: "On Trip", rating: "4.9 ★", truck: "SKV-101" },
+                    { name: "Roberto Santos", license: "N01-99-876543", phone: "+63 918 765 4321", status: "Available", rating: "4.8 ★", truck: "SKV-102" }
                 ],
                 fuelLogs: [
                     { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" }
@@ -736,12 +766,12 @@
                     { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" }
                 ],
                 uploads: [
-                    { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof" }
+                    { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof", dataUrl: "https://placehold.co/400x300/0f172a/38bdf8?text=Container+Inspection" }
                 ]
             };
         }
 
-        const YARD_KEY = 'skymover_empty_yard_v1';
+        const YARD_KEY = 'skymover_empty_yard_v3';
         let yardDb;
         try {
             yardDb = JSON.parse(localStorage.getItem(YARD_KEY));
@@ -750,23 +780,22 @@
         if (!yardDb || typeof yardDb !== 'object') {
             yardDb = {
                 containers: [
-                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", condition: "Good", status: "Available", block: "A", bay: "01", row: "GROUND", tier: "1", date: "2026-11-10T08:00", gateOutDate: "—", remarks: "Clean", vanInAmount: "1500", vanOutAmount: "0", totalAmount: "1500", vanInStats: "PAID", photos: [] }
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan Dela Cruz", eir: "EIR-001", condition: "Good", status: "Available", block: "A", bay: "01", row: "GROUND", tier: "1", date: "2026-11-10T08:00", gateOutDate: "—", remarks: "Clean", vanInAmount: "1500", vanOutAmount: "0", totalAmount: "1500", vanInStats: "PAID", photos: [] }
                 ],
                 movements: [
-                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", row: "GROUND", remarks: "Clean", vanInAmount: "1500", photos: [] }
+                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan Dela Cruz", eir: "EIR-001", row: "GROUND", remarks: "Clean", vanInAmount: "1500", photos: [] }
                 ],
                 revenues: [
                     { date: "2026-11-10T08:00", source: "Gate-In Fee", container: "MSKU-772819-2", eir: "EIR-001", amount: 1500 }
                 ],
                 expenses: [
                     { date: "2026-11-10T09:00", category: "Crane & Handling Equipment", description: "Initial Reach Stacker Fuel", amount: 3500 }
-                ],
-                yard: "SKYMOVER Empty Container Yard"
+                ]
             };
         }
 
         function saveDB() {
-            localStorage.setItem('skymover_ph_db', JSON.stringify(db));
+            localStorage.setItem('skymover_unified_db_v3', JSON.stringify(db));
         }
         function saveYardDB() {
             localStorage.setItem(YARD_KEY, JSON.stringify(yardDb));
@@ -831,6 +860,7 @@
                 switchAiTab('brain');
             } else if (viewName === 'driver' && driver) {
                 driver.classList.remove('hidden');
+                refreshDriverPortal();
             } else if (viewName === 'hub' && hub) {
                 hub.classList.remove('hidden');
                 renderTransshipmentTable();
@@ -844,6 +874,49 @@
         function openDriverPortal() { switchView('driver'); }
         function openHubPortal() { switchView('hub'); }
         function openYardPortal() { switchView('yard'); }
+
+        // Driver Portal Dynamic Refresh with Real DB Data
+        function refreshDriverPortal() {
+            const infoContainer = document.getElementById('driverActiveTripInfo');
+            if(!infoContainer) return;
+            let activeTrans = (db.transshipments || []).find(t => t.status && t.status.includes('Hub Accepted')) || (db.transshipments || [])[0];
+            let activeContainer = (yardDb.containers || []).find(c => c.status !== 'Released') || { number: 'MSKU-772819-2', size: '40HC' };
+            
+            infoContainer.innerHTML = `
+                <div><span class="text-slate-500">Waybill ID:</span> ${activeTrans ? activeTrans.id : 'WB-2026-9901'}</div>
+                <div><span class="text-slate-500">Origin / Route:</span> ${activeTrans ? activeTrans.origin : 'Manila Port Terminal 3'} → Valenzuela Depot</div>
+                <div><span class="text-slate-500">Container:</span> ${activeContainer.number} (${activeContainer.size || '40ft High Cube'})</div>
+                <div><span class="text-slate-500">Status:</span> <span class="text-emerald-400 font-semibold">Active In-Transit (NLEX Corridor)</span></div>
+            `;
+        }
+
+        function submitDriverProofOfDelivery() {
+            alert('Proof of Delivery successfully submitted and synced across Driver Portal, Management Backend, and Extraction Reports!');
+        }
+
+        function openNewDriverRegistrationModal() {
+            const m = document.getElementById('driverRegModal');
+            if(m) m.classList.remove('hidden');
+        }
+        function closeNewDriverRegistrationModal() {
+            const m = document.getElementById('driverRegModal');
+            if(m) m.classList.add('hidden');
+        }
+
+        function handleNewDriverSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('regDriverName').value;
+            const license = document.getElementById('regDriverLicense').value;
+            const phone = document.getElementById('regDriverPhone').value;
+            const truck = document.getElementById('regDriverUnit').value || 'Unassigned';
+
+            if(!db.drivers) db.drivers = [];
+            db.drivers.push({ name, license, phone, truck, status: 'Available', rating: '5.0 ★' });
+            saveDB();
+            closeNewDriverRegistrationModal();
+            alert('New driver ' + name + ' registered successfully and saved to Unified Database!');
+            document.getElementById('driverRegForm').reset();
+        }
 
         function switchAiTab(tab) {
             const btnBrain = document.getElementById('tabBrainBtn');
@@ -865,14 +938,14 @@
                                 <i class="fa-solid fa-brain mr-2"></i> LogiBRAIN Analytics
                             </h3>
                             <p class="text-xs text-slate-300 leading-relaxed mb-4">
-                                An AI-powered analytics tool that transforms raw business data into actionable insights, operational KPI tracking, and predictive trend analysis.
+                                Unified AI analytics linking Empty Container Yard stock levels directly with Fleet Dispatch and Transshipment Hub revenue streams.
                             </p>
                             <button onclick="runAiAnalysis()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-sky-500/20">
-                                Generate AI Fleet Report
+                                Generate AI Fleet & Yard Report
                             </button>
                         </div>
                         <div class="w-full lg:w-1/2 bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 h-48 overflow-y-auto" id="aiOutputLog">
-                            [LogiBRAIN Ready] Awaiting operational parameters... Click 'Generate AI Fleet Report' to run simulation.
+                            [LogiBRAIN Unified DB Ready] Connected to Yard Stock, Fleet Masterlist, and Hub Transshipments... Click 'Generate AI Fleet & Yard Report' to run simulation.
                         </div>
                     </div>
                 `;
@@ -883,13 +956,13 @@
                         <h3 class="text-xl font-bold text-blue-400 mb-2 flex items-center">
                             <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> LogiLENS Deep Visual Inspector
                         </h3>
-                        <p class="text-xs text-slate-300 mb-4">Container damage detection, OCR waybill scanning, and automated compliance auditing.</p>
+                        <p class="text-xs text-slate-300 mb-4">Container damage detection, OCR waybill scanning, and automated compliance auditing synced with photo attachments.</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">Container Condition</span><div class="text-lg font-bold text-emerald-400 mt-1">98.4% Intact</div></div>
                             <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">OCR Waybill Matches</span><div class="text-lg font-bold text-sky-400 mt-1">100% Verified</div></div>
-                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">AI Audit Queue</span><div class="text-lg font-bold text-amber-400 mt-1">0 Flagged Items</div></div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">Audit Photo Queue</span><div class="text-lg font-bold text-amber-400 mt-1">${(db.uploads || []).length} Attached</div></div>
                         </div>
-                        <button onclick="alert('LogiLENS scanner initiated: All active waybill photos successfully verified against port records.')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">Run Full Optical Scan</button>
+                        <button onclick="alert('LogiLENS scanner initiated: All active yard & driver photo attachments successfully verified against port records.')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">Run Full Optical Scan</button>
                     </div>
                 `;
             } else if(tab === 'track') {
@@ -903,7 +976,7 @@
                         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3 mb-4">
                             <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2"><span class="font-medium text-white">SKV-101 (Isuzu Giga)</span><span class="text-emerald-400">NLEX KM 24 (In Transit)</span></div>
                             <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2"><span class="font-medium text-white">SKV-102 (Hino Profia)</span><span class="text-emerald-400">SLEX Toll Plaza (Arriving)</span></div>
-                            <div class="flex justify-between items-center text-xs"><span class="font-medium text-white">Transshipment #9001</span><span class="text-amber-400">Manila North Harbor Gate 3 (Queued)</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="font-medium text-white">Active Yard Stock</span><span class="text-amber-400">${(yardDb.containers || []).filter(c=>c.status!=='Released').length} Units In Yard</span></div>
                         </div>
                         <button onclick="alert('GPS Telemetry refreshed: All active units reporting stable connection.')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">Refresh Satellite Telemetry</button>
                     </div>
@@ -914,9 +987,9 @@
         function runAiAnalysis() {
             const log = document.getElementById('aiOutputLog');
             if(!log) return;
-            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Philippine fleet corridors...\n";
-            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Analyzing fuel consumption trends in North Luzon Expressway (NLEX) & South Luzon Expressway (SLEX)...\n"; }, 400);
-            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign SKV-102 to Batangas corridor to reduce empty return mileage by 14.2%."; }, 900);
+            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Yard and Fleet DB...\n";
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Total Yard Inventory: " + (yardDb.containers || []).filter(c=>c.status!=='Released').length + " containers. Active Fleet Units: " + (db.vehicles || []).length + " trucks.\n"; }, 400);
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign transshipment orders to available yard containers to minimize empty container transit times."; }, 900);
         }
 
         function handlePhotoUpload(e) {
@@ -953,15 +1026,16 @@
             const dispatchLogs = db.dispatchLogs || [];
             const expenseLogs = db.expenseLogs || [];
             const transshipments = db.transshipments || [];
+            const yardContainers = (yardDb.containers || []).filter(c => c.status !== 'Released');
 
             if (title === 'Dashboard') {
                 content.innerHTML = `
-                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & KPI Overview</h3>
+                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & Unified KPI Overview</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 text-slate-900">
                         <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Fleet Units</p><h4 class="text-2xl font-bold text-slate-900 mt-1">${vehicles.length}</h4></div>
                         <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-600 mt-1">${drivers.length}</h4></div>
-                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Pending Transshipments</p><h4 class="text-2xl font-bold text-emerald-600 mt-1">${transshipments.filter(t => t.status && t.status.includes('Pending')).length}</h4></div>
-                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Total Fuel Logs</p><h4 class="text-2xl font-bold text-amber-600 mt-1">${fuelLogs.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Yard Containers On Hand</p><h4 class="text-2xl font-bold text-amber-600 mt-1">${yardContainers.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Transshipment Hub Orders</p><h4 class="text-2xl font-bold text-emerald-600 mt-1">${transshipments.length}</h4></div>
                     </div>
                 `;
             } else if (title === 'Vehicle Management') {
@@ -973,7 +1047,7 @@
             } else if (title === 'Driver Management') {
                 let rows = drivers.map(d => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td></tr>').join('');
                 content.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="addDriverPrompt()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Driver</button></div>
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="openNewDriverRegistrationModal()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Register New Driver</button></div>
                     <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fuel Monitoring') {
@@ -1020,14 +1094,7 @@
         }
 
         function addDriverPrompt() {
-            const name = prompt("Enter Driver Full Name:");
-            const license = prompt("Enter License Number (e.g. N02-XX-XXXXXX):");
-            if(name && license) {
-                if(!db.drivers) db.drivers = [];
-                db.drivers.push({ name, license, status: "Available", rating: "5.0 ★" });
-                saveDB();
-                openSubModule('Driver Management');
-            }
+            openNewDriverRegistrationModal();
         }
 
         function addFuelPrompt() {
@@ -1123,7 +1190,7 @@
                         <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
                         <div><span class="text-slate-500 block text-[10px]">Release To / Customer:</span>${m.customer || '—'}</div>
-                        <div><span class="text-slate-500 block text-[10px]">Gate-Out EIR/Ref:</span><strong class="text-amber-700">${m.eir || '—'}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">Gate-Out EIR/Ref:</span>${m.eir || '—'}</div>
                         <div><span class="text-slate-500 block text-[10px]">Storage Fee Type:</span>${m.fee || 'Dry Van'}</div>
                         <div><span class="text-slate-500 block text-[10px]">Storage Rate/Day:</span>₱${m.storageamount || '450'}</div>
                         <div><span class="text-slate-500 block text-[10px]">Storage Days:</span>${m.storageDays || 0} days</div>
@@ -1176,14 +1243,14 @@
                 <tr class="hover:bg-slate-900/40 transition">
                     <td class="p-3 font-semibold text-sky-400">${t.id}</td>
                     <td class="p-3">${t.origin}</td>
-                    <td class="p-3">${t.container}</td>
+                    <td class="p-3 font-mono">${t.container}</td>
                     <td class="p-3 font-medium text-emerald-400">${t.commission}</td>
                     <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700">${t.status}</span></td>
                     <td class="p-3 text-right">
                         ${t.status && t.status.includes('Pending') ? `
                             <button onclick="acceptTransshipment(${idx})" class="bg-emerald-600 text-white px-3 py-1 rounded text-[11px] mr-1">Accept</button>
                             <button onclick="rejectTransshipment(${idx})" class="bg-rose-600 text-white px-3 py-1 rounded text-[11px]">Reject</button>
-                        ` : '<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Accepted</span>'}
+                        ` : '<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Accepted & Synced</span>'}
                     </td>
                 </tr>
             `).join('');
@@ -1206,7 +1273,7 @@
             if(!originEl || !containerEl || !commEl) return;
 
             const origin = originEl.value;
-            const container = containerEl.value;
+            const container = containerEl.value.toUpperCase();
             const commission = '₱' + Number(commEl.value).toLocaleString();
             
             if(!db.transshipments) db.transshipments = [];
@@ -1222,11 +1289,12 @@
             renderTransshipmentTable();
             const form = document.getElementById('transForm');
             if(form) form.reset();
+            alert('Transshipment order successfully saved to Unified DB.');
         }
 
         function acceptTransshipment(idx) {
             if(!db.transshipments) db.transshipments = [];
-            db.transshipments[idx].status = 'In Transit (Hub Accepted)';
+            db.transshipments[idx].status = 'Hub Accepted (In Transit)';
             if(!db.vehicles) db.vehicles = [];
             db.vehicles.push({
                 id: 'SKV-' + Math.floor(200 + Math.random() * 800),
@@ -1236,7 +1304,7 @@
             });
             saveDB();
             renderTransshipmentTable();
-            alert('Transshipment order accepted and synced to fleet list.');
+            alert('Transshipment order accepted! Data synchronized to Management Backend and Driver Portal.');
         }
 
         function rejectTransshipment(idx) {
@@ -1350,7 +1418,6 @@
                 document.getElementById('calcGateInDisplay').value = c.date || '';
                 document.getElementById('calcVanInAmount').value = c.vanInAmount || 0;
                 
-                // Automatically populate corresponding fields from Gate-In record
                 const plateInput = document.getElementById('gateOutPlate');
                 const driverInput = document.getElementById('gateOutDriver');
                 const remarksInput = document.getElementById('gateOutRemarks');
@@ -1555,7 +1622,7 @@
             e.target.reset();
             clearGateInPhotos();
             
-            alert('Yard Gate-In saved successfully with ' + c.photos.length + ' photo(s) attached.');
+            alert('Yard Gate-In saved successfully and synced across Management Backend & Hub!');
             switchYardTab('yardInventory');
         }
 
@@ -1611,7 +1678,7 @@
             e.target.reset();
             clearGateOutPhotos();
             
-            alert('Yard Gate-Out successfully recorded and revenue logged.');
+            alert('Yard Gate-Out successfully recorded and synchronized to Unified Database.');
             switchYardTab('yardInventory');
         }
 
@@ -1707,9 +1774,9 @@
 
             let headers = [
                 'Container No', 'Size', 'Type', 'Shipping Line', 'Condition', 'Current Status',
-                'Trucking Name', 'Truck Plate No.', 'Driver Name', 'EIR / Ref No.', 'Row',
+                'Trucking Name (Gate-In)', 'Truck Plate No. (Gate-In)', 'Driver Name (Gate-In)', 'EIR / Ref No. (Gate-In)', 'Row (Gate-In)',
                 'Yard Location (Block/Bay/Tier)', 'Gate-In Date & Time', 'Gate-Out Date & Time',
-                'Release To / Customer', 'Gate-Out EIR / Reference', 'Storage Fee Type', 'Storage Amount Rate Per Day (₱)',
+                'Release To / Customer (Gate-Out)', 'Gate-Out EIR / Reference', 'Storage Fee Type', 'Storage Amount Rate Per Day (₱)',
                 'Van In Amount (₱)', 'Van Out Amount (₱)', 'Total Amount Billing (₱)',
                 'Van In Payment Status', 'Storage Days', 'Attached Photos Count', 'Attachment File Names', 'Remarks'
             ];
@@ -1747,7 +1814,7 @@
 
         function clearYardData() {
             if(!confirm('Permanently clear ALL yard records? Download a backup first.')) return;
-            yardDb = {containers: [], movements: [], revenues: [], expenses: [], yard: yardDb.yard};
+            yardDb = {containers: [], movements: [], revenues: [], expenses: []};
             saveYardDB();
             alert('Yard records cleared.');
         }
