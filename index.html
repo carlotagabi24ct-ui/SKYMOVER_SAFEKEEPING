@@ -466,7 +466,10 @@
                                 <input type="number" id="calcStorageDays" name="storageDays" readonly class="text-xl font-extrabold text-amber-700 bg-transparent border-0 p-0 w-full" value="0">
                             </div>
                             <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 flex flex-col justify-center">
-                                <span class="font-bold text-emerald-900 text-xs">Total Amount Summation (₱):</span>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-emerald-900 text-xs">Total Amount Summation (₱):</span>
+                                    <span id="vanInDeductionNotice" class="text-[10px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded hidden">Van In Paid (Deducted)</span>
+                                </div>
                                 <input type="text" id="calcTotalAmount" name="totalAmount" readonly class="text-xl font-extrabold text-emerald-700 bg-transparent border-0 p-0 w-full font-mono" value="0.00">
                             </div>
 
@@ -554,8 +557,8 @@
                     <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                         <h3 class="font-bold text-base text-slate-800">Full Movement History & Billings (Gate-In to Gate-Out)</h3>
                         <div class="flex gap-2">
-                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow" onclick="exportFullDetailedReportCSV()">
-                                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export Full Detailed Report (Merged Gate-In & Gate-Out)
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow" onclick="openExtractionReport()">
+                                <i class="fa-solid fa-file-arrow-down mr-1"></i> Open Visual Extraction Report & Photo Audit
                             </button>
                             <button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button>
                         </div>
@@ -1097,7 +1100,7 @@
             const gateOutMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT');
 
             let gateInHtml = gateInMovements.length ? gateInMovements.map(m => `
-                <div class="border rounded-xl p-4 bg-slate-50 mb-3">
+                <div class="border rounded-xl p-4 bg-slate-50 mb-3 text-slate-900">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                         <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Date & Time:</span>${stamp(m.date)}</div>
@@ -1112,19 +1115,19 @@
                     <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-In Photos (${m.photos ? m.photos.length : 0}):</div>
                     <div class="flex flex-wrap gap-3">
                         ${m.photos && m.photos.length ? m.photos.map(p => `
-                            <div class="border rounded-lg p-2 bg-white shadow-sm w-32 text-center">
-                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image">
-                                    <img src="${p.dataUrl}" class="w-full h-24 object-cover rounded mb-1 hover:opacity-80 transition">
+                            <div class="border rounded-lg p-2 bg-white shadow-sm w-36 text-center">
+                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image in new tab">
+                                    <img src="${p.dataUrl}" class="w-full h-28 object-cover rounded mb-1 hover:opacity-80 transition cursor-pointer border">
                                 </a>
-                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
+                                <div class="text-[9px] text-slate-600 truncate font-medium">${p.name}</div>
                             </div>
-                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-In entry.</span>'}
+                        `).join('') : '<span class="text-slate-400 italic text-[11px]">No photo attachments for this Gate-In entry.</span>'}
                     </div>
                 </div>
             `).join('') : '<div class="text-slate-400 p-2">No Gate-In records found.</div>';
 
             let gateOutHtml = gateOutMovements.length ? gateOutMovements.map(m => `
-                <div class="border rounded-xl p-4 bg-slate-50 mb-3">
+                <div class="border rounded-xl p-4 bg-slate-50 mb-3 text-slate-900">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                         <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
@@ -1139,13 +1142,13 @@
                     <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-Out Photos (${m.photos ? m.photos.length : 0}):</div>
                     <div class="flex flex-wrap gap-3">
                         ${m.photos && m.photos.length ? m.photos.map(p => `
-                            <div class="border rounded-lg p-2 bg-white shadow-sm w-32 text-center">
-                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image">
-                                    <img src="${p.dataUrl}" class="w-full h-24 object-cover rounded mb-1 hover:opacity-80 transition">
+                            <div class="border rounded-lg p-2 bg-white shadow-sm w-36 text-center">
+                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image in new tab">
+                                    <img src="${p.dataUrl}" class="w-full h-28 object-cover rounded mb-1 hover:opacity-80 transition cursor-pointer border">
                                 </a>
-                                <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
+                                <div class="text-[9px] text-slate-600 truncate font-medium">${p.name}</div>
                             </div>
-                        `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-Out release.</span>'}
+                        `).join('') : '<span class="text-slate-400 italic text-[11px]">No photo attachments for this Gate-Out release.</span>'}
                     </div>
                 </div>
             `).join('') : '<div class="text-slate-400 p-2">No Gate-Out records found.</div>';
@@ -1153,21 +1156,21 @@
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
                     <div>
-                        <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Unified Gate-In & Gate-Out Extraction Report</h3>
-                        <p class="text-xs text-slate-400">Complete merged details of Gate-In inputs with image previews and Gate-Out releases with proofs.</p>
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Visual Extraction Report & Photo Audit</h3>
+                        <p class="text-xs text-slate-400">Complete merged details of Gate-In inputs with actual photo previews and Gate-Out releases with proofs.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="exportFullDetailedReportCSV()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Export Merged CSV</button>
                         <button onclick="window.print()" class="bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print Report</button>
                     </div>
                 </div>
-                <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl">
+                <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl shadow">
                     <div>
-                        <h4 class="font-bold text-sm text-sky-800 mb-2">1. Gate-In Inputs & Attached Photos / Documents (${gateInMovements.length} Records)</h4>
+                        <h4 class="font-bold text-sm text-sky-800 mb-3 border-b pb-1">1. Gate-In Inputs & Attached Actual Photos / Documents (${gateInMovements.length} Records)</h4>
                         ${gateInHtml}
                     </div>
                     <div class="pt-4 border-t border-slate-200">
-                        <h4 class="font-bold text-sm text-amber-800 mb-2">2. Gate-Out Inputs & Attached Photos / Documents (${gateOutMovements.length} Records)</h4>
+                        <h4 class="font-bold text-sm text-amber-800 mb-3 border-b pb-1">2. Gate-Out Inputs & Attached Actual Photos / Documents (${gateOutMovements.length} Records)</h4>
                         ${gateOutHtml}
                     </div>
                 </div>
@@ -1320,34 +1323,19 @@
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-bold font-mono">
                             ${c.number}
-                            ${c.photos && c.photos.length ? '<span class="ml-1 text-amber-600" title="' + c.photos.length + ' photo(s) attached"><i class="fa-solid fa-camera"></i></span>' : ''}
+                            ${c.photos && c.photos.length ? '<span class="ml-1 text-amber-600 font-semibold" title="' + c.photos.length + ' photo(s) attached"><i class="fa-solid fa-camera"></i> (' + c.photos.length + ')</span>' : ''}
                         </td>
                         <td class="p-3">${c.size} ${c.type}</td>
                         <td class="p-3">${c.line}</td>
                         <td class="p-3">
                             <span class="pill ${c.status}">${c.status}</span>
                             ${c.vanInStats === 'UNPAID' ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded">UNPAID</span>' : ''}
-                        </td>
-                        <td class="p-3">${yardLoc(c)}</td>
-                        <td class="p-3">${stamp(c.date)}</td>
-                        <td class="p-3">${c.gateOutDate || '—'}</td>
-                        <td class="p-3 font-mono text-[11px]">In: ₱${c.vanInAmount||0}<br>Out: ₱${c.vanOutAmount||0}</td>
-                        <td class="p-3"><button class="bg-slate-200 hover:bg-slate-300 text-[11px] py-1 px-2 rounded font-semibold" onclick="editYardStatus('${c.id}')">Status</button></td>
-                    </tr>
-                `).join('') : '<tr><td colspan="9" class="p-4 text-center text-slate-400">No matching containers found.</td></tr>';
-            }
-        }
-
-        function renderYardOutSelect() {
-            const sel = document.getElementById('yardOutContainer');
-            if(sel) {
-                sel.innerHTML = '<option value="">Select container in yard</option>' + liveYard().map(c => '<option value="' + c.id + '">' + c.number + ' — ' + c.size + ' — ' + c.line + ' (' + c.status + ') ' + (c.vanInStats === 'UNPAID' ? '⚠️ [UNPAID]' : '') + '</option>').join('');
-            }
-        }
+        let activeSelectedContainer = null;
 
         function onContainerSelectForGateOut() {
             const selId = document.getElementById('yardOutContainer').value;
             const c = yardDb.containers.find(x => x.id === selId);
+            activeSelectedContainer = c || null;
             if(c) {
                 document.getElementById('calcGateInDisplay').value = c.date || '';
                 document.getElementById('calcVanInAmount').value = c.vanInAmount || 0;
@@ -1357,6 +1345,8 @@
                 document.getElementById('calcVanInAmount').value = 0;
                 document.getElementById('calcStorageDays').value = 0;
                 document.getElementById('calcTotalAmount').value = '0.00';
+                const notice = document.getElementById('vanInDeductionNotice');
+                if(notice) notice.classList.add('hidden');
             }
         }
 
@@ -1378,8 +1368,21 @@
             }
             document.getElementById('calcStorageDays').value = storageDays;
 
-            const totalAmount = vanIn + vanOut + (storageRate * storageDays);
-            document.getElementById('calcTotalAmount').value = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            // Compute gross billing: Van In + Van Out + (Storage Rate * Days)
+            let grossAmount = vanIn + vanOut + (storageRate * storageDays);
+            
+            // If active container's Van In was already paid during Gate-In, deduct Van In Amount from total to prevent double-counting revenue
+            let finalTotal = grossAmount;
+            const notice = document.getElementById('vanInDeductionNotice');
+            if (activeSelectedContainer && activeSelectedContainer.vanInStats === 'PAID') {
+                finalTotal = grossAmount - vanIn;
+                if(finalTotal < 0) finalTotal = 0;
+                if(notice) notice.classList.remove('hidden');
+            } else {
+                if(notice) notice.classList.add('hidden');
+            }
+
+            document.getElementById('calcTotalAmount').value = finalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
         function renderYardRevenue() {
