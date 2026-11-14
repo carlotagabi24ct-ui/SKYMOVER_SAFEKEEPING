@@ -259,27 +259,24 @@
                     <p class="text-xs text-slate-500 mb-6">Input container specs, trucking details, location block/bay/tier, and attach actual inspection photos.</p>
                     <form id="yardGateInForm" onsubmit="handleYardGateIn(event)" class="space-y-4 text-xs">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Number *</label><input name="number" required class="p-2 border rounded-lg w-full uppercase font-mono" placeholder="e.g. MSKU-772819-2"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Size *</label><select name="size" class="p-2 border rounded-lg w-full"><option>20FT</option><option selected>40HC</option><option>40FT</option><option>45FT</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Type *</label><select name="type" class="p-2 border rounded-lg w-full"><option selected>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Shipping Line *</label><input name="line" required class="p-2 border rounded-lg w-full" placeholder="e.g. Maersk, MSC, Evergreen"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Company *</label><input name="truckingName" required class="p-2 border rounded-lg w-full" placeholder="e.g. Skymover Logistics"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full" placeholder="e.g. ABC-1234"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name *</label><input name="driver" required class="p-2 border rounded-lg w-full" placeholder="e.g. Juan Dela Cruz"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full font-mono" placeholder="e.g. EIR-2026-900"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Condition *</label><select name="condition" class="p-2 border rounded-lg w-full"><option selected>Good</option><option>Damaged</option><option>For Inspection</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Block / Bay / Row / Tier</label><div class="grid grid-cols-4 gap-1"><input name="block" class="p-2 border rounded text-center" placeholder="Blk"><input name="bay" class="p-2 border rounded text-center" placeholder="Bay"><input name="row" class="p-2 border rounded text-center" placeholder="Row"><input name="tier" class="p-2 border rounded text-center" placeholder="Tier"></div></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input type="datetime-local" name="date" required class="p-2 border rounded-lg w-full"></div>
-                            
-                            <div>
-                                <label class="font-semibold text-slate-600 mb-1 block">Van In Fee (₱)</label>
-                                <div class="flex gap-2">
-                                    <input type="number" step="any" name="vanInAmount" value="1500" class="p-2 border rounded-lg w-full font-mono" placeholder="1500">
-                                    <select name="vanInStats" class="p-2 border rounded-lg bg-slate-50 font-semibold"><option value="PAID">Paid</option><option value="UNPAID">Unpaid</option></select>
-                                </div>
-                            </div>
-
-                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Notes</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full" placeholder="Inspection remarks..."></textarea></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Number *</label><input name="number" required class="p-2 border rounded-lg w-full" placeholder="ABCD1234567"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Size *</label><select name="size" required class="p-2 border rounded-lg w-full"><option value="">Select size</option><option>20FT</option><option>40FT</option><option>40HC</option><option>45FT</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Type</label><select name="type" class="p-2 border rounded-lg w-full"><option>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option><option>Other</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Shipping Line *</label><select name="line" class="p-2 border rounded-lg w-full"><option>TS LINE</option><option>EVERGREEN</option><option>SINO TRANS</option><option>ASL</option><option>COSCO</option><option>ONE</option><option>M-SC</option><option>HMM</option><option>MAERKS</option><option>CMA-CGM</option><option>WAN-HAI</option><option>OOCL</option><option>ZIM LINE</option><option>PIL</option><option>SITC</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Name *</label><select name="truckingName" class="p-2 border rounded-lg w-full"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>    
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Condition *</label><select name="condition" required class="p-2 border rounded-lg w-full"><option>Good</option><option>Damaged</option><option>For Inspection</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Initial Status</label><select name="status" class="p-2 border rounded-lg w-full"><option>Available</option><option>Reserved</option><option>Hold</option><option>Pending</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Block</label><select name="block" class="p-2 border rounded-lg w-full"><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Bay</label><select name="bay" class="p-2 border rounded-lg w-full"><option>BAY-1</option><option>BAY-2</option><option>BAY-3</option><option>BAY-4</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Row</label><select name="row" class="p-2 border rounded-lg w-full"><option>GROUND</option><option>2ND ROW</option><option>3RD ROW</option><option>4TH ROW</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount</label><input type="number" id="gateInVanAmount" name="vanInAmount" placeholder="0.00" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Status Payment</label><select name="vanInStats" class="p-2 border rounded-lg w-full"><option>PAID</option><option>UNPAID</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Tier</label><input name="tier" class="p-2 border rounded-lg w-full" placeholder="1"></div>
+                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input name="date" id="gateInDateInput" type="datetime-local" required class="p-2 border rounded-lg w-full"></div>
+                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
 
                             <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-IN -->
                             <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateInDropZone" 
@@ -301,41 +298,38 @@
                 </div>
             </div>
 
-            <!-- Yard Tab 4: Gate-Out -->
             <div id="yardGateOut" class="yard-tab hidden">
-                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
-                    <h3 class="font-bold text-base text-slate-800 mb-2">Record Container Gate-Out & Storage Billing</h3>
-                    <p class="text-xs text-slate-500 mb-6">Select an on-hand container, calculate storage days and fees automatically, and attach release proofs.</p>
+                <div class="panel bg-white p-6 rounded-2xl shadow border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">Container Gate-Out / Release</h3>
                     <form id="yardGateOutForm" onsubmit="handleYardGateOut(event)" class="space-y-4 text-xs">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Select Container in Yard *</label><select name="container" id="yardOutContainer" required onchange="containerSelectedForGateOut()" class="p-2 border rounded-lg w-full font-mono font-semibold"></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Release Date & Time *</label><input type="datetime-local" name="date" required id="calcGateOutDate" onchange="recalculateTotals()" class="p-2 border rounded-lg w-full"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="font-semibold text-slate-600 mb-1 block">Container Number *</label>
+                                <select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full" onchange="onContainerSelectForGateOut()"><option value="">Select container in yard</option></select>
+                            </div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer *</label><input name="customer" required class="p-2 border rounded-lg w-full" placeholder="e.g. Acme Logistics Corp"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" id="gateOutPlate" required class="p-2 border rounded-lg w-full" placeholder="Reflected from Gate-In"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" id="gateOutDriver" class="p-2 border rounded-lg w-full" placeholder="Reflected from Gate-In"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
                             
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date (Auto)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono text-slate-500"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Days (Auto Calculated)</label><input type="number" id="calcStorageDays" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono font-bold text-sky-700" value="0"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount (₱)</label><input type="number" id="calcVanInAmount" name="vanInAmount" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-semibold" value="0"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount (₱)</label><input type="number" id="calcVanOutAmount" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full" oninput="recalculateTotals()"></div>
+                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee Type</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Dry Van</option><option>Reefer Van</option><option>Flat Rack</option><option>Open Top</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" id="calcStorageAmount" class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"><option value="450">450</option><option value="500">500</option><option value="800">800</option><option value="1000">1000</option></select></div>
+                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time (Read-only)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" id="calcGateOutDate" type="datetime-local" required class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"></div>
 
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer *</label><input name="customer" required class="p-2 border rounded-lg w-full" placeholder="e.g. ABC Forwarding"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Ref No. *</label><input name="eir" required class="p-2 border rounded-lg w-full font-mono" placeholder="e.g. EIR-OUT-991"></div>
-
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate No. *</label><input name="plate" id="gateOutPlate" required class="p-2 border rounded-lg w-full" placeholder="XYZ-5678"></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name *</label><input name="driver" id="gateOutDriver" required class="p-2 border rounded-lg w-full" placeholder="Driver name"></div>
-
-                            <div>
-                                <label class="font-semibold text-slate-600 mb-1 block">Storage Rate per Day (₱)</label>
-                                <input type="number" step="any" name="storageamount" id="calcStorageAmount" value="450" oninput="recalculateTotals()" class="p-2 border rounded-lg w-full font-mono" placeholder="450">
+                            <!-- AUTO CALCULATED FIELDS -->
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 flex flex-col justify-center">
+                                <span class="font-bold text-amber-900 text-xs">Storage Days:</span>
+                                <input type="number" id="calcStorageDays" name="storageDays" readonly class="text-xl font-extrabold text-amber-700 bg-transparent border-0 p-0 w-full" value="0">
                             </div>
-                            <div>
-                                <label class="font-semibold text-slate-600 mb-1 block">Van Out Fee (₱)</label>
-                                <input type="number" step="any" name="vanOutAmount" id="calcVanOutAmount" value="0" oninput="recalculateTotals()" class="p-2 border rounded-lg w-full font-mono" placeholder="0">
-                            </div>
-
-                            <input type="hidden" id="calcVanInAmount" value="0">
-
-                            <!-- Total Summary Box -->
-                            <div class="md:col-span-2 bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 flex flex-col justify-center">
                                 <div class="flex justify-between items-center mb-1">
-                                    <span class="text-xs font-bold text-emerald-800">TOTAL BILLING AMOUNT (PHP)</span>
-                                    <span id="vanInDeductionNotice" class="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded hidden">Van In Paid (Deducted)</span>
+                                    <span class="font-bold text-emerald-900 text-xs">Total Amount Summation (₱):</span>
+                                    <span id="vanInDeductionNotice" class="text-[10px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded hidden">Van In Paid (Deducted)</span>
                                 </div>
                                 <input type="text" id="calcTotalAmount" name="totalAmount" readonly class="text-xl font-extrabold text-emerald-700 bg-transparent border-0 p-0 w-full font-mono" value="0.00">
                             </div>
