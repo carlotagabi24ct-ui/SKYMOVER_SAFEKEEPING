@@ -38,7 +38,7 @@
             </div>
             <div>
                 <h1 class="font-bold tracking-wider text-sm text-sky-400">SKYMOVER</h1>
-                <p id="syncStatusBadge" class="text-[10px] text-emerald-400 tracking-widest uppercase">● Cloud Sync Active</p>
+                <p id="syncStatusBadge" class="text-[10px] text-emerald-400 tracking-widest uppercase">● Unified DB Active</p>
             </div>
         </div>
 
@@ -152,7 +152,6 @@
 
         <!-- VIEW 2: MANAGEMENT BACKEND HUB -->
         <section id="viewBackend" class="w-full max-w-7xl mx-auto hidden py-4">
-            
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-800 gap-4">
                 <div>
                     <button onclick="switchView('landing')" class="text-xs text-sky-400 hover:underline mb-2 inline-block">
@@ -293,7 +292,7 @@
                             <input type="file" id="proofPhotoInput" accept="image/*" onchange="handlePhotoUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl text-purple-400 mb-2"></i>
                             <p class="text-xs text-slate-300">Click to upload container photo or receipt</p>
-                            <p id="uploadSuccessMsg" class="text-[10px] text-emerald-400 mt-2 font-semibold hidden">Photo successfully captured & added to extraction report & unified database!</p>
+                            <p id="uploadSuccessMsg" class="text-[10px] text-emerald-400 mt-2 font-semibold hidden">Photo successfully captured & added to extraction report!</p>
                         </div>
                         <button onclick="submitDriverProofOfDelivery()" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 rounded-lg transition">
                             Submit Proof of Delivery
@@ -656,7 +655,7 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC & FIREBASE PERSISTENCE -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
@@ -880,6 +879,7 @@
             }
         }
 
+        // NAVIGATION PORTAL HANDLERS
         function openBackendModule(mod) { switchView('backend'); }
         function openDriverPortal() { switchView('driver'); }
         function openHubPortal() { switchView('hub'); }
@@ -1140,19 +1140,118 @@
             r.readAsText(f);
         }
 
-        function closeSubModule() {
-            const modal = document.getElementById('subModuleModal');
-            if(modal) modal.classList.add('hidden');
+        function clearBackendDataOnly() {
+            if(!confirm('Are you sure you want to reset and clear all Management Backend saved data (vehicles, drivers, fuel logs, maintenance, dispatch, expenses, and transshipment records)? This action cannot be undone.')) return;
+            
+            // Reset Management Backend database to default clean state
+            db = {
+                vehicles: [
+                    { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" }
+                ],
+                drivers: [
+                    { name: "Juan Dela Cruz", license: "N02-12-345678", phone: "+63 912 345 6789", status: "Available", rating: "5.0 ★", truck: "SKV-101" }
+                ],
+                fuelLogs: [],
+                maintenanceLogs: [],
+                dispatchLogs: [],
+                expenseLogs: [],
+                transshipments: [],
+                uploads: []
+            };
+            saveDB();
+            alert('Management Backend saved data has been successfully reset and cleared.');
+            closeSubModule();
         }
 
-        function addVehiclePrompt() {
-            const id = prompt("Enter Unit ID (e.g. SKV-104):");
-            const model = prompt("Enter Vehicle Model:");
-            if(id && model) {
-                if(!db.vehicles) db.vehicles = [];
-                db.vehicles.push({ id, model, status: "Active", driver: "Unassigned" });
-                saveDB();
-                openSubModule('Vehicle Management');
+        function openSubModule(title) {
+            const modal = document.getElementById('subModuleModal');
+            const content = document.getElementById('subModuleContent');
+            if(!modal || !content) return;
+            modal.classList.remove('hidden');
+
+            const vehicles = db.vehicles || [];
+            const drivers = db.drivers || [];
+            const fuelLogs = db.fuelLogs || [];
+            const maintenanceLogs = db.maintenanceLogs || [];
+            const dispatchLogs = db.dispatchLogs || [];
+            const expenseLogs = db.expenseLogs || [];
+            const transshipments = db.transshipments || [];
+            const yardContainers = (yardDb.containers || []).filter(c => c.status !== 'Released');
+
+            if (title === 'Dashboard') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & Unified KPI Overview</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 text-slate-900">
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Fleet Units</p><h4 class="text-2xl font-bold text-slate-900 mt-1">${vehicles.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-600 mt-1">${drivers.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Yard Containers On Hand</p><h4 class="text-2xl font-bold text-amber-600 mt-1">${yardContainers.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Transshipment Hub Orders</p><h4 class="text-2xl font-bold text-emerald-600 mt-1">${transshipments.length}</h4></div>
+                    </div>
+                `;
+            } else if (title === 'Vehicle Management') {
+                let rows = vehicles.map(v => '<tr class="border-b"><td class="p-3 font-medium">' + v.id + '</td><td class="p-3">' + v.model + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">' + v.status + '</span></td><td class="p-3">' + v.driver + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Driver Management') {
+                let rows = drivers.map(d => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="openNewDriverRegistrationModal()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Register New Driver</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Fuel Monitoring') {
+                let rows = fuelLogs.map(f => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + f.unit + '</td><td class="p-3">' + f.liters + '</td><td class="p-3 font-medium text-emerald-600">' + f.cost + '</td><td class="p-3">' + f.station + '</td><td class="p-3">' + f.date + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3><button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Maintenance') {
+                let rows = maintenanceLogs.map(m => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + m.unit + '</td><td class="p-3">' + m.issue + '</td><td class="p-3 font-medium text-rose-600">' + m.cost + '</td><td class="p-3">' + m.status + '</td><td class="p-3">' + m.date + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'GPS & Dispatch') {
+                let rows = dispatchLogs.map(d => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + d.unit + '</td><td class="p-3">' + d.route + '</td><td class="p-3">' + d.driver + '</td><td class="p-3 text-emerald-600 font-semibold">' + d.status + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Fleet Expenses') {
+                let rows = expenseLogs.map(e => '<tr class="border-b"><td class="p-3 font-semibold text-sky-600">' + e.trip + '</td><td class="p-3">' + e.fuel + '</td><td class="p-3">' + e.tolls + '</td><td class="p-3">' + e.maintenance + '</td><td class="p-3 font-bold text-emerald-600">' + e.total + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3><button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Data Backup') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-database text-amber-400 mr-2"></i> Management Backend Data Backup & Restore</h3>
+                    <p class="text-xs text-slate-400 mb-6">Download a complete JSON snapshot of your entire Skymover Unified Fleet and Yard database, or restore from a previously exported backup file.</p>
+                    
+                    <div class="space-y-6 text-slate-900">
+                        <div class="bg-white p-6 rounded-2xl shadow border border-slate-200">
+                            <h4 class="font-bold text-sm text-slate-800 mb-2">Export Unified Enterprise Backup</h4>
+                            <p class="text-xs text-slate-500 mb-4">Includes all fleet masterlists, driver records, fuel logs, maintenance schedules, transshipment hubs, and yard containers.</p>
+                            <button onclick="backupUnifiedBackendData()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow">Download Full Enterprise Backup (.json)</button>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow border border-slate-200">
+                            <h4 class="font-bold text-sm text-slate-800 mb-2">Restore Backup</h4>
+                            <p class="text-xs text-slate-500 mb-4">Upload a valid Skymover JSON backup file to overwrite and restore local records.</p>
+                            <label class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center">
+                                <i class="fa-solid fa-upload mr-2"></i> Select Backup File to Restore
+                                <input type="file" id="unifiedRestoreFile" accept=".json,application/json" hidden onchange="restoreUnifiedBackendData(event)">
+                            </label>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow border border-rose-200">
+                            <h4 class="font-bold text-sm text-rose-800 mb-2">Reset & Clear Management Backend Data</h4>
+                            <p class="text-xs text-slate-500 mb-4">Permanently erase and reset all saved fleet, driver, fuel, maintenance, and dispatch logs in the Management Backend.</p>
+                            <button onclick="clearBackendDataOnly()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow">Clear & Reset Backend Data</button>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -1761,40 +1860,6 @@
             a.href = u; a.download = name; a.click(); URL.revokeObjectURL(u);
         }
 
-        function backupYardData() {
-            blobDownload(new Blob([JSON.stringify({...yardDb, backupCreated: new Date().toISOString()}, null, 2)], {type: 'application/json'}), 'SKYMOVER_Yard_Backup_' + new Date().toISOString().slice(0,10) + '.json');
-        }
-
-        function restoreYardData(e) {
-            let f = e.target.files[0]; if(!f) return;
-            let r = new FileReader();
-            r.onload = () => {
-                try {
-                    let d = JSON.parse(r.result);
-                    if(!Array.isArray(d.containers) || !Array.isArray(d.movements)) throw 0;
-                    if(!confirm('Restore yard backup? Current local yard records will be replaced.')) return;
-                    yardDb = d;
-                    saveYardDB();
-                    alert('Yard backup restored.');
-                } catch(x) { alert('Invalid backup file.'); }
-                e.target.value = '';
-            };
-            r.readAsText(f);
-        }
-
-        function csv(rows, name) {
-            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
-            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
-        }
-
-        function exportYardCSV() {
-            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Trucking Name','Truck Plate No','Driver Name','EIR','Row','Van In Amount','Van Out Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Gate-Out Date','Remarks','Photos Attached'], ...(yardDb.containers || []).map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.truckingName, c.plate, c.driver, c.eir, c.row, c.vanInAmount, c.vanOutAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.gateOutDate, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
-        }
-
-        function exportYardMovements() {
-            csv([['Date','Movement','Container No','Trucking Name','Plate','Driver','Customer','EIR','Fee Type','Rate/Day','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.truckingName, m.plate, m.driver, m.customer, m.eir, m.fee, m.storageamount, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
-        }
-
         function exportFullDetailedReportCSV() {
             let containerMap = {};
             let containers = yardDb.containers || [];
@@ -1867,6 +1932,14 @@
             csv([headers, ...dataRows], 'SKYMOVER_Full_Detailed_Report_Merged_GateIn_GateOut.csv');
         }
 
+        function exportRevenueCSV() {
+            csv([['Date','Source','Container No','EIR','Amount (PHP)'], ...(yardDb.revenues || []).map(r => [r.date, r.source, r.container, r.eir, r.amount])], 'SKYMOVER_Yard_Revenues.csv');
+        }
+
+        function exportExpensesCSV() {
+            csv([['Date','Category','Description','Amount (PHP)'], ...(yardDb.expenses || []).map(e => [e.date, e.category, e.description, e.amount])], 'SKYMOVER_Yard_Expenses.csv');
+        }
+
         function backupUnifiedEnterpriseData() {
             const unifiedData = {
                 managementBackend: db,
@@ -1914,3 +1987,5 @@
     </script>
 </body>
 </html>
+```
+@@eof
