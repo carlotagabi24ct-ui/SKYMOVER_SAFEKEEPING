@@ -1051,40 +1051,40 @@
                     </div>
                 `;
             } else if (title === 'Vehicle Management') {
-                let rows = vehicles.map(v => '<tr class="border-b"><td class="p-3 font-medium">' + v.id + '</td><td class="p-3">' + v.model + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">' + v.status + '</span></td><td class="p-3">' + v.driver + '</td></tr>').join('');
+                let rows = vehicles.length ? vehicles.map((v, idx) => '<tr class="border-b"><td class="p-3 font-medium">' + v.id + '</td><td class="p-3">' + v.model + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">' + v.status + '</span></td><td class="p-3">' + v.driver + '</td><td class="p-3 text-right"><button onclick="deleteVehicleItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No vehicles recorded.</td></tr>';
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>` + rows + `</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Driver Management') {
-                let rows = drivers.map(d => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td></tr>').join('');
+                let rows = drivers.length ? drivers.map((d, idx) => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td><td class="p-3 text-right"><button onclick="deleteDriverItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No drivers registered.</td></tr>';
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="openNewDriverRegistrationModal()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Register New Driver</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>` + rows + `</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fuel Monitoring') {
-                let rows = fuelLogs.map(f => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + f.unit + '</td><td class="p-3">' + f.liters + '</td><td class="p-3 font-medium text-emerald-600">' + f.cost + '</td><td class="p-3">' + f.station + '</td><td class="p-3">' + f.date + '</td></tr>').join('');
+                let rows = fuelLogs.length ? fuelLogs.map((f, idx) => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + f.unit + '</td><td class="p-3">' + f.liters + '</td><td class="p-3 font-medium text-emerald-600">' + f.cost + '</td><td class="p-3">' + f.station + '</td><td class="p-3">' + f.date + '</td><td class="p-3 text-right"><button onclick="deleteFuelItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No fuel fills logged.</td></tr>';
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3><button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Maintenance') {
-                let rows = maintenanceLogs.map(m => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + m.unit + '</td><td class="p-3">' + m.issue + '</td><td class="p-3 font-medium text-rose-600">' + m.cost + '</td><td class="p-3">' + m.status + '</td><td class="p-3">' + m.date + '</td></tr>').join('');
+                let rows = maintenanceLogs.length ? maintenanceLogs.map((m, idx) => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + m.unit + '</td><td class="p-3">' + m.issue + '</td><td class="p-3 font-medium text-rose-600">' + m.cost + '</td><td class="p-3">' + m.status + '</td><td class="p-3">' + m.date + '</td><td class="p-3 text-right"><button onclick="deleteMaintenanceItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No maintenance tickets.</td></tr>';
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'GPS & Dispatch') {
-                let rows = dispatchLogs.map(d => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + d.unit + '</td><td class="p-3">' + d.route + '</td><td class="p-3">' + d.driver + '</td><td class="p-3 text-emerald-600 font-semibold">' + d.status + '</td></tr>').join('');
+                let rows = dispatchLogs.length ? dispatchLogs.map((d, idx) => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + d.unit + '</td><td class="p-3">' + d.route + '</td><td class="p-3">' + d.driver + '</td><td class="p-3 text-emerald-600 font-semibold">' + d.status + '</td><td class="p-3 text-right"><button onclick="deleteDispatchItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No active dispatches.</td></tr>';
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th></tr>` + rows + `</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Fleet Expenses') {
-                let rows = expenseLogs.map(e => '<tr class="border-b"><td class="p-3 font-semibold text-sky-600">' + e.trip + '</td><td class="p-3">' + e.fuel + '</td><td class="p-3">' + e.tolls + '</td><td class="p-3">' + e.maintenance + '</td><td class="p-3 font-bold text-emerald-600">' + e.total + '</td></tr>').join('');
+                let rows = expenseLogs.length ? expenseLogs.map((e, idx) => '<tr class="border-b"><td class="p-3 font-semibold text-sky-600">' + e.trip + '</td><td class="p-3">' + e.fuel + '</td><td class="p-3">' + e.tolls + '</td><td class="p-3">' + e.maintenance + '</td><td class="p-3 font-bold text-emerald-600">' + e.total + '</td><td class="p-3 text-right"><button onclick="deleteExpenseItem(' + idx + ')" class="text-rose-600 hover:underline">Delete</button></td></tr>').join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No trip expenses logged.</td></tr>';
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3><button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
-                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>` + rows + `</table></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th><th class="p-3 text-right">Actions</th></tr>` + rows + `</table></div>
                 `;
             } else if (title === 'Data Backup') {
                 content.innerHTML = `
@@ -1106,9 +1106,68 @@
                                 <input type="file" id="unifiedRestoreFile" accept=".json,application/json" hidden onchange="restoreUnifiedBackendData(event)">
                             </label>
                         </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow border border-rose-200">
+                            <h4 class="font-bold text-sm text-rose-800 mb-2">Reset & Clear Management Backend Data</h4>
+                            <p class="text-xs text-slate-500 mb-4">Permanently erase and reset all saved fleet, driver, fuel, maintenance, and dispatch logs in the Management Backend.</p>
+                            <button onclick="clearBackendDataOnly()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow">Clear & Reset Backend Data</button>
+                        </div>
                     </div>
                 `;
             }
+        }
+
+        function deleteVehicleItem(idx) {
+            db.vehicles.splice(idx, 1);
+            saveDB();
+            openSubModule('Vehicle Management');
+        }
+
+        function deleteDriverItem(idx) {
+            db.drivers.splice(idx, 1);
+            saveDB();
+            openSubModule('Driver Management');
+        }
+
+        function deleteFuelItem(idx) {
+            db.fuelLogs.splice(idx, 1);
+            saveDB();
+            openSubModule('Fuel Monitoring');
+        }
+
+        function deleteMaintenanceItem(idx) {
+            db.maintenanceLogs.splice(idx, 1);
+            saveDB();
+            openSubModule('Maintenance');
+        }
+
+        function deleteDispatchItem(idx) {
+            db.dispatchLogs.splice(idx, 1);
+            saveDB();
+            openSubModule('GPS & Dispatch');
+        }
+
+        function deleteExpenseItem(idx) {
+            db.expenseLogs.splice(idx, 1);
+            saveDB();
+            openSubModule('Fleet Expenses');
+        }
+
+        function clearBackendDataOnly() {
+            if(!confirm('Are you sure you want to reset and clear all Management Backend saved data?')) return;
+            db = {
+                vehicles: [],
+                drivers: [],
+                fuelLogs: [],
+                maintenanceLogs: [],
+                dispatchLogs: [],
+                expenseLogs: [],
+                transshipments: [],
+                uploads: []
+            };
+            saveDB();
+            alert('Management Backend saved data has been cleared.');
+            closeSubModule();
         }
 
         function backupUnifiedBackendData() {
