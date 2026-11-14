@@ -3,388 +3,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skymover - Empty Container Yard Management System</title>
+    <title>SKYMOVER TRANSPORTATION • Unified Fleet, Hub & Yard Platform</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js CDN -->
+    <!-- Chart.js for Graphical Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html2pdf.js CDN -->
+    <!-- html2pdf.js for PDF Statement Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Supabase JS Client -->
+    <!-- Supabase JS Client for Real-Time Multi-User Cloud DB Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        skyBrand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 750: '#0369a1', 900: '#03588c' }
-                    }
-                }
-            }
-        }
-    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); }
+        .modal-glass { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); }
+        .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; text-transform: uppercase; }
+        .pill.Available { background: #d1fae5; color: #065f46; }
+        .pill.Reserved { background: #fef3c7; color: #92400e; }
+        .pill.Hold { background: #fee2e2; color: #991b1b; }
+        .pill.Released { background: #f1f5f9; color: #64748b; }
+        .drag-over { border-color: #0284c7 !important; background-color: rgba(2, 132, 199, 0.05) !important; }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-skyBrand-500 p-2 rounded-lg text-white font-black text-xl shadow">
-                    <i class="fa-solid fa-ship"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight">SKYMOVER <span class="text-skyBrand-500 font-light">ECY PORTAL</span></h1>
-                    <p class="text-xs text-slate-400">Empty Container Yard & Depot Operations</p>
-                </div>
+    <!-- TOP NAVIGATION BAR -->
+    <header class="w-full bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 px-6 py-3.5 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('landing')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-500 flex items-center justify-center shadow-md shadow-sky-500/20">
+                <i class="fa-solid fa-truck-ramp-box text-white text-lg"></i>
             </div>
-            <div class="flex items-center space-x-4 mt-2 sm:mt-0">
-                <span id="syncStatusBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                    <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Local Storage Mode
-                </span>
-                <button onclick="openConfigModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">
-                    <i class="fa-solid fa-gear mr-1"></i> Supabase Config
-                </button>
+            <div>
+                <h1 class="font-extrabold text-sm tracking-wide text-white">SKYMOVER TRANSPORTATION</h1>
+                <p class="text-[10px] text-slate-400">Enterprise Fleet, Hub & Container Yard Platform</p>
             </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- SUPABASE SYNC STATUS BADGE -->
+            <div id="syncStatusBadge" class="hidden sm:flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-[11px]">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" id="syncDot"></span>
+                <span id="syncText" class="text-slate-300 font-medium">Connecting to Cloud DB...</span>
+            </div>
+            <button onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5">
+                <i class="fa-solid fa-globe text-sky-400"></i>
+                <span id="langLabel">Chinese/English</span>
+            </button>
+            <button onclick="switchView('landing')" class="bg-sky-600 hover:bg-sky-700 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold transition shadow">
+                <i class="fa-solid fa-house mr-1"></i> Hub Portal
+            </button>
         </div>
     </header>
 
-    <!-- Main Navigation Tabs -->
-    <nav class="bg-white border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto">
-            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-btn py-3 px-4 text-sm font-medium border-b-2 border-skyBrand-500 text-skyBrand-600 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
-            </button>
-            <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="tab-btn py-3 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-boxes-stacked"></i><span>Yard Inventory</span>
-            </button>
-            <button onclick="switchTab('gate')" id="tab-btn-gate" class="tab-btn py-3 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-truck-ramp-box"></i><span>Gate Operations</span>
-            </button>
-            <button onclick="switchTab('transshipment')" id="tab-btn-transshipment" class="tab-btn py-3 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-arrows-split-up-and-left"></i><span>Transshipment Hub</span>
-            </button>
-            <button onclick="switchTab('financials')" id="tab-btn-financials" class="tab-btn py-3 px-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap">
-                <i class="fa-solid fa-file-invoice-dollar"></i><span>Billing & Statements</span>
-            </button>
-        </div>
-    </nav>
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-grow p-4 sm:p-8 max-w-7xl mx-auto w-full">
 
-    <!-- Main Content Body -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
-
-        <!-- DASHBOARD TAB -->
-        <section id="tab-dashboard" class="tab-content space-y-6">
-            <!-- Metric Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Containers in Yard</p>
-                        <h3 id="statTotalCount" class="text-2xl font-black text-slate-900 mt-1">0</h3>
-                    </div>
-                    <div class="bg-sky-50 text-skyBrand-500 p-3 rounded-lg text-xl"><i class="fa-solid fa-cubes"></i></div>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">20ft / 40ft Breakdown</p>
-                        <h3 id="statSizeBreakdown" class="text-lg font-bold text-slate-800 mt-1">0 (20') / 0 (40')</h3>
-                    </div>
-                    <div class="bg-emerald-50 text-emerald-600 p-3 rounded-lg text-xl"><i class="fa-solid fa-ruler-combined"></i></div>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Month Revenue (Van In/Out)</p>
-                        <h3 id="statMonthRevenue" class="text-2xl font-black text-emerald-600 mt-1">₱0.00</h3>
-                    </div>
-                    <div class="bg-emerald-50 text-emerald-600 p-3 rounded-lg text-xl"><i class="fa-solid fa-peso-sign"></i></div>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Gate-Outs</p>
-                        <h3 id="statPendingOut" class="text-2xl font-black text-amber-600 mt-1">0</h3>
-                    </div>
-                    <div class="bg-amber-50 text-amber-600 p-3 rounded-lg text-xl"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                </div>
+        <!-- VIEW 1: LANDING HUB / PORTAL SELECTOR -->
+        <section id="viewLanding" class="space-y-8 animate-fadeIn">
+            <div class="text-center max-w-2xl mx-auto pt-6">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3" data-i18n="mainTitle">SKYMOVER TRANSPORTATION</h2>
+                <p class="text-xs sm:text-sm text-slate-400" data-i18n="mainSubtitle">Philippine Container Fleet & Empty Container Yard Management Platform</p>
             </div>
 
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center"><i class="fa-solid fa-chart-bar mr-2 text-skyBrand-500"></i> Container Status Breakdown (ISO/Grade)</h3>
-                    <div class="relative h-64"><canvas id="statusChart"></canvas></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                <!-- Card 1: Management Backend -->
+                <div onclick="openBackendModule('Dashboard')" class="glass-card border border-slate-800 hover:border-sky-500/50 p-6 rounded-2xl cursor-pointer transition group shadow-xl hover:shadow-sky-500/10">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1" data-i18n="card1Title">Management Backend</h3>
+                    <p class="text-xs text-slate-400 mb-4" data-i18n="card1Desc">Scheduling, Finance, and Reporting</p>
+                    <span class="text-sky-400 text-xs font-semibold inline-flex items-center gap-1 group-hover:translate-x-1 transition">Open Dashboard →</span>
                 </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center"><i class="fa-solid fa-chart-line mr-2 text-skyBrand-500"></i> Monthly Financial Inflows (PHP)</h3>
-                    <div class="relative h-64"><canvas id="revenueChart"></canvas></div>
+
+                <!-- Card 2: Driver Portal -->
+                <div onclick="openDriverPortal()" class="glass-card border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl cursor-pointer transition group shadow-xl hover:shadow-purple-500/10">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1" data-i18n="card2Title">Driver's side</h3>
+                    <p class="text-xs text-slate-400 mb-4" data-i18n="card2Desc">Waybill, Photo, Navigation</p>
+                    <button onclick="event.stopPropagation(); openNewDriverRegistrationModal();" class="text-purple-400 text-xs font-semibold inline-flex items-center gap-1 hover:underline" data-i18n="newDriverReg">New driver registration →</button>
+                </div>
+
+                <!-- Card 3: Transshipment Hub & Yard -->
+                <div onclick="openYardPortal()" class="glass-card border border-slate-800 hover:border-emerald-500/50 p-6 rounded-2xl cursor-pointer transition group shadow-xl hover:shadow-emerald-500/10">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-ship"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1" data-i18n="card3Title">Transshipment Hub</h3>
+                    <p class="text-xs text-slate-400 mb-4" data-i18n="card3Desc">Waybill, Photograph, Commission & Terminal Acceptance</p>
+                    <span class="text-emerald-400 text-xs font-semibold inline-flex items-center gap-1 group-hover:translate-x-1 transition">Open Empty Yard →</span>
                 </div>
             </div>
         </section>
 
-        <!-- YARD INVENTORY TAB -->
-        <section id="tab-inventory" class="tab-content hidden space-y-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center space-x-2 flex-grow max-w-md">
-                    <div class="relative w-full">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input type="text" id="inventorySearch" oninput="renderInventoryTable()" placeholder="Search by Container No, ISO, Line, or Plate..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-skyBrand-500">
-                    </div>
+        <!-- VIEW 2: MANAGEMENT BACKEND -->
+        <section id="viewBackend" class="hidden space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-gauge-high text-sky-400 mr-2"></i> Management Backend & Analytics</h2>
+                    <p class="text-xs text-slate-400">Centralized operations, vehicle masterlist, fuel logs, and real-time cloud data synchronization.</p>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <select id="filterLine" onchange="renderInventoryTable()" class="border border-slate-300 text-sm rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-skyBrand-500">
-                        <option value="">All Shipping Lines</option>
-                    </select>
-                    <button onclick="openContainerModal()" class="bg-skyBrand-500 hover:bg-skyBrand-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-2">
-                        <i class="fa-solid fa-plus"></i><span>Gate-In Container</span>
-                    </button>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openSubModule('Dashboard')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">Dashboard</button>
+                    <button onclick="openSubModule('Vehicle Management')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">Vehicles</button>
+                    <button onclick="openSubModule('Driver Management')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">Drivers</button>
+                    <button onclick="openSubModule('Fuel Monitoring')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">Fuel</button>
+                    <button onclick="openSubModule('Maintenance')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">Maintenance</button>
+                    <button onclick="openSubModule('GPS & Dispatch')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">GPS & Dispatch</button>
+                    <button onclick="openSubModule('Fleet Expenses')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700">Expenses</button>
+                    <button onclick="openSubModule('Data Backup')" class="bg-amber-600 hover:bg-amber-700 text-xs px-3 py-2 rounded-lg font-semibold text-white">Backup / Restore</button>
                 </div>
             </div>
 
-            <!-- Inventory Data Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                <th class="py-3 px-4">Container No.</th>
-                                <th class="py-3 px-4">ISO / Size</th>
-                                <th class="py-3 px-4">Shipping Line</th>
-                                <th class="py-3 px-4">Gate-In Date</th>
-                                <th class="py-3 px-4">Grade</th>
-                                <th class="py-3 px-4">Van-In Status</th>
-                                <th class="py-3 px-4 text-right">Actions</th>
+            <!-- AI Modules Bar -->
+            <div class="glass-card border border-slate-800 p-6 rounded-2xl">
+                <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-800 pb-3">
+                    <button onclick="switchAiTab('brain')" id="tabBrainBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow">LogiBRAIN AI</button>
+                    <button onclick="switchAiTab('lens')" id="tabLensBtn" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">LogiLENS Inspector</button>
+                    <button onclick="switchAiTab('track')" id="tabTrackBtn" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">LogiTRACK GPS</button>
+                </div>
+                <div id="aiContainer"></div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: DRIVER'S SIDE PORTAL -->
+        <section id="viewDriver" class="hidden space-y-6">
+            <div class="glass-card border border-slate-800 p-6 rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white"><i class="fa-solid id-card text-purple-400 mr-2"></i> Driver's Portal & Waybill Mobile View</h2>
+                        <p class="text-xs text-slate-400">Mobile waybill dispatch, active route navigation, and proof-of-delivery photo uploads.</p>
+                    </div>
+                    <button onclick="openNewDriverRegistrationModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Register New Driver</button>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+                    <h3 class="font-bold text-sm text-purple-300">Active Assigned Trip</h3>
+                    <div id="driverActiveTripInfo" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono"></div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1"><i class="fa-solid fa-camera mr-1"></i> Upload Proof of Delivery / Waybill Photo</label>
+                        <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="w-full text-xs bg-slate-950 border border-slate-800 p-2 rounded-lg text-slate-300">
+                    </div>
+                    <button onclick="submitDriverProofOfDelivery()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition">Submit Proof of Delivery</button>
+                    <div id="uploadSuccessMsg" class="hidden text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i> Photo successfully uploaded and synced to cloud database!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: TRANSSHIPMENT HUB PORTAL -->
+        <section id="viewHub" class="hidden space-y-6">
+            <div class="glass-card border border-slate-800 p-6 rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-ship text-emerald-400 mr-2"></i> Transshipment Hub & Terminal Acceptance</h2>
+                        <p class="text-xs text-slate-400">Accept or reject container transshipment orders and sync commissions with fleet dispatch.</p>
+                    </div>
+                    <button onclick="openNewTransshipmentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">+ Post New Order</button>
+                </div>
+                <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-xl">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Order ID</th>
+                                <th class="p-3">Origin Hub</th>
+                                <th class="p-3">Container No.</th>
+                                <th class="p-3">Commission</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="inventoryTableBody" class="divide-y divide-slate-200 text-sm text-slate-700">
-                            <!-- Populated dynamically -->
-                        </tbody>
+                        <tbody id="transshipmentTableBody" class="divide-y divide-slate-800"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- GATE OPERATIONS TAB -->
-        <section id="tab-gate" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Gate-In Quick Form -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center">
-                        <i class="fa-solid fa-truck-arrow-right text-emerald-600 mr-2"></i> Quick Gate-In Processing
-                    </h3>
-                    <form id="gateInForm" onsubmit="handleGateInSubmit(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Container Number *</label>
-                                <input type="text" id="giContainerNo" required placeholder="MSCU1234567" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm uppercase focus:ring-2 focus:ring-skyBrand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">ISO Code / Size</label>
-                                <select id="giIsoCode" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-skyBrand-500">
-                                    <option value="22G1">22G1 (20ft Dry)</option>
-                                    <option value="42G1">42G1 (40ft Dry)</option>
-                                    <option value="45G1">45G1 (40ft HC)</option>
-                                    <option value="22RE">22RE (20ft Reefer)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Shipping Line / Principal *</label>
-                                <input type="text" id="giShippingLine" required placeholder="MSC / Maersk / CMA" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm uppercase focus:ring-2 focus:ring-skyBrand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Gate-In Date & Time *</label>
-                                <input type="datetime-local" id="giDate" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-skyBrand-500">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Truck Plate No.</label>
-                                <input type="text" id="giPlate" placeholder="NAG-1234" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm uppercase">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Driver Name</label>
-                                <input type="text" id="giDriver" placeholder="Juan Dela Cruz" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Container Grade</label>
-                                <select id="giGrade" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
-                                    <option value="A">Grade A (Worthy)</option>
-                                    <option value="B" selected>Grade B (Standard)</option>
-                                    <option value="C">Grade C (Repairable)</option>
-                                    <option value="W">WWT (Washed/Worthy)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Van-In Lift-on/Lift-off Amount (₱)</label>
-                                <input type="number" id="giVanInAmount" value="2500" step="0.01" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Van-In Stats Payment</label>
-                                <select id="giVanInStats" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
-                                    <option value="PAID">Paid / Settled</option>
-                                    <option value="UNPAID" selected>Unpaid / Account</option>
-                                </select>
-                            </div>
-                        </div>
+        <!-- VIEW 5: EMPTY CONTAINER YARD & REVENUE PLATFORM -->
+        <section id="viewYard" class="hidden space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-warehouse text-amber-500 mr-2"></i> Skymover Empty Container Yard</h2>
+                    <p class="text-xs text-slate-400">Live yard stock, Gate-In/Gate-Out billing, multi-currency revenue analytics, and photo audits.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <button onclick="switchYardTab('yardDashboard')" id="yBtn1" class="btn px-3 py-1.5 rounded-lg font-semibold bg-amber-600 text-white">Dashboard</button>
+                    <button onclick="switchYardTab('yardInventory')" id="yBtn2" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">Inventory</button>
+                    <button onclick="switchYardTab('yardGateIn')" id="yBtn3" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">+ Gate-In</button>
+                    <button onclick="switchYardTab('yardGateOut')" id="yBtn4" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">Gate-Out</button>
+                    <button onclick="switchYardTab('yardRevenue')" id="yBtn5" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">Revenue</button>
+                    <button onclick="switchYardTab('yardExpenses')" id="yBtn6" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">Expenses</button>
+                    <button onclick="switchYardTab('yardReports')" id="yBtn7" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">Reports</button>
+                    <button onclick="switchYardTab('yardBackup')" id="yBtn8" class="btn px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200">Cloud Sync & Backup</button>
+                </div>
+            </div>
+
+            <!-- Yard Tab 1: Dashboard -->
+            <div id="yardDashboard" class="yard-tab space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">TOTAL CONTAINERS ON-HAND</div><div class="text-3xl font-extrabold text-slate-900 my-1" id="yardTotal">0</div></div>
+                    <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">AVAILABLE & GOOD</div><div class="text-3xl font-extrabold text-emerald-600 my-1" id="yardAvailable">0</div></div>
+                    <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">RESERVED</div><div class="text-3xl font-extrabold text-amber-600 my-1" id="yardReserved">0</div></div>
+                    <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">DAMAGED / HOLD</div><div class="text-3xl font-extrabold text-rose-600 my-1" id="yardDamaged">0</div></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">TOTAL GATE-IN (UNITS)</div><div class="text-2xl font-bold my-1 text-sky-600" id="dashGateInCount">0</div></div>
+                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">TOTAL GATE-OUT (UNITS)</div><div class="text-2xl font-bold my-1 text-purple-600" id="dashGateOutCount">0</div></div>
+                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-500">TOTAL REVENUE (PAID)</div><div class="text-2xl font-bold my-1 text-emerald-600" id="dashTotalRev">₱0.00</div></div>
+                </div>
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">Recent Yard Movements</h3>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate No.</th><th class="p-3">EIR / Ref</th><th class="p-3">Amount</th></tr></thead><tbody id="yardRecentBody" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 2: Inventory -->
+            <div id="yardInventory" class="yard-tab hidden space-y-6">
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">EIR / Damage Remarks</label>
-                            <input type="text" id="giRemarks" placeholder="Minor scratch on left side panel, clean interior." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                            <h3 class="font-bold text-base text-slate-800">Empty Container Master Inventory</h3>
+                            <p class="text-xs text-slate-500">Real-time status, condition, and location tracking.</p>
                         </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg shadow transition text-sm">
-                            <i class="fa-solid fa-check mr-2"></i> Process Gate-In Entry
-                        </button>
+                        <div class="flex gap-2">
+                            <input type="text" id="yardSearchInput" oninput="renderYardInventory()" placeholder="Search container no, line, plate..." class="p-2 border rounded-lg text-xs w-64 bg-slate-50">
+                            <button onclick="exportYardCSV()" class="bg-slate-200 hover:bg-slate-300 px-3 py-2 rounded-lg text-xs font-semibold">Export Inventory CSV</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600">
+                                <tr>
+                                    <th class="p-3">Container No.</th>
+                                    <th class="p-3">Size / Type</th>
+                                    <th class="p-3">Shipping Line</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Yard Location</th>
+                                    <th class="p-3">Gate-In</th>
+                                    <th class="p-3">Gate-Out</th>
+                                    <th class="p-3">Van In / Out</th>
+                                    <th class="p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="yardInventoryRows" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 3: Gate-In -->
+            <div id="yardGateIn" class="yard-tab hidden">
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 mb-2">Record Container Gate-In</h3>
+                    <p class="text-xs text-slate-500 mb-6">Input container specs, trucking details, location block/bay/tier, and attach actual inspection photos.</p>
+                    <form id="yardGateInForm" onsubmit="handleYardGateIn(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Container Number *</label><input name="number" required class="p-2 border rounded-lg w-full uppercase font-mono" placeholder="e.g. MSKU-772819-2"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Size *</label><select name="size" class="p-2 border rounded-lg w-full"><option>20FT</option><option selected>40HC</option><option>40FT</option><option>45FT</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Type *</label><select name="type" class="p-2 border rounded-lg w-full"><option selected>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Shipping Line *</label><input name="line" required class="p-2 border rounded-lg w-full" placeholder="e.g. Maersk, MSC, Evergreen"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Company *</label><input name="truckingName" required class="p-2 border rounded-lg w-full" placeholder="e.g. Skymover Logistics"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full" placeholder="e.g. ABC-1234"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name *</label><input name="driver" required class="p-2 border rounded-lg w-full" placeholder="e.g. Juan Dela Cruz"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full font-mono" placeholder="e.g. EIR-2026-900"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Condition *</label><select name="condition" class="p-2 border rounded-lg w-full"><option selected>Good</option><option>Damaged</option><option>For Inspection</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Block / Bay / Row / Tier</label><div class="grid grid-cols-4 gap-1"><input name="block" class="p-2 border rounded text-center" placeholder="Blk"><input name="bay" class="p-2 border rounded text-center" placeholder="Bay"><input name="row" class="p-2 border rounded text-center" placeholder="Row"><input name="tier" class="p-2 border rounded text-center" placeholder="Tier"></div></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time *</label><input type="datetime-local" name="date" required class="p-2 border rounded-lg w-full"></div>
+                            
+                            <div>
+                                <label class="font-semibold text-slate-600 mb-1 block">Van In Fee (₱)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" step="any" name="vanInAmount" value="1500" class="p-2 border rounded-lg w-full font-mono" placeholder="1500">
+                                    <select name="vanInStats" class="p-2 border rounded-lg bg-slate-50 font-semibold"><option value="PAID">Paid</option><option value="UNPAID">Unpaid</option></select>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-3"><label class="font-semibold text-slate-600 mb-1 block">Remarks / Notes</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full" placeholder="Inspection remarks..."></textarea></div>
+
+                            <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-IN -->
+                            <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateInDropZone" 
+                                   ondragover="handleDragOver(event, 'gateInDropZone')" 
+                                   ondragleave="handleDragLeave(event, 'gateInDropZone')" 
+                                   ondrop="handleDrop(event, 'gateIn')">
+                                <label class="font-semibold text-slate-700 mb-1 block"><i class="fa-solid fa-cloud-arrow-up mr-1 text-sky-600"></i> Drag & Drop Photos / Files Here (Gate-In)</label>
+                                <p class="text-[11px] text-slate-500 mb-3">or click the button below to browse files</p>
+                                <input type="file" id="gateInPhotoInput" accept="image/*,application/pdf" multiple onchange="handleFileInput(event, 'gateIn')" class="hidden">
+                                <button type="button" onclick="document.getElementById('gateInPhotoInput').click()" class="bg-sky-100 hover:bg-sky-200 text-sky-800 px-3 py-1.5 rounded-lg font-semibold text-xs transition">Browse Files</button>
+                                <div id="gateInPhotoPreviewContainer" class="flex flex-wrap justify-center gap-3 mt-4"></div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-semibold">Save Gate-In Entry</button>
+                            <button type="reset" onclick="clearGateInPhotos()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-semibold">Clear Form</button>
+                        </div>
                     </form>
                 </div>
+            </div>
 
-                <!-- Gate-Out & Billing Calculator -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center">
-                        <i class="fa-solid fa-truck-arrow-left text-skyBrand-500 mr-2"></i> Gate-Out & Storage Calculator
-                    </h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Container for Release *</label>
-                            <select id="yardOutContainer" onchange="onContainerSelectForGateOut()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-skyBrand-500">
-                                <option value="">-- Choose Container in Yard --</option>
-                            </select>
-                        </div>
+            <!-- Yard Tab 4: Gate-Out -->
+            <div id="yardGateOut" class="yard-tab hidden">
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <h3 class="font-bold text-base text-slate-800 mb-2">Record Container Gate-Out & Storage Billing</h3>
+                    <p class="text-xs text-slate-500 mb-6">Select an on-hand container, calculate storage days and fees automatically, and attach release proofs.</p>
+                    <form id="yardGateOutForm" onsubmit="handleYardGateOut(event)" class="space-y-4 text-xs">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Select Container in Yard *</label><select name="container" id="yardOutContainer" required onchange="containerSelectedForGateOut()" class="p-2 border rounded-lg w-full font-mono font-semibold"></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Release Date & Time *</label><input type="datetime-local" name="date" required id="calcGateOutDate" onchange="recalculateTotals()" class="p-2 border rounded-lg w-full"></div>
+                            
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date (Auto)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono text-slate-500"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Days (Auto Calculated)</label><input type="number" id="calcStorageDays" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono font-bold text-sky-700" value="0"></div>
+
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer *</label><input name="customer" required class="p-2 border rounded-lg w-full" placeholder="e.g. ABC Forwarding"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Ref No. *</label><input name="eir" required class="p-2 border rounded-lg w-full font-mono" placeholder="e.g. EIR-OUT-991"></div>
+
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate No. *</label><input name="plate" id="gateOutPlate" required class="p-2 border rounded-lg w-full" placeholder="XYZ-5678"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name *</label><input name="driver" id="gateOutDriver" required class="p-2 border rounded-lg w-full" placeholder="Driver name"></div>
+
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Gate-In Date</label>
-                                <input type="text" id="calcGateInDisplay" readonly class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600">
+                                <label class="font-semibold text-slate-600 mb-1 block">Storage Rate per Day (₱)</label>
+                                <input type="number" step="any" name="storageamount" id="calcStorageAmount" value="450" oninput="recalculateTotals()" class="p-2 border rounded-lg w-full font-mono" placeholder="450">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Gate-Out Date *</label>
-                                <input type="datetime-local" id="calcGateOutDate" onchange="recalculateTotals()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-skyBrand-500">
+                                <label class="font-semibold text-slate-600 mb-1 block">Van Out Fee (₱)</label>
+                                <input type="number" step="any" name="vanOutAmount" id="calcVanOutAmount" value="0" oninput="recalculateTotals()" class="p-2 border rounded-lg w-full font-mono" placeholder="0">
+                            </div>
+
+                            <input type="hidden" id="calcVanInAmount" value="0">
+
+                            <!-- Total Summary Box -->
+                            <div class="md:col-span-2 bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-bold text-emerald-800">TOTAL BILLING AMOUNT (PHP)</span>
+                                    <span id="vanInDeductionNotice" class="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded hidden">Van In Paid (Deducted)</span>
+                                </div>
+                                <input type="text" id="calcTotalAmount" name="totalAmount" readonly class="text-xl font-extrabold text-emerald-700 bg-transparent border-0 p-0 w-full font-mono" value="0.00">
+                            </div>
+
+                            <div class="md:col-span-2"><label class="font-semibold text-slate-600 mb-1 block">Remarks</label><textarea name="remarks" id="gateOutRemarks" rows="2" class="p-2 border rounded-lg w-full"></textarea></div>
+
+                            <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-OUT -->
+                            <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateOutDropZone" 
+                                   ondragover="handleDragOver(event, 'gateOutDropZone')" 
+                                   ondragleave="handleDragLeave(event, 'gateOutDropZone')" 
+                                   ondrop="handleDrop(event, 'gateOut')">
+                                <label class="font-semibold text-slate-700 mb-1 block"><i class="fa-solid fa-cloud-arrow-up mr-1 text-amber-600"></i> Drag & Drop Photos / Files Here (Gate-Out)</label>
+                                <p class="text-[11px] text-slate-500 mb-3">or click the button below to browse files</p>
+                                <input type="file" id="gateOutPhotoInput" accept="image/*,application/pdf" multiple onchange="handleFileInput(event, 'gateOut')" class="hidden">
+                                <button type="button" onclick="document.getElementById('gateOutPhotoInput').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-lg font-semibold text-xs transition">Browse Files</button>
+                                <div id="gateOutPhotoPreviewContainer" class="flex flex-wrap justify-center gap-3 mt-4"></div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Van-In Fee (₱)</label>
-                                <input type="number" id="calcVanInAmount" readonly class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600" value="0">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Van-Out Fee (₱)</label>
-                                <input type="number" id="calcVanOutAmount" value="2500" oninput="recalculateTotals()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Storage Rate / Day (₱)</label>
-                                <input type="number" id="calcStorageAmount" value="150" oninput="recalculateTotals()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                            </div>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold">Confirm Gate-Out</button>
+                            <button type="reset" onclick="clearGateOutPhotos()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-semibold">Clear Form</button>
                         </div>
-                        <div class="bg-sky-50 border border-sky-100 p-4 rounded-lg space-y-2">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-slate-600">Computed Storage Days:</span>
-                                <span id="calcStorageDays" class="font-bold text-slate-800">0 days</span>
-                            </div>
-                            <div id="vanInDeductionNotice" class="hidden text-xs text-emerald-700 italic">
-                                <i class="fa-solid fa-circle-check"></i> Van-In fee marked PAID (deducted from balance).
-                            </div>
-                            <div class="flex justify-between text-base font-black pt-2 border-t border-sky-200 text-skyBrand-900">
-                                <span>Total Amount Due:</span>
-                                <span id="calcTotalAmount">₱0.00</span>
-                            </div>
-                        </div>
-                        <button onclick="executeGateOut()" class="w-full bg-skyBrand-500 hover:bg-skyBrand-600 text-white font-semibold py-2.5 rounded-lg shadow transition text-sm">
-                            <i class="fa-solid fa-file-invoice mr-2"></i> Complete Gate-Out & Generate Invoice
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
-        </section>
 
-        <!-- TRANSSHIPMENT HUB TAB -->
-        <section id="tab-transshipment" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-100 gap-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800">Inter-Depot & Port Transshipment Planner</h3>
-                        <p class="text-xs text-slate-500">Coordinate container transfers between Manila North Harbor, South Harbor, and provincial depots.</p>
+            <!-- Yard Tab 5: Revenue History -->
+            <div id="yardRevenue" class="yard-tab hidden space-y-6">
+                <!-- KPI Financial Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="card bg-emerald-50 p-5 rounded-2xl shadow border border-emerald-200">
+                        <div class="text-xs font-semibold text-emerald-800">TOTAL REVENUE (PAID)</div>
+                        <div class="text-2xl font-extrabold text-emerald-700 my-1" id="totalRevenueDisplay">₱0.00</div>
+                        <div class="text-[10px] text-emerald-600">Excludes unpaid Van-In items</div>
                     </div>
-                    <button onclick="openTransshipmentModal()" class="bg-skyBrand-500 hover:bg-skyBrand-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition">
-                        <i class="fa-solid fa-route mr-1"></i> New Transfer Order
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                <th class="py-3 px-4">Transfer ID</th>
-                                <th class="py-3 px-4">Container No.</th>
-                                <th class="py-3 px-4">Origin Hub</th>
-                                <th class="py-3 px-4">Destination Hub</th>
-                                <th class="py-3 px-4">Hauler / Truck</th>
-                                <th class="py-3 px-4">Status</th>
-                                <th class="py-3 px-4 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transshipmentTableBody" class="divide-y divide-slate-200 text-sm text-slate-700">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- FINANCIALS TAB -->
-        <section id="tab-financials" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-100 gap-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800">Billing Statement Generator & Ledger</h3>
-                        <p class="text-xs text-slate-500">Export professional statement of accounts with integrated PDF generation.</p>
+                    <div class="card bg-rose-50 p-5 rounded-2xl shadow border border-rose-200">
+                        <div class="text-xs font-semibold text-rose-800">TOTAL EXPENSES INCURRED</div>
+                        <div class="text-2xl font-extrabold text-rose-700 my-1" id="totalExpenseDisplayRev">₱0.00</div>
+                        <div class="text-[10px] text-rose-600">All yard operating costs</div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button onclick="exportBillingPDF()" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition">
-                            <i class="fa-solid fa-file-pdf mr-1 text-rose-400"></i> Export PDF Statement
-                        </button>
+                    <div class="card bg-blue-50 p-5 rounded-2xl shadow border border-blue-200">
+                        <div class="text-xs font-semibold text-blue-800">NET TOTAL INCOME</div>
+                        <div class="text-2xl font-extrabold text-blue-700 my-1" id="netTotalIncomeDisplay">₱0.00</div>
+                        <div class="text-[10px] text-blue-600">Revenue minus Expenses</div>
                     </div>
                 </div>
 
-                <!-- Printable Statement Preview Area -->
-                <div id="pdfStatementContainer" class="bg-white p-8 border border-slate-200 rounded-xl shadow-inner max-w-4xl mx-auto space-y-6">
-                    <div class="flex justify-between items-start border-b border-slate-200 pb-6">
+                <!-- MONTHLY FINANCIAL TREND CHART PANEL WITH PNG EXPORT BUTTON -->
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
                         <div>
-                            <h2 class="text-xl font-black text-slate-900">SKYMOVER LOGISTICS & ECY DEPOT</h2>
-                            <p class="text-xs text-slate-500">Pier 18, North Harbor, Metro Manila</p>
-                            <p class="text-xs text-slate-500">VAT Reg TIN: 000-123-456-000</p>
+                            <h3 class="font-bold text-base text-slate-800"><i class="fa-solid fa-chart-line text-sky-600 mr-2"></i> Monthly Revenue & Expense Trends</h3>
+                            <p class="text-xs text-slate-500">Visual comparison of monthly earnings, operating costs, and net income performance.</p>
                         </div>
-                        <div class="text-right">
-                            <h4 class="text-lg font-bold text-skyBrand-600 uppercase tracking-wide">Statement of Account</h4>
-                            <p class="text-xs text-slate-600" id="statementDatePrint">Date: November 14, 2026</p>
-                            <p class="text-xs text-slate-600">SOA Ref: SOA-2026-1104</p>
+                        <button onclick="exportChartAsImage()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-download"></i> Download Chart (PNG)
+                        </button>
+                    </div>
+                    <div class="w-full h-72 relative">
+                        <canvas id="monthlyTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary Table & PDF Download Action -->
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800">Monthly Revenue & Expense Summary</h3>
+                            <p class="text-xs text-slate-500">Breakdown of earnings, operating costs, and net income by month.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="statementMonthSelect" class="p-2 border rounded-lg text-xs bg-slate-50 font-semibold"></select>
+                            <button onclick="downloadMonthlyStatementPDF()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow">
+                                <i class="fa-solid fa-file-pdf mr-1"></i> Download PDF Statement
+                            </button>
                         </div>
                     </div>
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase">Billed To:</p>
-                        <h4 class="text-sm font-bold text-slate-800">MSC MEDITERRANEAN SHIPPING COMPANY (PHILS) INC.</h4>
-                        <p class="text-xs text-slate-600">Bonifacio Global City, Taguig City</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600">
+                                <tr>
+                                    <th class="p-3">Month</th>
+                                    <th class="p-3 text-right">Revenue (₱)</th>
+                                    <th class="p-3 text-right">Expenses (₱)</th>
+                                    <th class="p-3 text-right">Net Income (₱)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthlyFinancialBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
                     </div>
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 border-b border-slate-300 text-slate-700">
-                                <th class="py-2 px-3">Container No.</th>
-                                <th class="py-2 px-3">Type</th>
-                                <th class="py-2 px-3">Gate-In</th>
-                                <th class="py-2 px-3">Gate-Out</th>
-                                <th class="py-2 px-3">Storage Days</th>
-                                <th class="py-2 px-3 text-right">Amount (PHP)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="statementTableItems" class="divide-y divide-slate-200 text-slate-600">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
-                    <div class="flex justify-end pt-4 border-t border-slate-200">
-                        <div class="w-64 space-y-2 text-xs">
-                            <div class="flex justify-between"><span class="text-slate-500">Subtotal:</span><span id="soaSubtotal" class="font-bold">₱0.00</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">VAT (12%):</span><span id="soaVat" class="font-bold">₱0.00</span></div>
-                            <div class="flex justify-between text-sm font-black border-t border-slate-300 pt-2 text-slate-900"><span>Total Due:</span><span id="soaGrandTotal">₱0.00</span></div>
+                </div>
+
+                <!-- Detailed Revenue Transactions -->
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800">Yard Revenue History (Paid Transactions Only)</h3>
+                            <p class="text-xs text-slate-500">Track all collected gate-in, gate-out, and storage fees.</p>
                         </div>
+                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold" onclick="exportRevenueCSV()">Export Revenue CSV</button>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Source Type</th><th class="p-3">Container No.</th><th class="p-3">Reference / EIR</th><th class="p-3 text-right">Amount (₱)</th></tr></thead><tbody id="revenueTableBody" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 6: Expenses History -->
+            <div id="yardExpenses" class="yard-tab hidden">
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200 mb-6">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">Log Yard Operating Expense</h3>
+                    <form id="yardExpenseForm" onsubmit="handleYardExpenseSubmit(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Expense Category *</label><select name="category" required class="p-2 border rounded-lg w-full"><option>Crane & Handling Equipment</option><option>Yard Maintenance & Repairs</option><option>Security & Personnel</option><option>Utilities (Water/Electricity)</option><option>Administrative & Permits</option><option>Other</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Description / Vendor *</label><input name="description" required class="p-2 border rounded-lg w-full" placeholder="e.g. Forklift fuel / repair"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Amount (₱) *</label><input type="number" step="any" name="amount" required class="p-2 border rounded-lg w-full" placeholder="0.00"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Date *</label><input type="datetime-local" name="date" id="expenseDateInput" required class="p-2 border rounded-lg w-full"></div>
+                        </div>
+                        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-semibold">Record Expense</button>
+                    </form>
+                </div>
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800">Yard Expense Logs</h3>
+                            <p class="text-xs text-slate-500">Monitor all yard operational expenses and outflows.</p>
+                        </div>
+                        <button class="bg-slate-200 hover:bg-slate-300 px-3 py-2 rounded-lg text-xs font-semibold" onclick="exportExpensesCSV()">Export Expenses CSV</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="card bg-rose-50 text-slate-900 p-4 rounded-xl border border-rose-200"><div class="text-xs font-semibold text-rose-800">TOTAL EXPENSES INCURRED</div><div class="text-2xl font-extrabold text-rose-700 my-1" id="totalExpenseDisplay">₱0.00</div></div>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Category</th><th class="p-3">Description</th><th class="p-3 text-right">Amount (₱)</th></tr></thead><tbody id="expenseTableBody" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 7: Reports -->
+            <div id="yardReports" class="yard-tab hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card bg-white text-slate-900 p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">GATE-IN RECORDS</div><div class="text-2xl font-bold my-1" id="yardRptGateIn">0</div></div>
+                    <div class="card bg-white text-slate-900 p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">GATE-OUT RECORDS</div><div class="text-2xl font-bold my-1" id="yardRptGateOut">0</div></div>
+                    <div class="card bg-white text-slate-900 p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">SHIPPING LINES</div><div class="text-2xl font-bold my-1" id="yardRptLines">0</div></div>
+                    <div class="card bg-white text-slate-900 p-5 rounded-xl shadow border"><div class="text-xs text-slate-500">MOVEMENTS LOGGED</div><div class="text-2xl font-bold my-1" id="yardRptMoves">0</div></div>
+                </div>
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border mb-6">
+                    <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-base text-slate-800">Stock by Shipping Line</h3><button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardCSV()">Export Inventory CSV</button></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Shipping Line</th><th class="p-3">On-Hand</th><th class="p-3">Available</th><th class="p-3">Reserved</th><th class="p-3">Damaged / Hold</th></tr></thead><tbody id="yardLineRows" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <h3 class="font-bold text-base text-slate-800">Full Movement History & Billings (Gate-In to Gate-Out)</h3>
+                        <div class="flex gap-2">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow" onclick="openExtractionReport()">
+                                <i class="fa-solid fa-file-arrow-down mr-1"></i> Open Visual Extraction Report & Photo Audit
+                            </button>
+                            <button class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-xs font-semibold" onclick="exportYardMovements()">Export Movements CSV</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate</th><th class="p-3">Storage Days</th><th class="p-3">Van In / Out</th><th class="p-3">Total Amount</th><th class="p-3">EIR / Ref.</th></tr></thead><tbody id="yardMovementRows" class="divide-y divide-slate-100"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Yard Tab 8: Cloud Sync & Backup -->
+            <div id="yardBackup" class="yard-tab hidden space-y-6">
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
+                    <h3 class="font-bold text-base text-slate-800 mb-2"><i class="fa-solid fa-cloud text-sky-600 mr-2"></i> Supabase Cloud Database Connection</h3>
+                    <p class="text-xs text-slate-500 mb-4">Connect your platform to a shared cloud database so multiple users see each other's inputs in real time.</p>
+                    <div class="space-y-3 max-w-xl mb-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Project URL</label>
+                            <input type="text" id="supabaseUrlInput" class="w-full p-2 border rounded-lg text-xs font-mono" placeholder="https://xyzproject.supabase.co">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Anon Key</label>
+                            <input type="password" id="supabaseKeyInput" class="w-full p-2 border rounded-lg text-xs font-mono" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                        </div>
+                        <button onclick="connectSupabaseCloud()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow">Connect & Enable Real-Time Sync</button>
+                    </div>
+                </div>
+                <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
+                    <h3 class="font-bold text-base text-slate-800 mb-2">Unified Enterprise Backup (Management Backend & Empty Yard)</h3>
+                    <p class="text-xs text-slate-500 mb-4">Download a complete JSON snapshot of both your Management Backend database and your Empty Yard database together.</p>
+                    <div class="flex gap-2">
+                        <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-semibold" onclick="backupUnifiedEnterpriseData()">Download Unified Backup</button>
+                        <label class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center">Restore Unified Backup<input type="file" id="unifiedRestoreFile" accept=".json,application/json" hidden onchange="restoreUnifiedEnterpriseData(event)"></label>
                     </div>
                 </div>
             </div>
@@ -392,250 +526,1008 @@
 
     </main>
 
-    <!-- Supabase Config Modal -->
-    <div id="configModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 class="text-base font-bold text-slate-900 flex items-center"><i class="fa-solid fa-database mr-2 text-skyBrand-500"></i> Supabase Cloud Connection</h3>
-            <p class="text-xs text-slate-500">Connect your Supabase project URL and Anon API key for real-time cloud synchronization.</p>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Supabase Project URL</label>
-                    <input type="text" id="supabaseUrlInput" placeholder="https://xyz.supabase.co" class="w-full border border-slate-300 rounded-lg px-3 py-2">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Supabase Anon Key</label>
-                    <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOi..." class="w-full border border-slate-300 rounded-lg px-3 py-2">
-                </div>
-            </div>
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
-                <button onclick="saveSupabaseConfig()" class="px-4 py-2 bg-skyBrand-500 hover:bg-skyBrand-600 text-white rounded-lg text-xs font-semibold">Save & Connect</button>
-            </div>
+    <!-- SUB-MODULE MODAL OVERLAY -->
+    <div id="subModuleModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
+            <button onclick="closeSubModule()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl z-50 p-2 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            <div id="subModuleContent"></div>
         </div>
     </div>
 
-    <!-- Container Details / Edit Modal -->
-    <div id="containerModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
-            <h3 id="containerModalTitle" class="text-base font-bold text-slate-900">Container Details</h3>
-            <div id="containerModalBody" class="space-y-3 text-sm text-slate-600">
-                <!-- Details populated dynamically -->
-            </div>
-            <div class="flex justify-end pt-2">
-                <button onclick="closeContainerModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Transshipment Order Modal -->
-    <div id="transshipmentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 class="text-base font-bold text-slate-900">New Transshipment Transfer Order</h3>
-            <form id="transshipmentForm" onsubmit="handleTransshipmentSubmit(event)" class="space-y-3 text-xs">
+    <!-- NEW TRANSSHIPMENT MODAL -->
+    <div id="transModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
+            <button onclick="closeNewTransshipmentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-white mb-4">Post Transshipment Order</h3>
+            <form id="transForm" onsubmit="handleTransSubmit(event)" class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Container Number *</label>
-                    <input type="text" id="trContainerNo" required placeholder="MSCU1234567" class="w-full border border-slate-300 rounded-lg px-3 py-2 uppercase">
+                    <label class="block text-slate-400 mb-1">Origin Hub</label>
+                    <input type="text" id="transOrigin" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. Manila North Harbor">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Origin Hub *</label>
-                    <input type="text" id="trOrigin" value="Skymover North Harbor Depot" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    <label class="block text-slate-400 mb-1">Container Number</label>
+                    <input type="text" id="transContainer" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. MSKU-882910-3">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Destination Hub *</label>
-                    <input type="text" id="trDest" value="Manila South Harbor Berth 4" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    <label class="block text-slate-400 mb-1">Commission Amount (₱)</label>
+                    <input type="number" id="transCommission" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="4500">
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">Hauler / Truck Plate</label>
-                    <input type="text" id="trHauler" placeholder="NAG-5678 (FastHaul)" class="w-full border border-slate-300 rounded-lg px-3 py-2 uppercase">
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeTransshipmentModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-skyBrand-500 hover:bg-skyBrand-600 text-white rounded-lg font-semibold">Create Order</button>
-                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition">Post Order to Hub</button>
             </form>
         </div>
     </div>
 
-    <!-- JavaScript Application Engine -->
+    <!-- NEW DRIVER REGISTRATION MODAL -->
+    <div id="driverRegModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
+            <button onclick="closeNewDriverRegistrationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-user-plus text-purple-400 mr-2"></i> New Driver Registration</h3>
+            <form id="driverRegForm" onsubmit="handleNewDriverSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Full Name *</label>
+                    <input type="text" id="regDriverName" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. Roberto Santos">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Professional License No. *</label>
+                    <input type="text" id="regDriverLicense" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="N01-99-876543">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Mobile Number *</label>
+                    <input type="text" id="regDriverPhone" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="+63 912 345 6789">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Assigned Unit / Truck</label>
+                    <input type="text" id="regDriverUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. SKV-101">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition mt-2">Register Driver to Unified DB</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full text-center py-6 border-t border-slate-800 bg-slate-950/80 text-[11px] text-slate-500">
+        <p>Skymover Transport Corporation • Container shipping services & Empty Yard in Manila, Philippines</p>
+        <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC WITH SUPABASE & CHART EXPORT -->
     <script>
-        let yardDb = {
-            containers: [
-                { id: '1', containerNo: 'MSCU7891234', iso: '22G1', shippingLine: 'MSC', date: '2026-11-01T08:00', plate: 'NAG-1234', driver: 'Juan Cruz', grade: 'A', vanInAmount: 2500, vanInStats: 'PAID', remarks: 'Clean interior, worthy.' },
-                { id: '2', containerNo: 'MAEU4567890', iso: '42G1', shippingLine: 'MAERSK', date: '2026-11-03T10:30', plate: 'CAR-9876', driver: 'Pedro Santos', grade: 'B', vanInAmount: 2500, vanInStats: 'UNPAID', remarks: 'Scratched side panel.' },
-                { id: '3', containerNo: 'CMAU3216549', iso: '45G1', shippingLine: 'CMA CGM', date: '2026-11-05T14:15', plate: 'ZXY-4321', driver: 'Jose Rizal', grade: 'W', vanInAmount: 3000, vanInStats: 'PAID', remarks: 'Washed and ready for stuffing.' }
-            ],
-            transfers: [
-                { id: 'TR-101', containerNo: 'MSCU7891234', origin: 'North Harbor Depot', dest: 'South Harbor Berth 4', hauler: 'FastHaul NAG-1234', status: 'IN TRANSIT' }
-            ],
-            revenues: [
-                { month: 'Jul', amount: 145000 },
-                { month: 'Aug', amount: 182000 },
-                { month: 'Sep', amount: 165000 },
-                { month: 'Financials Oct', amount: 198000 },
-                { month: 'Nov', amount: 215000 }
-            ]
+        let stagedGateInPhotos = [];
+        let stagedGateOutPhotos = [];
+        let trendChartInstance = null;
+        let supabaseClient = null;
+
+        // SUPABASE REAL-TIME CONNECTION INITIALIZER
+        function initSupabase() {
+            const savedUrl = localStorage.getItem('skymover_supabase_url');
+            const savedKey = localStorage.getItem('skymover_supabase_key');
+            if(savedUrl && savedKey) {
+                document.getElementById('supabaseUrlInput').value = savedUrl;
+                document.getElementById('supabaseKeyInput').value = savedKey;
+                try {
+                    supabaseClient = window.supabase.createClient(savedUrl, savedKey);
+                    updateSyncBadge('connected', 'Cloud DB Live Sync Active');
+                    fetchCloudData();
+                } catch(e) {
+                    updateSyncBadge('error', 'Cloud Connection Failed');
+                }
+            } else {
+                updateSyncBadge('local', 'Local Storage Mode (Offline)');
+            }
+        }
+
+        function connectSupabaseCloud() {
+            const url = document.getElementById('supabaseUrlInput').value.trim();
+            const key = document.getElementById('supabaseKeyInput').value.trim();
+            if(!url || !key) return alert('Please enter both Supabase URL and Anon Key.');
+            
+            localStorage.setItem('skymover_supabase_url', url);
+            localStorage.setItem('skymover_supabase_key', key);
+            
+            try {
+                supabaseClient = window.supabase.createClient(url, key);
+                updateSyncBadge('connected', 'Cloud DB Live Sync Active');
+                alert('Connected to Supabase successfully!');
+                fetchCloudData();
+            } catch(e) {
+                alert('Failed to connect to Supabase: ' + e.message);
+                updateSyncBadge('error', 'Cloud Connection Failed');
+            }
+        }
+
+        function updateSyncBadge(status, text) {
+            const dot = document.getElementById('syncDot');
+            const txt = document.getElementById('syncText');
+            const badge = document.getElementById('syncStatusBadge');
+            if(!dot || !txt || !badge) return;
+            badge.classList.remove('hidden');
+            if(status === 'connected') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+                txt.textContent = text;
+            } else if(status === 'error') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+                txt.textContent = text;
+            } else {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+                txt.textContent = text;
+            }
+        }
+
+        async function fetchCloudData() {
+            if(!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient.from('skymover_enterprise_db').select('*').eq('id', 1).single();
+                if(data && data.payload) {
+                    db = data.payload.managementBackend || db;
+                    yardDb = data.payload.emptyYard || yardDb;
+                    refreshYard();
+                }
+            } catch(e) {
+                console.log('No existing cloud record found, saving initial local state...');
+                saveCloudData();
+            }
+        }
+
+        async function saveCloudData() {
+            saveDB();
+            localStorage.setItem(YARD_KEY, JSON.stringify(yardDb));
+            refreshYard();
+
+            if(!supabaseClient) return;
+            try {
+                await supabaseClient.from('skymover_enterprise_db').upsert({
+                    id: 1,
+                    payload: { managementBackend: db, emptyYard: yardDb },
+                    updated_at: new Date().toISOString()
+                });
+            } catch(e) {
+                console.error('Cloud sync error:', e);
+            }
+        }
+
+        function handleDragOver(e, zoneId) {
+            e.preventDefault();
+            e.stopPropagation();
+            const zone = document.getElementById(zoneId);
+            if(zone) zone.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e, zoneId) {
+            e.preventDefault();
+            e.stopPropagation();
+            const zone = document.getElementById(zoneId);
+            if(zone) zone.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, type) {
+            e.preventDefault();
+            e.stopPropagation();
+            const zoneId = type === 'gateIn' ? 'gateInDropZone' : 'gateOutDropZone';
+            const zone = document.getElementById(zoneId);
+            if(zone) zone.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if(files && files.length > 0) {
+                processFiles(files, type);
+            }
+        }
+
+        function handleFileInput(e, type) {
+            const files = e.target.files;
+            if(files && files.length > 0) {
+                processFiles(files, type);
+            }
+        }
+
+        function processFiles(files, type) {
+            const containerId = type === 'gateIn' ? 'gateInPhotoPreviewContainer' : 'gateOutPhotoPreviewContainer';
+            const previewContainer = document.getElementById(containerId);
+            if(!previewContainer) return;
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Data = event.target.result;
+                    const fileObj = {
+                        name: file.name,
+                        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                        dataUrl: base64Data,
+                        date: new Date().toISOString()
+                    };
+
+                    if(type === 'gateIn') {
+                        stagedGateInPhotos.push(fileObj);
+                    } else {
+                        stagedGateOutPhotos.push(fileObj);
+                    }
+                    
+                    const thumb = document.createElement('div');
+                    thumb.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white flex items-center justify-center';
+                    
+                    if(file.type.startsWith('image/')) {
+                        thumb.innerHTML = '<img src="' + base64Data + '" class="w-full h-full object-cover">';
+                    } else {
+                        thumb.innerHTML = '<div class="text-[9px] font-bold text-slate-700 text-center p-1 truncate">' + file.name + '</div>';
+                    }
+                    previewContainer.appendChild(thumb);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearGateInPhotos() {
+            stagedGateInPhotos = [];
+            const container = document.getElementById('gateInPhotoPreviewContainer');
+            if (container) container.innerHTML = '';
+        }
+
+        function clearGateOutPhotos() {
+            stagedGateOutPhotos = [];
+            const container = document.getElementById('gateOutPhotoPreviewContainer');
+            if (container) container.innerHTML = '';
+        }
+
+        // UNIFIED APP DATA STATE & LOCALSTORAGE FALLBACK
+        let db;
+        try {
+            db = JSON.parse(localStorage.getItem('skymover_unified_db_v3'));
+        } catch(e) { db = null; }
+
+        if (!db || typeof db !== 'object') {
+            db = {
+                vehicles: [
+                    { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" },
+                    { id: "SKV-102", model: "HINO Profia Tractor Head", status: "Active", driver: "Roberto Santos" },
+                    { id: "SKV-103", model: "FUSO Super Great", status: "Maintenance", driver: "Unassigned" }
+                ],
+                drivers: [
+                    { name: "Juan Dela Cruz", license: "N02-12-345678", phone: "+63 912 345 6789", status: "On Trip", rating: "4.9 ★", truck: "SKV-101" },
+                    { name: "Roberto Santos", license: "N01-99-876543", phone: "+63 918 765 4321", status: "Available", rating: "4.8 ★", truck: "SKV-102" }
+                ],
+                fuelLogs: [
+                    { unit: "SKV-101", liters: "120 L", cost: "₱7,800", date: "2026-11-12", station: "Shell NLEX Petron" }
+                ],
+                maintenanceLogs: [
+                    { unit: "SKV-103", issue: "Brake Pad Replacement & Hydraulic Check", date: "2026-11-10", cost: "₱8,500", status: "In Shop" }
+                ],
+                dispatchLogs: [
+                    { unit: "SKV-101", route: "Manila Port → Valenzuela Depot", status: "In Transit (NLEX KM 24)", driver: "Juan Dela Cruz" }
+                ],
+                expenseLogs: [
+                    { trip: "Trip #401", fuel: "₱7,800", tolls: "₱1,250", maintenance: "₱0", total: "₱9,050" }
+                ],
+                transshipments: [
+                    { id: "TR-9001", origin: "Manila North Harbor Terminal 1", container: "MSKU-772819-2", commission: "₱5,000", status: "Pending Hub Review" }
+                ],
+                uploads: [
+                    { name: "Container_Inspection_Manila_01.jpg", date: "2026-11-12 14:20", size: "1.2 MB", type: "Delivery Proof", dataUrl: "https://placehold.co/400x300/0f172a/38bdf8?text=Container+Inspection" }
+                ]
+            };
+        }
+
+        const YARD_KEY = 'skymover_empty_yard_v3';
+        let yardDb;
+        try {
+            yardDb = JSON.parse(localStorage.getItem(YARD_KEY));
+        } catch(e) { yardDb = null; }
+
+        if (!yardDb || typeof yardDb !== 'object') {
+            yardDb = {
+                containers: [
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan Dela Cruz", eir: "EIR-001", condition: "Good", status: "Available", block: "A", bay: "01", row: "GROUND", tier: "1", date: "2026-11-10T08:00", gateOutDate: "—", remarks: "Clean", vanInAmount: "1500", vanOutAmount: "0", totalAmount: "1500", vanInStats: "PAID", photos: [] }
+                ],
+                movements: [
+                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan Dela Cruz", eir: "EIR-001", row: "GROUND", remarks: "Clean", vanInAmount: "1500", vanInStats: "PAID", photos: [] }
+                ],
+                revenues: [
+                    { date: "2026-11-10T08:00", source: "Gate-In Fee", container: "MSKU-772819-2", eir: "EIR-001", amount: 1500 }
+                ],
+                expenses: [
+                    { date: "2026-11-10T09:00", category: "Crane & Handling Equipment", description: "Initial Reach Stacker Fuel", amount: 3500 }
+                ]
+            };
+        }
+
+        function saveDB() {
+            localStorage.setItem('skymover_unified_db_v3', JSON.stringify(db));
+        }
+        function saveYardDB() {
+            saveCloudData();
+        }
+
+        let currentLang = 'en';
+        const translations = {
+            en: {
+                mainTitle: "SKYMOVER TRANSPORTATION",
+                mainSubtitle: "Philippine Container Fleet & Empty Container Yard Management Platform",
+                card1Title: "Management Backend",
+                card1Desc: "Scheduling, Finance, and Reporting",
+                card2Title: "Driver's side",
+                card2Desc: "Waybill, Photo, Navigation",
+                newDriverReg: "New driver registration →",
+                card3Title: "Transshipment Hub",
+                card3Desc: "Waybill, Photograph, Commission & Terminal Acceptance"
+            },
+            zh: {
+                mainTitle: "SKYMOVER 运输物流",
+                mainSubtitle: "菲律宾集装箱车队及空箱场站智能管理平台",
+                card1Title: "管理后台",
+                card1Desc: "调度、财务与报表",
+                card2Title: "司机端",
+                card2Desc: "运单、照片、导航",
+                newDriverReg: "新司机注册 →",
+                card3Title: "转运与二手枢纽",
+                card3Desc: "运单、照片、佣金与航运终端验收"
+            }
         };
 
-        let supabaseClient = null;
-        let activeSelectedContainer = null;
-        let statusChartInstance = null;
-        let revenueChartInstance = null;
-
-        // Initialize App on Load
-        document.addEventListener('DOMContentLoaded', () => {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('giDate').value = now.toISOString().slice(0, 16);
-            document.getElementById('calcGateOutDate').value = now.toISOString().slice(0, 16);
-
-            initCharts();
-            refreshAllDataViews();
-        });
-
-        // Tab Switching Logic
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-skyBrand-500', 'text-skyBrand-600');
-                btn.classList.add('border-transparent', 'text-slate-500');
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            const labelEl = document.getElementById('langLabel');
+            if (labelEl) labelEl.innerText = currentLang === 'en' ? 'Chinese/English' : '中文/英文';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
             });
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-            activeBtn.classList.add('border-skyBrand-500', 'text-skyBrand-600');
-            activeBtn.classList.remove('border-transparent', 'text-slate-500');
-
-            if (tabId === 'dashboard') updateCharts();
-            if (tabId === 'gate') updateGateOutDropdown();
-            if (tabId === 'financials') renderBillingStatement();
         }
 
-        // Data Refresh & Render Pipeline
-        function refreshAllDataViews() {
-            renderInventoryTable();
-            updateDashboardStats();
-            updateGateOutDropdown();
+        function switchView(viewName) {
+            const landing = document.getElementById('viewLanding');
+            const backend = document.getElementById('viewBackend');
+            const driver = document.getElementById('viewDriver');
+            const hub = document.getElementById('viewHub');
+            const yard = document.getElementById('viewYard');
+
+            if (landing) landing.classList.add('hidden');
+            if (backend) backend.classList.add('hidden');
+            if (driver) driver.classList.add('hidden');
+            if (hub) hub.classList.add('hidden');
+            if (yard) yard.classList.add('hidden');
+
+            if (viewName === 'landing' && landing) {
+                landing.classList.remove('hidden');
+            } else if (viewName === 'backend' && backend) {
+                backend.classList.remove('hidden');
+                switchAiTab('brain');
+            } else if (viewName === 'driver' && driver) {
+                driver.classList.remove('hidden');
+                refreshDriverPortal();
+            } else if (viewName === 'hub' && hub) {
+                hub.classList.remove('hidden');
+                renderTransshipmentTable();
+            } else if (viewName === 'yard' && yard) {
+                yard.classList.remove('hidden');
+                switchYardTab('yardDashboard'); 
+            }
+        }
+
+        function openBackendModule(mod) { switchView('backend'); }
+        function openDriverPortal() { switchView('driver'); }
+        function openHubPortal() { switchView('hub'); }
+        function openYardPortal() { 
+            switchView('yard'); 
+            switchYardTab('yardDashboard'); 
+        }
+
+        function refreshDriverPortal() {
+            const infoContainer = document.getElementById('driverActiveTripInfo');
+            if(!infoContainer) return;
+            let activeTrans = (db.transshipments || []).find(t => t.status && t.status.includes('Hub Accepted')) || (db.transshipments || [])[0];
+            let activeContainer = (yardDb.containers || []).find(c => c.status !== 'Released') || { number: 'MSKU-772819-2', size: '40HC' };
+            
+            infoContainer.innerHTML = `
+                <div><span class="text-slate-500">Waybill ID:</span> ${activeTrans ? activeTrans.id : 'WB-2026-9901'}</div>
+                <div><span class="text-slate-500">Origin / Route:</span> ${activeTrans ? activeTrans.origin : 'Manila Port Terminal 3'} → Valenzuela Depot</div>
+                <div><span class="text-slate-500">Container:</span> ${activeContainer.number} (${activeContainer.size || '40ft High Cube'})</div>
+                <div><span class="text-slate-500">Status:</span> <span class="text-emerald-400 font-semibold">Active In-Transit (NLEX Corridor)</span></div>
+            `;
+        }
+
+        function submitDriverProofOfDelivery() {
+            alert('Proof of Delivery successfully submitted and synced across Driver Portal, Management Backend, and Cloud DB!');
+        }
+
+        function openNewDriverRegistrationModal() {
+            const m = document.getElementById('driverRegModal');
+            if(m) m.classList.remove('hidden');
+        }
+        function closeNewDriverRegistrationModal() {
+            const m = document.getElementById('driverRegModal');
+            if(m) m.classList.add('hidden');
+        }
+
+        function handleNewDriverSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('regDriverName').value;
+            const license = document.getElementById('regDriverLicense').value;
+            const phone = document.getElementById('regDriverPhone').value;
+            const truck = document.getElementById('regDriverUnit').value || 'Unassigned';
+
+            if(!db.drivers) db.drivers = [];
+            db.drivers.push({ name, license, phone, truck, status: 'Available', rating: '5.0 ★' });
+            saveDB();
+            closeNewDriverRegistrationModal();
+            alert('New driver ' + name + ' registered successfully and saved to Unified Database!');
+            document.getElementById('driverRegForm').reset();
+        }
+
+        function switchAiTab(tab) {
+            const btnBrain = document.getElementById('tabBrainBtn');
+            const btnLens = document.getElementById('tabLensBtn');
+            const btnTrack = document.getElementById('tabTrackBtn');
+            if(btnBrain) btnBrain.className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+            if(btnLens) btnLens.className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+            if(btnTrack) btnTrack.className = "px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+            
+            const container = document.getElementById('aiContainer');
+            if(!container) return;
+
+            if(tab === 'brain') {
+                if(btnBrain) btnBrain.className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
+                container.innerHTML = `
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="w-full lg:w-1/2">
+                            <h3 class="text-xl font-bold text-sky-400 mb-2 flex items-center">
+                                <i class="fa-solid fa-brain mr-2"></i> LogiBRAIN Analytics
+                            </h3>
+                            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                                Unified AI analytics linking Empty Container Yard stock levels directly with Fleet Dispatch and Transshipment Hub revenue streams.
+                            </p>
+                            <button onclick="runAiAnalysis()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-sky-500/20">
+                                Generate AI Fleet & Yard Report
+                            </button>
+                        </div>
+                        <div class="w-full lg:w-1/2 bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 h-48 overflow-y-auto" id="aiOutputLog">
+                            [LogiBRAIN Unified DB Ready] Connected to Yard Stock, Fleet Masterlist, and Hub Transshipments... Click 'Generate AI Fleet & Yard Report' to run simulation.
+                        </div>
+                    </div>
+                `;
+            } else if(tab === 'lens') {
+                if(btnLens) btnLens.className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
+                container.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold text-blue-400 mb-2 flex items-center">
+                            <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> LogiLENS Deep Visual Inspector
+                        </h3>
+                        <p class="text-xs text-slate-300 mb-4">Container damage detection, OCR waybill scanning, and automated compliance auditing synced with photo attachments.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">Container Condition</span><div class="text-lg font-bold text-emerald-400 mt-1">98.4% Intact</div></div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">OCR Waybill Matches</span><div class="text-lg font-bold text-sky-400 mt-1">100% Verified</div></div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><span class="text-[10px] text-slate-400">Audit Photo Queue</span><div class="text-lg font-bold text-amber-400 mt-1">${(db.uploads || []).length} Attached</div></div>
+                        </div>
+                        <button onclick="alert('LogiLENS scanner initiated: All active yard & driver photo attachments successfully verified against port records.')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">Run Full Optical Scan</button>
+                    </div>
+                `;
+            } else if(tab === 'track') {
+                if(btnTrack) btnTrack.className = "px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow";
+                container.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold text-emerald-400 mb-2 flex items-center">
+                            <i class="fa-solid fa-satellite-dish mr-2"></i> LogiTRACK Real-Time Telemetry & GPS
+                        </h3>
+                        <p class="text-xs text-slate-300 mb-4">Live Philippine corridor positioning (NLEX, SLEX, North/South Harbor), geofencing alerts, and active container tracking.</p>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3 mb-4">
+                            <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2"><span class="font-medium text-white">SKV-101 (Isuzu Giga)</span><span class="text-emerald-400">NLEX KM 24 (In Transit)</span></div>
+                            <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2"><span class="font-medium text-white">SKV-102 (Hino Profia)</span><span class="text-emerald-400">SLEX Toll Plaza (Arriving)</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="font-medium text-white">Active Yard Stock</span><span class="text-amber-400">${(yardDb.containers || []).filter(c=>c.status!=='Released').length} Units In Yard</span></div>
+                        </div>
+                        <button onclick="alert('GPS Telemetry refreshed: All active units reporting stable connection.')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">Refresh Satellite Telemetry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function runAiAnalysis() {
+            const log = document.getElementById('aiOutputLog');
+            if(!log) return;
+            log.innerHTML = "[LogiBRAIN] Initializing deep neural telemetry scan across Yard and Fleet DB...\n";
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Total Yard Inventory: " + (yardDb.containers || []).filter(c=>c.status!=='Released').length + " containers. Active Fleet Units: " + (db.vehicles || []).length + " trucks.\n"; }, 400);
+            setTimeout(() => { log.innerHTML += "[LogiBRAIN] Success! Recommended dispatch adjustments: Reassign transshipment orders to available yard containers to minimize empty container transit times."; }, 900);
+        }
+
+        function handlePhotoUpload(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if(!db.uploads) db.uploads = [];
+                    db.uploads.push({
+                        name: file.name,
+                        date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                        size: (file.size / (1024*1024)).toFixed(1) + ' MB',
+                        type: 'Delivery Proof',
+                        dataUrl: event.target.result
+                    });
+                    saveDB();
+                    const msg = document.getElementById('uploadSuccessMsg');
+                    if(msg) msg.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openSubModule(title) {
+            const modal = document.getElementById('subModuleModal');
+            const content = document.getElementById('subModuleContent');
+            if(!modal || !content) return;
+            modal.classList.remove('hidden');
+
+            const vehicles = db.vehicles || [];
+            const drivers = db.drivers || [];
+            const fuelLogs = db.fuelLogs || [];
+            const maintenanceLogs = db.maintenanceLogs || [];
+            const dispatchLogs = db.dispatchLogs || [];
+            const expenseLogs = db.expenseLogs || [];
+            const transshipments = db.transshipments || [];
+            const yardContainers = (yardDb.containers || []).filter(c => c.status !== 'Released');
+
+            if (title === 'Dashboard') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-table-cells-large text-sky-400 mr-2"></i> Dashboard & Unified KPI Overview</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 text-slate-900">
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Fleet Units</p><h4 class="text-2xl font-bold text-slate-900 mt-1">${vehicles.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Active Drivers</p><h4 class="text-2xl font-bold text-indigo-600 mt-1">${drivers.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Yard Containers On Hand</p><h4 class="text-2xl font-bold text-amber-600 mt-1">${yardContainers.length}</h4></div>
+                        <div class="bg-white p-4 rounded-xl shadow border"><p class="text-xs text-slate-500">Transshipment Hub Orders</p><h4 class="text-2xl font-bold text-emerald-600 mt-1">${transshipments.length}</h4></div>
+                    </div>
+                `;
+            } else if (title === 'Vehicle Management') {
+                let rows = vehicles.map(v => '<tr class="border-b"><td class="p-3 font-medium">' + v.id + '</td><td class="p-3">' + v.model + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-sky-100 text-sky-800">' + v.status + '</span></td><td class="p-3">' + v.driver + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-truck text-blue-400 mr-2"></i> Vehicle Masterlist</h3><button onclick="addVehiclePrompt()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Add Vehicle</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Model</th><th class="p-3">Status</th><th class="p-3">Assigned Driver</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Driver Management') {
+                let rows = drivers.map(d => '<tr class="border-b"><td class="p-3 font-medium">' + d.name + '</td><td class="p-3 font-mono">' + d.license + '</td><td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-indigo-100 text-indigo-800">' + d.status + '</span></td><td class="p-3 text-amber-600">' + d.rating + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-users text-indigo-400 mr-2"></i> Driver Management</h3><button onclick="openNewDriverRegistrationModal()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Register New Driver</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Driver Name</th><th class="p-3">License Number</th><th class="p-3">Status</th><th class="p-3">Rating</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Fuel Monitoring') {
+                let rows = fuelLogs.map(f => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + f.unit + '</td><td class="p-3">' + f.liters + '</td><td class="p-3 font-medium text-emerald-600">' + f.cost + '</td><td class="p-3">' + f.station + '</td><td class="p-3">' + f.date + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-gas-pump text-amber-400 mr-2"></i> Fuel Monitoring</h3><button onclick="addFuelPrompt()" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Fuel Fill</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Volume</th><th class="p-3">Cost</th><th class="p-3">Station</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Maintenance') {
+                let rows = maintenanceLogs.map(m => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + m.unit + '</td><td class="p-3">' + m.issue + '</td><td class="p-3 font-medium text-rose-600">' + m.cost + '</td><td class="p-3">' + m.status + '</td><td class="p-3">' + m.date + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-screwdriver-wrench text-rose-400 mr-2"></i> Fleet Maintenance</h3><button onclick="addMaintenancePrompt()" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Schedule Maintenance</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Issue</th><th class="p-3">Cost</th><th class="p-3">Status</th><th class="p-3">Date</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'GPS & Dispatch') {
+                let rows = dispatchLogs.map(d => '<tr class="border-b"><td class="p-3 font-mono text-sky-600">' + d.unit + '</td><td class="p-3">' + d.route + '</td><td class="p-3">' + d.driver + '</td><td class="p-3 text-emerald-600 font-semibold">' + d.status + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-location-crosshairs text-emerald-400 mr-2"></i> GPS & Dispatch</h3><button onclick="addDispatchPrompt()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg">+ New Dispatch</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Unit ID</th><th class="p-3">Route</th><th class="p-3">Driver</th><th class="p-3">Status</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Fleet Expenses') {
+                let rows = expenseLogs.map(e => '<tr class="border-b"><td class="p-3 font-semibold text-sky-600">' + e.trip + '</td><td class="p-3">' + e.fuel + '</td><td class="p-3">' + e.tolls + '</td><td class="p-3">' + e.maintenance + '</td><td class="p-3 font-bold text-emerald-600">' + e.total + '</td></tr>').join('');
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 text-white"><h3 class="text-xl font-bold"><i class="fa-solid fa-wallet text-teal-400 mr-2"></i> Fleet Expenses</h3><button onclick="addExpensePrompt()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Log Trip Expense</button></div>
+                    <div class="overflow-x-auto bg-white text-slate-900 rounded-xl p-3"><table class="w-full text-left text-xs"><tr class="border-b text-slate-500"><th class="p-3">Trip ID</th><th class="p-3">Fuel</th><th class="p-3">Tolls</th><th class="p-3">Maintenance</th><th class="p-3">Total Cost</th></tr>` + rows + `</table></div>
+                `;
+            } else if (title === 'Data Backup') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-database text-amber-400 mr-2"></i> Management Backend Data Backup & Restore</h3>
+                    <p class="text-xs text-slate-400 mb-6">Download a complete JSON snapshot of your entire Skymover Unified Fleet and Yard database, or restore from a previously exported backup file.</p>
+                    
+                    <div class="space-y-6 text-slate-900">
+                        <div class="bg-white p-6 rounded-2xl shadow border border-slate-200">
+                            <h4 class="font-bold text-sm text-slate-800 mb-2">Export Unified Enterprise Backup</h4>
+                            <p class="text-xs text-slate-500 mb-4">Includes all fleet masterlists, driver records, fuel logs, maintenance schedules, transshipment hubs, and yard containers.</p>
+                            <button onclick="backupUnifiedBackendData()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow">Download Full Enterprise Backup (.json)</button>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow border border-slate-200">
+                            <h4 class="font-bold text-sm text-slate-800 mb-2">Restore Backup</h4>
+                            <p class="text-xs text-slate-500 mb-4">Upload a valid Skymover JSON backup file to overwrite and restore local records.</p>
+                            <label class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center">
+                                <i class="fa-solid fa-upload mr-2"></i> Select Backup File to Restore
+                                <input type="file" id="unifiedRestoreFile" accept=".json,application/json" hidden onchange="restoreUnifiedBackendData(event)">
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function backupUnifiedBackendData() {
+            const unifiedData = {
+                managementBackend: db,
+                emptyYard: yardDb,
+                exportedAt: new Date().toISOString()
+            };
+            blobDownload(new Blob([JSON.stringify(unifiedData, null, 2)], {type: 'application/json'}), 'SKYMOVER_Unified_Enterprise_Backup_' + new Date().toISOString().slice(0,10) + '.json');
+        }
+
+        function restoreUnifiedBackendData(e) {
+            let f = e.target.files[0]; if(!f) return;
+            let r = new FileReader();
+            r.onload = () => {
+                try {
+                    let d = JSON.parse(r.result);
+                    if(!d.managementBackend || !d.emptyYard) throw 0;
+                    if(!confirm('Restore enterprise backup? Current local backend and yard records will be replaced.')) return;
+                    db = d.managementBackend;
+                    yardDb = d.emptyYard;
+                    saveCloudData();
+                    alert('Unified Enterprise Backup successfully restored!');
+                    closeSubModule();
+                } catch(x) { alert('Invalid Skymover backup file format.'); }
+                e.target.value = '';
+            };
+            r.readAsText(f);
+        }
+
+        function closeSubModule() {
+            const modal = document.getElementById('subModuleModal');
+            if(modal) modal.classList.add('hidden');
+        }
+
+        function addVehiclePrompt() {
+            const id = prompt("Enter Unit ID (e.g. SKV-104):");
+            const model = prompt("Enter Vehicle Model:");
+            if(id && model) {
+                if(!db.vehicles) db.vehicles = [];
+                db.vehicles.push({ id, model, status: "Active", driver: "Unassigned" });
+                saveDB();
+                openSubModule('Vehicle Management');
+            }
+        }
+
+        function addFuelPrompt() {
+            const unit = prompt("Enter Unit ID (e.g. SKV-101):");
+            const liters = prompt("Enter Fuel Volume (e.g. 100 L):");
+            const cost = prompt("Enter Total Cost (e.g. ₱6,500):");
+            const station = prompt("Enter Fuel Station & Location (e.g. Shell NLEX):");
+            if(unit && liters && cost) {
+                if(!db.fuelLogs) db.fuelLogs = [];
+                db.fuelLogs.push({ unit, liters, cost, station: station || "Petron Station", date: new Date().toISOString().substring(0, 10) });
+                saveDB();
+                openSubModule('Fuel Monitoring');
+            }
+        }
+
+        function addMaintenancePrompt() {
+            const unit = prompt("Enter Unit ID (e.g. SKV-103):");
+            const issue = prompt("Enter Maintenance Issue / Repair Description:");
+            const cost = prompt("Enter Repair Cost (e.g. ₱4,500):");
+            if(unit && issue) {
+                if(!db.maintenanceLogs) db.maintenanceLogs = [];
+                db.maintenanceLogs.push({ unit, issue, cost: cost || "₱0", status: "In Shop", date: new Date().toISOString().substring(0, 10) });
+                saveDB();
+                openSubModule('Maintenance');
+            }
+        }
+
+        function addDispatchPrompt() {
+            const unit = prompt("Enter Unit ID (e.g. SKV-101):");
+            const route = prompt("Enter Route (e.g. Manila Port → Clark Depot):");
+            const driver = prompt("Enter Assigned Driver:");
+            if(unit && route) {
+                if(!db.dispatchLogs) db.dispatchLogs = [];
+                db.dispatchLogs.push({ unit, route, driver: driver || "Assigned Driver", status: "In Transit" });
+                saveDB();
+                openSubModule('GPS & Dispatch');
+            }
+        }
+
+        function addExpensePrompt() {
+            const trip = prompt("Enter Trip ID (e.g. Trip #403):");
+            const fuel = prompt("Enter Fuel Cost (e.g. ₱5,000):");
+            const tolls = prompt("Enter Toll Fees (e.g. ₱850):");
+            const maint = prompt("Enter Maintenance Cost (e.g. ₱0):");
+            const total = prompt("Enter Total Cost (e.g. ₱5,850):");
+            if(trip && total) {
+                if(!db.expenseLogs) db.expenseLogs = [];
+                db.expenseLogs.push({ trip, fuel: fuel || "₱0", tolls: tolls || "₱0", maintenance: maint || "₱0", total });
+                saveDB();
+                openSubModule('Fleet Expenses');
+            }
+        }
+
+        function openExtractionReport() {
+            const modal = document.getElementById('subModuleModal');
+            const content = document.getElementById('subModuleContent');
+            if(!modal || !content) return;
+            modal.classList.remove('hidden');
+
+            const gateInMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN');
+            const gateOutMovements = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT');
+
+            let gateInHtml = gateInMovements.length ? gateInMovements.map(m => `
+                <div class="border rounded-xl p-4 bg-slate-50 mb-3 text-slate-900">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">Date & Time:</span>${stamp(m.date)}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Trucking Name:</span>${m.truckingName || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Plate No.:</span>${m.plate || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Driver Name:</span>${m.driver || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">EIR / Ref No.:</span>${m.eir || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Row Location:</span>${m.row || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Van In Amount:</span>₱${m.vanInAmount || '0'} ${m.vanInStats === 'UNPAID' ? '<span class="text-rose-600 font-bold">(UNPAID)</span>' : ''}</div>
+                    </div>
+                    <div class="text-[11px] mb-3"><span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
+                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-In Photos (${m.photos ? m.photos.length : 0}):</div>
+                    <div class="flex flex-wrap gap-3">
+                        ${m.photos && m.photos.length ? m.photos.map(p => `
+                            <div class="border rounded-lg p-2 bg-white shadow-sm w-36 text-center">
+                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image in new tab">
+                                    <img src="${p.dataUrl}" class="w-full h-28 object-cover rounded mb-1 hover:opacity-80 transition cursor-pointer border">
+                                </a>
+                                <div class="text-[9px] text-slate-600 truncate font-medium">${p.name}</div>
+                            </div>
+                        `).join('') : '<span class="text-slate-400 italic text-[11px]">No photo attachments for this Gate-In entry.</span>'}
+                    </div>
+                </div>
+            `).join('') : '<div class="text-slate-400 p-2">No Gate-In records found.</div>';
+
+            let gateOutHtml = gateOutMovements.length ? gateOutMovements.map(m => `
+                <div class="border rounded-xl p-4 bg-slate-50 mb-3 text-slate-900">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                        <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Release To / Customer:</span>${m.customer || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Gate-Out EIR/Ref:</span>${m.eir || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Storage Fee Type:</span>${m.fee || 'Dry Van'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Storage Rate/Day:</span>₱${m.storageamount || '450'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Storage Days:</span>${m.storageDays || 0} days</div>
+                        <div><span class="text-slate-500 block text-[10px]">Total Billing:</span><strong class="text-emerald-600">₱${m.totalAmount || '0.00'}</strong></div>
+                    </div>
+                    <div class="text-[11px] mb-3"><span class="text-slate-500">Plate:</span> ${m.plate} | <span class="text-slate-500">Driver:</span> ${m.driver || '—'} | <span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
+                    <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-Out Photos (${m.photos ? m.photos.length : 0}):</div>
+                    <div class="flex flex-wrap gap-3">
+                        ${m.photos && m.photos.length ? m.photos.map(p => `
+                            <div class="border rounded-lg p-2 bg-white shadow-sm w-36 text-center">
+                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image in new tab">
+                                    <img src="${p.dataUrl}" class="w-full h-28 object-cover rounded mb-1 hover:opacity-80 transition cursor-pointer border">
+                                </a>
+                                <div class="text-[9px] text-slate-600 truncate font-medium">${p.name}</div>
+                            </div>
+                        `).join('') : '<span class="text-slate-400 italic text-[11px]">No photo attachments for this Gate-Out release.</span>'}
+                    </div>
+                </div>
+            `).join('') : '<div class="text-slate-400 p-2">No Gate-Out records found.</div>';
+
+            content.innerHTML = `
+                <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 text-white">
+                    <div>
+                        <h3 class="text-xl font-bold"><i class="fa-solid fa-file-arrow-down text-purple-400 mr-2"></i> Skymover Visual Extraction Report & Photo Audit</h3>
+                        <p class="text-xs text-slate-400">Complete merged details of Gate-In inputs with actual photo previews and Gate-Out releases with proofs.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportFullDetailedReportCSV()" class="bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Export Merged CSV</button>
+                        <button onclick="window.print()" class="bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl">Print Report</button>
+                    </div>
+                </div>
+                <div class="space-y-6 text-xs text-slate-900 bg-white p-4 rounded-xl shadow">
+                    <div>
+                        <h4 class="font-bold text-sm text-sky-800 mb-3 border-b pb-1">1. Gate-In Inputs & Attached Actual Photos / Documents (${gateInMovements.length} Records)</h4>
+                        ${gateInHtml}
+                    </div>
+                    <div class="pt-4 border-t border-slate-200">
+                        <h4 class="font-bold text-sm text-amber-800 mb-3 border-b pb-1">2. Gate-Out Inputs & Attached Actual Photos / Documents (${gateOutMovements.length} Records)</h4>
+                        ${gateOutHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTransshipmentTable() {
+            const tbody = document.getElementById('transshipmentTableBody');
+            if(!tbody) return;
+            const transshipments = db.transshipments || [];
+            tbody.innerHTML = transshipments.map((t, idx) => `
+                <tr class="hover:bg-slate-900/40 transition">
+                    <td class="p-3 font-semibold text-sky-400">${t.id}</td>
+                    <td class="p-3">${t.origin}</td>
+                    <td class="p-3 font-mono">${t.container}</td>
+                    <td class="p-3 font-medium text-emerald-400">${t.commission}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700">${t.status}</span></td>
+                    <td class="p-3 text-right">
+                        ${t.status && t.status.includes('Pending') ? `
+                            <button onclick="acceptTransshipment(${idx})" class="bg-emerald-600 text-white px-3 py-1 rounded text-[11px] mr-1">Accept</button>
+                            <button onclick="rejectTransshipment(${idx})" class="bg-rose-600 text-white px-3 py-1 rounded text-[11px]">Reject</button>
+                        ` : '<span class="text-emerald-400 font-semibold text-[11px]"><i class="fa-solid fa-check mr-1"></i> Accepted & Synced</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openNewTransshipmentModal() {
+            const m = document.getElementById('transModal');
+            if(m) m.classList.remove('hidden');
+        }
+        function closeNewTransshipmentModal() {
+            const m = document.getElementById('transModal');
+            if(m) m.classList.add('hidden');
+        }
+
+        function handleTransSubmit(e) {
+            e.preventDefault();
+            const originEl = document.getElementById('transOrigin');
+            const containerEl = document.getElementById('transContainer');
+            const commEl = document.getElementById('transCommission');
+            if(!originEl || !containerEl || !commEl) return;
+
+            const origin = originEl.value;
+            const container = containerEl.value.toUpperCase();
+            const commission = '₱' + Number(commEl.value).toLocaleString();
+            
+            if(!db.transshipments) db.transshipments = [];
+            db.transshipments.push({
+                id: 'TR-' + Math.floor(1000 + Math.random() * 9000),
+                origin,
+                container,
+                commission,
+                status: 'Pending Hub Review'
+            });
+            saveDB();
+            closeNewTransshipmentModal();
             renderTransshipmentTable();
-            renderBillingStatement();
-            updateShippingLineFilter();
+            const form = document.getElementById('transForm');
+            if(form) form.reset();
+            alert('Transshipment order successfully saved to Unified DB.');
         }
 
-        function updateDashboardStats() {
-            const total = yardDb.containers.length;
-            const count20 = yardDb.containers.filter(c => c.iso.startsWith('22')).length;
-            const count40 = total - count20;
-            
-            document.getElementById('statTotalCount').innerText = total;
-            document.getElementById('statSizeBreakdown').innerText = `${count20} (20') / ${count40} (40')`;
-            
-            const totalRev = yardDb.containers.reduce((acc, c) => acc + (parseFloat(c.vanInAmount) || 0), 145000);
-            document.getElementById('statMonthRevenue').innerText = '₱' + totalRev.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('statPendingOut').innerText = yardDb.containers.length;
-        }
-
-        function updateShippingLineFilter() {
-            const select = document.getElementById('filterLine');
-            const lines = [...new Set(yardDb.containers.map(c => c.shippingLine))];
-            let html = '<option value="">All Shipping Lines</option>';
-            lines.forEach(l => { html += `<option value="${l}">${l}</option>`; });
-            select.innerHTML = html;
-        }
-
-        function renderInventoryTable() {
-            const query = document.getElementById('inventorySearch').value.toLowerCase();
-            const filterLine = document.getElementById('filterLine').value;
-            const tbody = document.getElementById('inventoryTableBody');
-            
-            const filtered = yardDb.containers.filter(c => {
-                const matchQuery = c.containerNo.toLowerCase().includes(query) || c.shippingLine.toLowerCase().includes(query) || (c.plate && c.plate.toLowerCase().includes(query));
-                const matchLine = filterLine ? c.shippingLine === filterLine : true;
-                return matchQuery && matchLine;
+        function acceptTransshipment(idx) {
+            if(!db.transshipments) db.transshipments = [];
+            db.transshipments[idx].status = 'Hub Accepted (In Transit)';
+            if(!db.vehicles) db.vehicles = [];
+            db.vehicles.push({
+                id: 'SKV-' + Math.floor(200 + Math.random() * 800),
+                model: 'Transshipment Unit (' + db.transshipments[idx].container + ')',
+                status: 'Assigned / On Trip',
+                driver: 'Assigned Hub Driver'
             });
+            saveDB();
+            renderTransshipmentTable();
+            alert('Transshipment order accepted! Data synchronized to Management Backend and Driver Portal.');
+        }
 
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">No containers found in yard inventory.</td></tr>`;
-                return;
+        function rejectTransshipment(idx) {
+            if(!db.transshipments) db.transshipments = [];
+            db.transshipments[idx].status = 'Rejected / Cancelled';
+            saveDB();
+            renderTransshipmentTable();
+        }
+
+        function switchYardTab(tabId) {
+            document.querySelectorAll('.yard-tab').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(tabId);
+            if(target) target.classList.remove('hidden');
+            
+            ['yBtn1','yBtn2','yBtn3','yBtn4','yBtn5','yBtn6','yBtn7','yBtn8'].forEach((id, idx) => {
+                let btn = document.getElementById(id);
+                if(btn) {
+                    btn.className = 'btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200';
+                    if(['yardDashboard','yardInventory','yardGateIn','yardGateOut','yardRevenue','yardExpenses','yardReports','yardBackup'][idx] === tabId) {
+                        btn.className = 'btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white';
+                    }
+                }
+            });
+            refreshYard();
+        }
+
+        function liveYard() { return (yardDb.containers || []).filter(c => c.status !== 'Released'); }
+        function yardLoc(c) { return [c.block && 'Block '+c.block, c.bay && 'Bay '+c.bay, c.row && 'Row '+c.row, c.tier && 'Tier '+c.tier].filter(Boolean).join(' • ') || '—'; }
+        function stamp(v) { return v ? new Date(v).toLocaleString() : '—'; }
+
+        function refreshYard() {
+            let a = liveYard();
+            const yt = document.getElementById('yardTotal');
+            const ya = document.getElementById('yardAvailable');
+            const yr = document.getElementById('yardReserved');
+            const yd = document.getElementById('yardDamaged');
+            if(yt) yt.textContent = a.length;
+            if(ya) ya.textContent = a.filter(c => c.status === 'Available' && c.condition === 'Good').length;
+            if(yr) yr.textContent = a.filter(c => c.status === 'Reserved').length;
+            if(yd) yd.textContent = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
+
+            const gateInCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN').length;
+            const gateOutCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT').length;
+            const totalRev = (yardDb.revenues || []).reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
+
+            const dGIn = document.getElementById('dashGateInCount');
+            const dGOut = document.getElementById('dashGateOutCount');
+            const dRev = document.getElementById('dashTotalRev');
+            if(dGIn) dGIn.textContent = gateInCnt;
+            if(dGOut) dGOut.textContent = gateOutCnt;
+            if(dRev) dRev.textContent = '₱' + totalRev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            let r = (yardDb.movements || []).slice(-8).reverse();
+            const yrb = document.getElementById('yardRecentBody');
+            if(yrb) {
+                yrb.innerHTML = r.length ? r.map(m => `<tr><td class="p-3">${stamp(m.date)}</td><td class="p-3 font-semibold">${m.kind}</td><td class="p-3 font-mono">${m.number}</td><td class="p-3">${m.plate}</td><td class="p-3">${m.eir||'—'}</td><td class="p-3">₱${m.vanInAmount || m.totalAmount || 0}</td></tr>`).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-400">No movements recorded yet.</td></tr>';
             }
 
-            let html = '';
-            filtered.forEach(c => {
-                const badgeColor = c.grade === 'A' ? 'bg-emerald-100 text-emerald-800' : c.grade === 'B' ? 'bg-sky-100 text-sky-800' : 'bg-amber-100 text-amber-800';
-                const statsColor = c.vanInStats === 'PAID' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
-                html += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="py-3 px-4 font-mono font-bold text-slate-900">${c.containerNo}</td>
-                        <td class="py-3 px-4"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-semibold">${c.iso}</span></td>
-                        <td class="py-3 px-4 font-semibold text-slate-800">${c.shippingLine}</td>
-                        <td class="py-3 px-4 text-xs text-slate-500">${c.date.replace('T', ' ')}</td>
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-bold ${badgeColor}">Grade ${c.grade}</span></td>
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-bold ${statsColor}">${c.vanInStats}</span></td>
-                        <td class="py-3 px-4 text-right space-x-2">
-                            <button onclick="viewContainer('${c.id}')" class="text-skyBrand-600 hover:text-skyBrand-900 text-xs font-semibold"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="deleteContainer('${c.id}')" class="text-rose-500 hover:text-rose-700 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
+            renderYardInventory();
+            renderYardOutSelect();
+            renderYardRevenue();
+            renderYardExpenses();
+            renderYardReports();
+        }
+
+        function renderYardInventory() {
+            const searchInput = document.getElementById('yardSearchInput');
+            let q = (searchInput ? searchInput.value : '').toLowerCase();
+            let allConts = yardDb.containers || [];
+            let filtered = allConts.filter(c => [c.number, c.line, c.status, c.size, c.plate].join(' ').toLowerCase().includes(q));
+            const rows = document.getElementById('yardInventoryRows');
+            if(rows) {
+                rows.innerHTML = filtered.length ? filtered.map(c => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold font-mono">
+                            ${c.number}
+                            ${c.photos && c.photos.length ? '<span class="ml-1 text-amber-600 font-semibold" title="' + c.photos.length + ' photo(s) attached"><i class="fa-solid fa-camera"></i> (' + c.photos.length + ')</span>' : ''}
+                        </td>
+                        <td class="p-3">${c.size} ${c.type}</td>
+                        <td class="p-3">${c.line}</td>
+                        <td class="p-3">
+                            <span class="pill ${c.status}">${c.status}</span>
+                            ${c.vanInStats === 'UNPAID' ? '<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded">UNPAID</span>' : ''}
+                        </td>
+                        <td class="p-3">${yardLoc(c)}</td>
+                        <td class="p-3">${stamp(c.date)}</td>
+                        <td class="p-3">${stamp(c.gateOutDate)}</td>
+                        <td class="p-3 font-mono">In: ₱${c.vanInAmount || 0}<br>Out: ₱${c.vanOutAmount || 0}</td>
+                        <td class="p-3">
+                            <button class="text-sky-600 hover:underline mr-2" onclick="editYardStatus('${c.id}')">Status</button>
                         </td>
                     </tr>
-                `;
-            });
-            tbody.innerHTML = html;
+                `).join('') : '<tr><td colspan="9" class="p-4 text-center text-slate-400">No containers found.</td></tr>';
+            }
         }
 
-        // Gate-In Handler
-        function handleGateInSubmit(e) {
-            e.preventDefault();
-            const newC = {
-                id: 'C-' + Date.now().toString().slice(-4),
-                containerNo: document.getElementById('giContainerNo').value.toUpperCase(),
-                iso: document.getElementById('giIsoCode').value,
-                shippingLine: document.getElementById('giShippingLine').value.toUpperCase(),
-                date: document.getElementById('giDate').value,
-                plate: document.getElementById('giPlate').value.toUpperCase(),
-                driver: document.getElementById('giDriver').value,
-                grade: document.getElementById('giGrade').value,
-                vanInAmount: parseFloat(document.getElementById('giVanInAmount').value) || 0,
-                vanInStats: document.getElementById('giVanInStats').value,
-                remarks: document.getElementById('giRemarks').value
-            };
-
-            yardDb.containers.unshift(newC);
-            refreshAllDataViews();
-            alert(`Container ${newC.containerNo} successfully gated-in!`);
-            document.getElementById('gateInForm').reset();
-            switchTab('inventory');
+        function renderYardOutSelect() {
+            const sel = document.getElementById('yardOutContainer');
+            if(!sel) return;
+            let a = liveYard();
+            sel.innerHTML = '<option value="">Select container in yard</option>' + a.map(c => `<option value="${c.id}">${c.number} (${c.size} ${c.type} - ${c.line})</option>`).join('');
         }
 
-        // Gate-Out & Calculation Logic (Fixed naming)
-        function updateGateOutDropdown() {
-            const select = document.getElementById('yardOutContainer');
-            let html = '<option value="">-- Choose Container in Yard --</option>';
-            yardDb.containers.forEach(c => {
-                html += `<option value="${c.id}">${c.containerNo} (${c.shippingLine} - ${c.iso})</option>`;
-            });
-            select.innerHTML = html;
-        }
+        let activeSelectedContainer = null;
 
-        function onContainerSelectForGateOut() {
+        function containerSelectedForGateOut() {
             const selId = document.getElementById('yardOutContainer').value;
             const c = yardDb.containers.find(x => x.id === selId);
             activeSelectedContainer = c || null;
             if(c) {
-                document.getElementById('calcGateInDisplay').value = c.date.replace('T', ' ');
+                document.getElementById('calcGateInDisplay').value = c.date || '';
                 document.getElementById('calcVanInAmount').value = c.vanInAmount || 0;
                 
-                const plateInput = document.getElementById('giPlate');
-                const driverInput = document.getElementById('giDriver');
+                const plateInput = document.getElementById('gateOutPlate');
+                const driverInput = document.getElementById('gateOutDriver');
+                const remarksInput = document.getElementById('gateOutRemarks');
+                
                 if(plateInput && c.plate) plateInput.value = c.plate;
                 if(driverInput && c.driver) driverInput.value = c.driver;
+                if(remarksInput && c.remarks) remarksInput.value = c.remarks;
 
                 recalculateTotals();
             } else {
                 document.getElementById('calcGateInDisplay').value = '';
                 document.getElementById('calcVanInAmount').value = 0;
-                document.getElementById('calcStorageDays').value = '0 days';
-                document.getElementById('calcTotalAmount').innerText = '₱0.00';
+                document.getElementById('calcStorageDays').value = 0;
+                document.getElementById('calcTotalAmount').value = '0.00';
+                
+                const plateInput = document.getElementById('gateOutPlate');
+                const driverInput = document.getElementById('gateOutDriver');
+                const remarksInput = document.getElementById('gateOutRemarks');
+                if(plateInput) plateInput.value = '';
+                if(driverInput) driverInput.value = '';
+                if(remarksInput) remarksInput.value = '';
+
+                const notice = document.getElementById('vanInDeductionNotice');
+                if(notice) notice.classList.add('hidden');
             }
         }
 
         function recalculateTotals() {
-            const gateInVal = activeSelectedContainer ? activeSelectedContainer.date : null;
+            const gateInVal = document.getElementById('calcGateInDisplay').value;
             const gateOutVal = document.getElementById('calcGateOutDate').value;
             const vanIn = parseFloat(document.getElementById('calcVanInAmount').value) || 0;
             const vanOut = parseFloat(document.getElementById('calcVanOutAmount').value) || 0;
@@ -647,211 +1539,596 @@
                 const dOut = new Date(gateOutVal);
                 const diffTime = dOut - dIn;
                 if(diffTime > 0) {
-                    storageDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                    storageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 }
             }
-            document.getElementById('calcStorageDays').innerText = `${storageDays} days`;
+            document.getElementById('calcStorageDays').value = storageDays;
 
             let grossAmount = vanIn + vanOut + (storageRate * storageDays);
+            
             let finalTotal = grossAmount;
             const notice = document.getElementById('vanInDeductionNotice');
-            
             if (activeSelectedContainer && activeSelectedContainer.vanInStats === 'PAID') {
-                finalTotal = Math.max(0, grossAmount - vanIn);
+                finalTotal = grossAmount - vanIn;
+                if(finalTotal < 0) finalTotal = 0;
                 if(notice) notice.classList.remove('hidden');
             } else {
                 if(notice) notice.classList.add('hidden');
             }
 
-            document.getElementById('calcTotalAmount').innerText = '₱' + finalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('calcTotalAmount').value = finalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        function executeGateOut() {
-            if(!activeSelectedContainer) {
-                alert('Please select a container from the yard for gate-out release.');
-                return;
+        function renderYardRevenue() {
+            const tbody = document.getElementById('revenueTableBody');
+            const totalDisp = document.getElementById('totalRevenueDisplay');
+            const totalExpDispRev = document.getElementById('totalExpenseDisplayRev');
+            const netIncomeDisp = document.getElementById('netTotalIncomeDisplay');
+            const monthlyBody = document.getElementById('monthlyFinancialBody');
+            const monthSelect = document.getElementById('statementMonthSelect');
+            if(!tbody) return;
+
+            const revs = yardDb.revenues || [];
+            let totalRev = revs.reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
+            if(totalDisp) totalDisp.textContent = '₱' + totalRev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            const exps = yardDb.expenses || [];
+            let totalExp = exps.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
+            if(totalExpDispRev) totalExpDispRev.textContent = '₱' + totalExp.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            let netIncome = totalRev - totalExp;
+            if(netIncomeDisp) {
+                netIncomeDisp.textContent = '₱' + netIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                netIncomeDisp.className = netIncome >= 0 ? "text-2xl font-extrabold text-blue-700 my-1" : "text-2xl font-extrabold text-rose-600 my-1";
             }
-            const cNo = activeSelectedContainer.containerNo;
-            yardDb.containers = yardDb.containers.filter(x => x.id !== activeSelectedContainer.id);
-            activeSelectedContainer = null;
-            refreshAllDataViews();
-            alert(`Container ${cNo} successfully gated-out and invoice recorded!`);
-            switchTab('inventory');
-        }
 
-        // Transshipment Hub
-        function renderTransshipmentTable() {
-            const tbody = document.getElementById('transshipmentTableBody');
-            if(yardDb.transfers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">No active transshipment transfers.</td></tr>`;
-                return;
+            // Calculate Monthly Breakdown
+            let monthlyMap = {};
+            revs.forEach(r => {
+                let mKey = r.date ? r.date.slice(0, 7) : 'Unknown';
+                if(!monthlyMap[mKey]) monthlyMap[mKey] = { rev: 0, exp: 0 };
+                monthlyMap[mKey].rev += parseFloat(r.amount) || 0;
+            });
+            exps.forEach(e => {
+                let mKey = e.date ? e.date.slice(0, 7) : 'Unknown';
+                if(!monthlyMap[mKey]) monthlyMap[mKey] = { rev: 0, exp: 0 };
+                monthlyMap[mKey].exp += parseFloat(e.amount) || 0;
+            });
+
+            let sortedMonths = Object.keys(monthlyMap).sort();
+            
+            if(monthSelect) {
+                monthSelect.innerHTML = sortedMonths.length ? sortedMonths.slice().reverse().map(m => `<option value="${m}">Statement: ${m}</option>`).join('') : '<option value="">No Months Available</option>';
             }
-            let html = '';
-            yardDb.transfers.forEach(t => {
-                html += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="py-3 px-4 font-mono font-bold text-skyBrand-600">${t.id}</td>
-                        <td class="py-3 px-4 font-mono font-bold text-slate-900">${t.containerNo}</td>
-                        <td class="py-3 px-4 text-slate-600">${t.origin}</td>
-                        <td class="py-3 px-4 text-slate-600">${t.dest}</td>
-                        <td class="py-3 px-4 text-slate-700">${t.hauler}</td>
-                        <td class="py-3 px-4"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-bold">${t.status}</span></td>
-                        <td class="py-3 px-4 text-right">
-                            <button onclick="completeTransfer('${t.id}')" class="text-emerald-600 hover:text-emerald-800 text-xs font-semibold"><i class="fa-solid fa-check mr-1"></i>Mark Arrived</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
+
+            if(monthlyBody) {
+                monthlyBody.innerHTML = sortedMonths.length ? sortedMonths.slice().reverse().map(m => {
+                    let data = monthlyMap[m];
+                    let net = data.rev - data.exp;
+                    return `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-3 font-semibold font-mono text-slate-700">${m}</td>
+                            <td class="p-3 text-right font-mono text-emerald-600">₱${data.rev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="p-3 text-right font-mono text-rose-600">₱${data.exp.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="p-3 text-right font-mono font-bold ${net >= 0 ? 'text-blue-600' : 'text-rose-600'}">₱${net.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
+                }).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-400">No monthly financial records found.</td></tr>';
+            }
+
+            tbody.innerHTML = revs.length ? revs.slice().reverse().map(r => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="p-3">${stamp(r.date)}</td>
+                    <td class="p-3 font-semibold text-emerald-700">${r.source}</td>
+                    <td class="p-3 font-mono">${r.container || '—'}</td>
+                    <td class="p-3">${r.eir || '—'}</td>
+                    <td class="p-3 text-right font-bold text-emerald-600">₱${Number(r.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No revenue records found.</td></tr>';
+
+            // RENDER OR UPDATE CHART.JS TREND GRAPH
+            renderMonthlyTrendChart(sortedMonths, monthlyMap);
         }
 
-        function openTransshipmentModal() { document.getElementById('transshipmentModal').classList.remove('hidden'); }
-        function closeTransshipmentModal() { document.getElementById('transshipmentModal').classList.add('hidden'); }
+        function renderMonthlyTrendChart(months, monthlyMap) {
+            const ctx = document.getElementById('monthlyTrendChart');
+            if(!ctx) return;
 
-        function handleTransshipmentSubmit(e) {
-            e.preventDefault();
-            const newT = {
-                id: 'TR-' + Math.floor(100 + Math.random() * 900),
-                containerNo: document.getElementById('trContainerNo').value.toUpperCase(),
-                origin: document.getElementById('trOrigin').value,
-                dest: document.getElementById('trDest').value,
-                hauler: document.getElementById('trHauler').value.toUpperCase() || 'Assigned Hauler',
-                status: 'IN TRANSIT'
-            };
-            yardDb.transfers.unshift(newT);
-            closeTransshipmentModal();
-            renderTransshipmentTable();
-            alert('Transshipment order successfully dispatched!');
-        }
+            let revData = months.map(m => monthlyMap[m].rev);
+            let expData = months.map(m => monthlyMap[m].exp);
+            let netData = months.map(m => monthlyMap[m].rev - monthlyMap[m].exp);
 
-        function completeTransfer(id) {
-            yardDb.transfers = yardDb.transfers.filter(t => t.id !== id);
-            renderTransshipmentTable();
-            alert('Transfer marked as arrived at destination.');
-        }
+            if(trendChartInstance) {
+                trendChartInstance.destroy();
+            }
 
-        // Financials & Billing Statement
-        function renderBillingStatement() {
-            const tbody = document.getElementById('statementTableItems');
-            let html = '';
-            let subtotal = 0;
-            yardDb.containers.forEach(c => {
-                const amt = c.vanInAmount || 2500;
-                subtotal += amt;
-                html += `
-                    <tr>
-                        <td class="py-2 px-3 font-mono font-bold">${c.containerNo}</td>
-                        <td class="py-2 px-3">${c.iso}</td>
-                        <td class="py-2 px-3">${c.date.slice(0, 10)}</td>
-                        <td class="py-2 px-3">In Yard</td>
-                        <td class="py-2 px-3">Active</td>
-                        <td class="py-2 px-3 text-right font-mono">₱${amt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-            const vat = subtotal * 0.12;
-            const grandTotal = subtotal + vat;
-            document.getElementById('soaSubtotal').innerText = '₱' + subtotal.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('soaVat').innerText = '₱' + vat.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('soaGrandTotal').innerText = '₱' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('statementDatePrint').innerText = 'Date: ' + new Date().toLocaleDateString();
-        }
-
-        function exportBillingPDF() {
-            const element = document.getElementById('pdfStatementContainer');
-            const opt = {
-                margin:        0.5,
-                filename:      'Skymover_Statement_of_Account.pdf',
-                image:         { type: 'jpeg', quality: 0.98 },
-                html2canvas:   { scale: 2 },
-                jsPDF:         { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().from(element).set(opt).save();
-        }
-
-        // Charts Initialization
-        function initCharts() {
-            const ctxStatus = document.getElementById('statusChart').getContext('2d');
-            statusChartInstance = new Chart(ctxStatus, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Grade A (Worthy)', 'Grade B (Standard)', 'Grade C (Repairable)', 'WWT (Washed)'],
-                    datasets: [{
-                        data: [12, 28, 6, 14],
-                        backgroundColor: ['#10b981', '#0ea5e9', '#f59e0b', '#6366f1']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctxRev = document.getElementById('revenueChart').getContext('2d');
-            revenueChartInstance = new Chart(ctxRev, {
+            trendChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: yardDb.revenues.map(r => r.month),
-                    datasets: [{
-                        label: 'Monthly Revenue (PHP)',
-                        data: yardDb.revenues.map(r => r.amount),
-                        backgroundColor: '#0284c7',
-                        borderRadius: 6
-                    }]
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Revenue (₱)',
+                            data: revData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Expenses (₱)',
+                            data: expData,
+                            backgroundColor: 'rgba(244, 63, 94, 0.8)',
+                            borderColor: 'rgb(244, 63, 94)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Net Income (₱)',
+                            data: netData,
+                            type: 'line',
+                            borderColor: 'rgb(37, 99, 235)',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.2
+                        }
+                    ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 11, family: 'Inter' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { font: { size: 10, family: 'Inter' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, family: 'Inter' } }
+                        }
+                    }
+                }
             });
         }
 
-        function updateCharts() {
-            if(statusChartInstance) statusChartInstance.update();
-            if(revenueChartInstance) revenueChartInstance.update();
-        }
-
-        // Modal Controls
-        function openConfigModal() { document.getElementById('configModal').classList.remove('hidden'); }
-        function closeConfigModal() { document.getElementById('configModal').classList.add('hidden'); }
-        function saveSupabaseConfig() {
-            const url = document.getElementById('supabaseUrlInput').value;
-            const key = document.getElementById('supabaseKeyInput').value;
-            if(url && key) {
-                try {
-                    supabaseClient = window.supabase.createClient(url, key);
-                    document.getElementById('syncStatusBadge').className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800";
-                    document.getElementById('syncStatusBadge').innerHTML = '<i class="fa-solid fa-cloud mr-1.5"></i> Supabase Connected';
-                    closeConfigModal();
-                    alert('Successfully connected to Supabase cloud database!');
-                } catch(err) {
-                    alert('Connection failed: ' + err.message);
-                }
-            } else {
-                alert('Please enter both Project URL and Anon Key.');
+        // Export Chart as PNG Image function
+        function exportChartAsImage() {
+            if(!trendChartInstance) {
+                return alert('Chart is not initialized yet.');
             }
+            const imageURL = trendChartInstance.toBase64Image();
+            const link = document.createElement('a');
+            link.href = imageURL;
+            link.download = 'Skymover_Revenue_Expense_Trend_Chart_' + new Date().toISOString().slice(0, 10) + '.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        function viewContainer(id) {
-            const c = yardDb.containers.find(x => x.id === id);
-            if(!c) return;
-            document.getElementById('containerModalTitle').innerText = `Container: ${c.containerNo}`;
-            document.getElementById('containerModalBody').innerHTML = `
-                <div class="space-y-2 text-xs">
-                    <p><strong>ISO Size:</strong> ${c.iso}</p>
-                    <p><strong>Shipping Line:</strong> ${c.shippingLine}</p>
-                    <p><strong>Gate-In Date:</strong> ${c.date.replace('T', ' ')}</p>
-                    <p><strong>Truck Plate / Driver:</strong> ${c.plate || 'N/A'} / ${c.driver || 'N/A'}</p>
-                    <p><strong>Container Grade:</strong> Grade ${c.grade}</p>
-                    <p><strong>Van-In Status:</strong> ₱${c.vanInAmount} (${c.vanInStats})</p>
-                    <p><strong>Remarks / EIR:</strong> ${c.remarks || 'None recorded'}</p>
+        function downloadMonthlyStatementPDF() {
+            const selectEl = document.getElementById('statementMonthSelect');
+            const targetMonth = selectEl ? selectEl.value : '';
+            if(!targetMonth) return alert('Please select a valid month to download statement.');
+
+            const revs = (yardDb.revenues || []).filter(r => r.date && r.date.startsWith(targetMonth));
+            const exps = (yardDb.expenses || []).filter(e => e.date && e.date.startsWith(targetMonth));
+
+            let monthRev = revs.reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
+            let monthExp = exps.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
+            let monthNet = monthRev - monthExp;
+
+            let revRows = revs.length ? revs.map(r => `<tr><td style="padding:6px; border-bottom:1px solid #eee;">${stamp(r.date)}</td><td style="padding:6px; border-bottom:1px solid #eee;">${r.source} (${r.container || '—'})</td><td style="padding:6px; border-bottom:1px solid #eee; text-align:right; color:#14734d; font-weight:bold;">₱${Number(r.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</td></tr>`).join('') : '<tr><td colspan="3" style="padding:10px; text-align:center; color:#888;">No revenue transactions for this month.</td></tr>';
+
+            let expRows = exps.length ? exps.map(e => `<tr><td style="padding:6px; border-bottom:1px solid #eee;">${stamp(e.date)}</td><td style="padding:6px; border-bottom:1px solid #eee;">${e.category} - ${e.description}</td><td style="padding:6px; border-bottom:1px solid #eee; text-align:right; color:#b33225; font-weight:bold;">₱${Number(e.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</td></tr>`).join('') : '<tr><td colspan="3" style="padding:10px; text-align:center; color:#888;">No expense transactions for this month.</td></tr>';
+
+            const container = document.createElement('div');
+            container.style.cssText = 'padding: 30px; font-family: Inter, sans-serif; color: #1e293b; background: #ffffff; width: 800px;';
+            container.innerHTML = `
+                <div style="border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <h1 style="color: #0284c7; font-size: 24px; font-weight: 800; margin: 0;">SKYMOVER TRANSPORTATION</h1>
+                        <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Empty Container Yard Management & Fleet Operations • Manila, Philippines</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h2 style="font-size: 16px; font-weight: 700; margin: 0; color: #0f172a;">FINANCIAL STATEMENT</h2>
+                        <p style="font-size: 12px; color: #0f172a; font-weight: 600; margin: 2px 0 0 0;">Period: ${targetMonth}</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                    <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #166534;">TOTAL REVENUE</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #15803d; margin-top: 4px;">₱${monthRev.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                    </div>
+                    <div style="flex: 1; background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #9f1239;">TOTAL EXPENSES</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #be123c; margin-top: 4px;">₱${monthExp.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                    </div>
+                    <div style="flex: 1; background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #1e40af;">NET TOTAL INCOME</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1d4ed8; margin-top: 4px;">₱${monthNet.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 13px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 10px;">1. Revenue Breakdown</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background: #f8fafc; text-align: left; color: #475569;">
+                                <th style="padding: 6px; border-bottom: 1px solid #cbd5e1;">Date</th>
+                                <th style="padding: 6px; border-bottom: 1px solid #cbd5e1;">Source / Description</th>
+                                <th style="padding: 6px; border-bottom: 1px solid #cbd5e1; text-align: right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>${revRows}</tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 13px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 10px;">2. Expense Breakdown</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background: #f8fafc; text-align: left; color: #475569;">
+                                <th style="padding: 6px; border-bottom: 1px solid #cbd5e1;">Date</th>
+                                <th style="padding: 6px; border-bottom: 1px solid #cbd5e1;">Category & Description</th>
+                                <th style="padding: 6px; border-bottom: 1px solid #cbd5e1; text-align: right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>${expRows}</tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                    Generated securely via Skymover Enterprise Platform • ${new Date().toLocaleString()}
                 </div>
             `;
-            document.getElementById('containerModal').classList.remove('hidden');
-        }
-        function closeContainerModal() { document.getElementById('containerModal').classList.add('hidden'); }
 
-        function deleteContainer(id) {
-            if(confirm('Are you sure you want to remove this container record from the yard inventory?')) {
-                yardDb.containers = yardDb.containers.filter(x => x.id !== id);
-                refreshAllDataViews();
+            const opt = {
+                margin:       10,
+                filename:     `Skymover_Financial_Statement_${targetMonth}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(container).set(opt).save();
+        }
+
+        function renderYardExpenses() {
+            const tbody = document.getElementById('expenseTableBody');
+            const totalDisp = document.getElementById('totalExpenseDisplay');
+            if(!tbody) return;
+
+            const exps = yardDb.expenses || [];
+            let total = exps.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
+            if(totalDisp) totalDisp.textContent = '₱' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            tbody.innerHTML = exps.length ? exps.slice().reverse().map(e => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="p-3">${stamp(e.date)}</td>
+                    <td class="p-3 font-semibold text-slate-700">${e.category}</td>
+                    <td class="p-3">${e.description}</td>
+                    <td class="p-3 text-right font-bold text-rose-600">₱${Number(e.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="4" class="p-4 text-center text-slate-400">No expense records found.</td></tr>';
+        }
+
+        function handleYardExpenseSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form));
+            if(!yardDb.expenses) yardDb.expenses = [];
+            yardDb.expenses.push({
+                date: data.date,
+                category: data.category,
+                description: data.description,
+                amount: parseFloat(data.amount) || 0
+            });
+            saveYardDB();
+            form.reset();
+            alert('Yard expense successfully recorded.');
+            renderYardExpenses();
+        }
+
+        function renderYardReports() {
+            let a = liveYard();
+            const r1 = document.getElementById('yardRptGateIn');
+            const r2 = document.getElementById('yardRptGateOut');
+            const r3 = document.getElementById('yardRptLines');
+            const r4 = document.getElementById('yardRptMoves');
+            if(r1) r1.textContent = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN').length;
+            if(r2) r2.textContent = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT').length;
+            if(r3) r3.textContent = new Set(a.map(c => c.line.toLowerCase())).size;
+            if(r4) r4.textContent = (yardDb.movements || []).length;
+
+            let lines = [...new Set(a.map(c => c.line))].sort();
+            const lineRows = document.getElementById('yardLineRows');
+            if(lineRows) {
+                lineRows.innerHTML = lines.length ? lines.map(l => {
+                    let x = a.filter(c => c.line === l);
+                    return '<tr class="border-b"><td class="p-3 font-medium">' + l + '</td><td class="p-3">' + x.length + '</td><td class="p-3">' + x.filter(c => c.status==='Available'&&c.condition==='Good').length + '</td><td class="p-3">' + x.filter(c => c.status==='Reserved').length + '</td><td class="p-3">' + x.filter(c => ['Damaged','For Inspection'].includes(c.condition)||c.status==='Hold').length + '</td></tr>';
+                }).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-400">No stock records.</td></tr>';
+            }
+
+            const moveRows = document.getElementById('yardMovementRows');
+            if(moveRows) {
+                moveRows.innerHTML = (yardDb.movements || []).length ? yardDb.movements.slice().reverse().map(m => `
+                    <tr class="border-b">
+                        <td class="p-3">${stamp(m.date)}</td>
+                        <td class="p-3 font-semibold">${m.kind}</td>
+                        <td class="p-3 font-mono">${m.number}</td>
+                        <td class="p-3">${m.plate}</td>
+                        <td class="p-3 font-bold">${m.storageDays !== undefined ? m.storageDays + ' days' : '—'}</td>
+                        <td class="p-3 font-mono">In: ₱${m.vanInAmount||0} ${m.vanInStats === 'UNPAID' ? '(UNPAID)' : ''}<br>Out: ₱${m.vanOutAmount||0}</td>
+                        <td class="p-3 font-bold text-emerald-600">${m.totalAmount ? '₱' + m.totalAmount : '—'}</td>
+                        <td class="p-3">${m.eir||'—'}</td>
+                    </tr>
+                `).join('') : '<tr><td colspan="8" class="p-4 text-center text-slate-400">No movement history.</td></tr>';
             }
         }
+
+        function handleYardGateIn(e) {
+            e.preventDefault();
+            let f = Object.fromEntries(new FormData(e.target));
+            f.number = f.number.trim().toUpperCase();
+            if(yardDb.containers.some(c => c.number.toUpperCase() === f.number && c.status !== 'Released')) {
+                return alert('This container is already recorded inside the yard.');
+            }
+            let c = {
+                ...f, 
+                id: 'yd-' + Math.random().toString(36).substring(2, 9),
+                gateOutDate: '—',
+                vanOutAmount: '0',
+                totalAmount: f.vanInAmount || '0',
+                photos: [...stagedGateInPhotos]
+            };
+            if(c.condition !== 'Good') c.status = 'Hold';
+            if(!yardDb.containers) yardDb.containers = [];
+            if(!yardDb.movements) yardDb.movements = [];
+            if(!yardDb.revenues) yardDb.revenues = [];
+
+            yardDb.containers.push(c);
+            yardDb.movements.push({
+                kind: 'GATE-IN', 
+                date: c.date, 
+                number: c.number, 
+                truckingName: c.truckingName,
+                plate: c.plate, 
+                driver: c.driver, 
+                eir: c.eir, 
+                row: c.row,
+                remarks: c.remarks,
+                vanInStats: c.vanInStats,
+                vanInAmount: c.vanInAmount,
+                photos: [...stagedGateInPhotos]
+            });
+
+            const vanInAmt = parseFloat(c.vanInAmount) || 0;
+            if(vanInAmt > 0 && c.vanInStats !== 'UNPAID') {
+                yardDb.revenues.push({
+                    date: c.date,
+                    source: 'Gate-In Fee (Van In)',
+                    container: c.number,
+                    eir: c.eir || '—',
+                    amount: vanInAmt
+                });
+            }
+
+            saveYardDB();
+            e.target.reset();
+            clearGateInPhotos();
+            
+            alert('Yard Gate-In saved successfully and synced across cloud database!');
+            switchYardTab('yardInventory');
+        }
+
+        function handleYardGateOut(e) {
+            e.preventDefault();
+            let f = Object.fromEntries(new FormData(e.target));
+            let c = yardDb.containers.find(x => x.id === f.container);
+            if(!c) return alert('Select a valid container.');
+
+            const storageDays = parseInt(document.getElementById('calcStorageDays').value) || 0;
+            const totalAmountStr = document.getElementById('calcTotalAmount').value.replace(/,/g, '');
+            const totalAmountNum = parseFloat(totalAmountStr) || 0;
+
+            if(!confirm('Confirm gate-out for ' + c.number + '?\nStorage Days: ' + storageDays + '\nTotal Billing Amount: ₱' + document.getElementById('calcTotalAmount').value)) return;
+            
+            if(c.vanInStats === 'UNPAID') {
+                c.vanInStats = 'PAID';
+                const vanInVal = parseFloat(c.vanInAmount) || 0;
+                if(vanInVal > 0) {
+                    if(!yardDb.revenues) yardDb.revenues = [];
+                    yardDb.revenues.push({
+                        date: f.date,
+                        source: 'Gate-In Fee (Van In - Cleared Upon Release)',
+                        container: c.number,
+                        eir: f.eir,
+                        amount: vanInVal
+                    });
+                }
+            }
+
+            c.status = 'Released';
+            c.gateOutDate = f.date;
+            c.vanOutAmount = f.vanOutAmount || '0';
+            c.totalAmount = document.getElementById('calcTotalAmount').value;
+
+            if(!yardDb.movements) yardDb.movements = [];
+            if(!yardDb.revenues) yardDb.revenues = [];
+
+            yardDb.movements.push({
+                kind: 'GATE-OUT', 
+                date: f.date, 
+                number: c.number, 
+                plate: f.plate, 
+                driver: f.driver, 
+                customer: f.customer, 
+                eir: f.eir, 
+                fee: f.fee,
+                storageamount: f.storageamount,
+                vanInAmount: c.vanInAmount || '0',
+                vanOutAmount: f.vanOutAmount || '0',
+                storageDays: storageDays,
+                totalAmount: document.getElementById('calcTotalAmount').value,
+                remarks: f.remarks,
+                photos: [...stagedGateOutPhotos]
+            });
+
+            if(totalAmountNum > 0) {
+                yardDb.revenues.push({
+                    date: f.date,
+                    source: 'Gate-Out & Storage Billing',
+                    container: c.number,
+                    eir: f.eir,
+                    amount: totalAmountNum
+                });
+            }
+
+            saveYardDB();
+            e.target.reset();
+            clearGateOutPhotos();
+            
+            alert('Yard Gate-Out successfully recorded and synced to cloud database.');
+            switchYardTab('yardInventory');
+        }
+
+        function editYardStatus(id) {
+            let c = yardDb.containers.find(x => x.id === id);
+            if(!c) return;
+            let s = prompt('Enter new status: Available, Reserved, or Hold', c.status);
+            if(s === null) return;
+            let m = {available:'Available', reserved:'Reserved', hold:'Hold'}[s.trim().toLowerCase()];
+            if(!m) return alert('Use Available, Reserved, or Hold.');
+            c.status = m;
+            saveYardDB();
+        }
+
+        function blobDownload(blob, name) {
+            let a = document.createElement('a'), u = URL.createObjectURL(blob);
+            a.href = u; a.download = name; a.click(); URL.revokeObjectURL(u);
+        }
+
+        function csv(rows, name) {
+            let t = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+            blobDownload(new Blob(['\ufeff' + t], {type: 'text/csv;charset=utf-8'}), name);
+        }
+
+        function exportYardCSV() {
+            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Trucking Name','Truck Plate No','Driver Name','EIR','Row','Van In Amount','Van Out Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Gate-Out Date','Remarks','Photos Attached'], ...(yardDb.containers || []).map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.truckingName, c.plate, c.driver, c.eir, c.row, c.vanInAmount, c.vanOutAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.gateOutDate, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
+        }
+
+        function exportYardMovements() {
+            csv([['Date','Movement','Container No','Trucking Name','Plate','Driver','Customer','EIR','Fee Type','Rate/Day','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.truckingName, m.plate, m.driver, m.customer, m.eir, m.fee, m.storageamount, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+        }
+
+        function exportFullDetailedReportCSV() {
+            let containerMap = {};
+            let containers = yardDb.containers || [];
+            let movements = yardDb.movements || [];
+
+            containers.forEach(c => {
+                containerMap[c.number] = {
+                    number: c.number, size: c.size, type: c.type, line: c.line, condition: c.condition, status: c.status,
+                    truckingName: c.truckingName || '—', plate: c.plate || '—', driver: c.driver || '—', eir: c.eir || '—', row: c.row || '—',
+                    block: c.block, bay: c.bay, tier: c.tier, gateInDate: c.date, gateOutDate: c.gateOutDate,
+                    releaseCustomer: '—', gateOutEir: '—', storageFeeType: '—', storageRatePerDay: '—',
+                    vanInAmount: c.vanInAmount, vanOutAmount: c.vanOutAmount, totalAmount: c.totalAmount, vanInStats: c.vanInStats,
+                    remarks: c.remarks, photosCount: c.photos ? c.photos.length : 0, photoNames: c.photos ? c.photos.map(p => p.name).join('; ') : ''
+                };
+            });
+
+            movements.forEach(m => {
+                if(!containerMap[m.number]) {
+                    containerMap[m.number] = {
+                        number: m.number, size: '—', type: '—', line: '—', condition: '—', status: '—',
+                        truckingName: m.truckingName || '—', plate: m.plate || '—', driver: m.driver || '—', eir: m.eir || '—', row: m.row || '—',
+                        block: '—', bay: '—', tier: '—', gateInDate: m.kind === 'GATE-IN' ? m.date : '—', gateOutDate: m.kind === 'GATE-OUT' ? m.date : '—',
+                        releaseCustomer: m.customer || '—', gateOutEir: m.kind === 'GATE-OUT' ? (m.eir || '—') : '—', storageFeeType: m.fee || '—', storageRatePerDay: m.storageamount || '—',
+                        vanInAmount: m.vanInAmount || '0', vanOutAmount: m.vanOutAmount || '0', totalAmount: m.totalAmount || '0', vanInStats: m.vanInStats || '—',
+                        remarks: m.remarks || '', photosCount: m.photos ? m.photos.length : 0, photoNames: m.photos ? m.photos.map(p => p.name).join('; ') : ''
+                    };
+                } else {
+                    if(m.kind === 'GATE-IN') {
+                        if(!containerMap[m.number].gateInDate || containerMap[m.number].gateInDate === '—') containerMap[m.number].gateInDate = m.date;
+                    }
+                    if(m.kind === 'GATE-OUT') {
+                        if(!containerMap[m.number].gateOutDate || containerMap[m.number].gateOutDate === '—') containerMap[m.number].gateOutDate = m.date;
+                        if(m.customer) containerMap[m.number].releaseCustomer = m.customer;
+                        if(m.eir) containerMap[m.number].gateOutEir = m.eir;
+                        if(m.fee) containerMap[m.number].storageFeeType = m.fee;
+                        if(m.storageamount) containerMap[m.number].storageRatePerDay = m.storageamount;
+                    }
+                }
+            });
+
+            let headers = [
+                'Container No', 'Size', 'Type', 'Shipping Line', 'Condition', 'Current Status',
+                'Trucking Name', 'Truck Plate No.', 'Driver Name', 'EIR / Ref No.', 'Row',
+                'Yard Location (Block/Bay/Tier)', 'Gate-In Date & Time', 'Gate-Out Date & Time',
+                'Release To / Customer', 'Gate-Out EIR / Reference', 'Storage Fee Type', 'Storage Amount Rate Per Day (₱)',
+                'Van In Amount (₱)', 'Van Out Amount (₱)', 'Total Amount Billing (₱)',
+                'Van In Payment Status', 'Storage Days', 'Attached Photos Count', 'Attachment File Names', 'Remarks'
+            ];
+
+            let dataRows = Object.values(containerMap).map(item => {
+                let storageDays = '—';
+                if(item.gateInDate && item.gateOutDate && item.gateInDate !== '—' && item.gateOutDate !== '—') {
+                    let d1 = new Date(item.gateInDate);
+                    let d2 = new Date(item.gateOutDate);
+                    let diff = d2 - d1;
+                    if(diff > 0) storageDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    else storageDays = 0;
+                }
+                return [
+                    item.number, item.size, item.type, item.line, item.condition, item.status,
+                    item.truckingName, item.plate, item.driver, item.eir, item.row,
+                    [item.block && 'Block '+item.block, item.bay && 'Bay '+item.bay, item.tier && 'Tier '+item.tier].filter(Boolean).join(' / ') || '—',
+                    item.gateInDate, item.gateOutDate,
+                    item.releaseCustomer, item.gateOutEir, item.storageFeeType, item.storageRatePerDay,
+                    item.vanInAmount || '0', item.vanOutAmount || '0', item.totalAmount || '0',
+                    item.vanInStats || '—', storageDays, item.photosCount, item.photoNames || 'None', item.remarks || ''
+                ];
+            });
+
+            csv([headers, ...dataRows], 'SKYMOVER_Full_Detailed_Report_Merged_GateIn_GateOut.csv');
+        }
+
+        function exportRevenueCSV() {
+            csv([['Date','Source','Container No','EIR','Amount (PHP)'], ...(yardDb.revenues || []).map(r => [r.date, r.source, r.container, r.eir, r.amount])], 'SKYMOVER_Yard_Revenues.csv');
+        }
+
+        function exportExpensesCSV() {
+            csv([['Date','Category','Description','Amount (PHP)'], ...(yardDb.expenses || []).map(e => [e.date, e.category, e.description, e.amount])], 'SKYMOVER_Yard_Expenses.csv');
+        }
+
+        function backupUnifiedEnterpriseData() {
+            const unifiedData = {
+                managementBackend: db,
+                emptyYard: yardDb,
+                exportedAt: new Date().toISOString()
+            };
+            blobDownload(new Blob([JSON.stringify(unifiedData, null, 2)], {type: 'application/json'}), 'SKYMOVER_Unified_Enterprise_Backup_' + new Date().toISOString().slice(0,10) + '.json');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[type=datetime-local]').forEach(x => {
+                if(!x.value) {
+                    let d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    x.value = d.toISOString().slice(0, 16);
+                }
+            });
+            initSupabase();
+            refreshYard();
+        });
     </script>
 </body>
 </html>
