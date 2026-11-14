@@ -319,7 +319,7 @@
                         </div>
                         <div class="flex gap-2 pt-2">
                             <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-bold">Save Gate-In Entry</button>
-                            <button type="reset" onclick="clearGateInPhotos()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-bold">Clear Form</button>
+                            <button type="reset" onclick="clearGateInFormAndPhotos()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-bold">Clear & Reset</button>
                         </div>
                     </form>
                 </div>
@@ -377,7 +377,7 @@
                         </div>
                         <div class="flex gap-2 pt-2">
                             <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold">Confirm Gate-Out</button>
-                            <button type="reset" onclick="clearGateOutPhotos()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-bold">Clear Form</button>
+                            <button type="reset" onclick="clearGateOutFormAndPhotos()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-bold">Clear & Reset</button>
                         </div>
                     </form>
                 </div>
@@ -465,7 +465,10 @@
             <!-- Yard Tab 6: Expenses History -->
             <div id="yardExpenses" class="yard-tab hidden">
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200 mb-6">
-                    <h3 class="font-bold text-base text-slate-900 mb-4">Log Yard Operating Expense</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-base text-slate-900">Log Yard Operating Expense</h3>
+                        <button type="button" onclick="clearYardExpenseForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-1.5 rounded-lg font-bold text-xs">Clear & Reset</button>
+                    </div>
                     <form id="yardExpenseForm" onsubmit="handleYardExpenseSubmit(event)" class="space-y-4 text-xs font-medium text-slate-900">
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div><label class="font-bold text-slate-800 mb-1 block">Expense Category *</label><select name="category" required class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>Crane & Handling Equipment</option><option>Yard Maintenance & Repairs</option><option>Security & Personnel</option><option>Utilities (Water/Electricity)</option><option>Administrative & Permits</option><option>Subscriptions</option><option>Other</option></select></div>
@@ -473,7 +476,10 @@
                             <div><label class="font-bold text-slate-800 mb-1 block">Amount (₱) *</label><input type="number" step="any" name="amount" required class="p-2 border rounded-lg w-full bg-white text-slate-900" placeholder="0.00"></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Date *</label><input type="datetime-local" name="date" id="expenseDateInput" required class="p-2 border rounded-lg w-full bg-white text-slate-900"></div>
                         </div>
-                        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold">Record Expense</button>
+                        <div class="flex gap-2">
+                            <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold">Record Expense</button>
+                            <button type="button" onclick="clearYardExpenseForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-bold">Clear Form</button>
+                        </div>
                     </form>
                 </div>
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
@@ -566,7 +572,10 @@
                     <label class="block text-slate-300 mb-1 font-semibold">Commission Amount (₱)</label>
                     <input type="number" id="transCommission" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="4500">
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition">Post Order to Hub</button>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition">Post Order to Hub</button>
+                    <button type="button" onclick="document.getElementById('transForm').reset()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg font-semibold">Clear</button>
+                </div>
             </form>
         </div>
     </div>
@@ -593,7 +602,10 @@
                     <label class="block text-slate-300 mb-1 font-semibold">Assigned Unit / Truck</label>
                     <input type="text" id="regDriverUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white" placeholder="e.g. SKV-101">
                 </div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition mt-2">Register Driver to Unified DB</button>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition">Register Driver</button>
+                    <button type="button" onclick="document.getElementById('driverRegForm').reset()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg font-semibold">Clear</button>
+                </div>
             </form>
         </div>
     </div>
@@ -613,9 +625,9 @@
         let yardBarChartInstance = null;
         let supabaseClient = null;
 
-        // HARDCODED SUPABASE CREDENTIALS & INITIALIZER
-        const SUPABASE_URL = https://ygghxpsddnjzgnkvbrtl.supabase.co;
-        const SUPABASE_ANON_KEY = sb_publishable__crUSfSiNT15j2bEtSGq8A_KnXDrnLo;
+        // HARDCODED SUPABASE CREDENTIALS & INITIALIZER (Quoted strings fixed)
+        const SUPABASE_URL = "https://ygghxpsddnjzgnkvbrtl.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable__crUSfSiNT15j2bEtSGq8A_KnXDrnLo";
 
         function initSupabase() {
             try {
@@ -757,6 +769,24 @@
             stagedGateOutPhotos = [];
             const container = document.getElementById('gateOutPhotoPreviewContainer');
             if (container) container.innerHTML = '';
+        }
+
+        function clearGateInFormAndPhotos() {
+            const form = document.getElementById('yardGateInForm');
+            if(form) form.reset();
+            clearGateInPhotos();
+        }
+
+        function clearGateOutFormAndPhotos() {
+            const form = document.getElementById('yardGateOutForm');
+            if(form) form.reset();
+            clearGateOutPhotos();
+            containerSelectedForGateOut();
+        }
+
+        function clearYardExpenseForm() {
+            const form = document.getElementById('yardExpenseForm');
+            if(form) form.reset();
         }
 
         // UNIFIED APP DATA STATE & LOCALSTORAGE FALLBACK
@@ -1882,7 +1912,7 @@
             `;
 
             const opt = {
-                margin:     10,
+                margin:    10,
                 filename:    `Skymover_Financial_Statement_${targetMonth}.pdf`,
                 image:       { type: 'jpeg', quality: 0.98 },
                 html2canvas:   { scale: 2, useCORS: true },
@@ -2198,15 +2228,6 @@
 
         function exportExpensesCSV() {
             csv([['Date','Category','Description','Amount (PHP)'], ...(yardDb.expenses || []).map(e => [e.date, e.category, e.description, e.amount])], 'SKYMOVER_Yard_Expenses.csv');
-        }
-
-        function backupUnifiedEnterpriseData() {
-            const unifiedData = {
-                managementBackend: db,
-                emptyYard: yardDb,
-                exportedAt: new Date().toISOString()
-            };
-            blobDownload(new Blob([JSON.stringify(unifiedData, null, 2)], {type: 'application/json'}), 'SKYMOVER_Unified_Enterprise_Backup_' + new Date().toISOString().slice(0,10) + '.json');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
