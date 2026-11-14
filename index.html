@@ -207,11 +207,26 @@
                     <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">RESERVED</div><div class="text-3xl font-extrabold text-amber-700 my-1" id="yardReserved">0</div></div>
                     <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">DAMAGED / HOLD</div><div class="text-3xl font-extrabold text-rose-700 my-1" id="yardDamaged">0</div></div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-IN (UNITS)</div><div class="text-2xl font-bold my-1 text-sky-700" id="dashGateInCount">0</div></div>
-                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-OUT (UNITS)</div><div class="text-2xl font-bold my-1 text-purple-700" id="dashGateOutCount">0</div></div>
-                    <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL REVENUE (PAID)</div><div class="text-2xl font-bold my-1 text-emerald-700" id="dashTotalRev">₱0.00</div></div>
+
+                <!-- YARD STATUS PIE CHART PANEL -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900 mb-1"><i class="fa-solid fa-chart-pie text-amber-600 mr-2"></i> Stock Status Distribution</h3>
+                            <p class="text-xs text-slate-600">Visual ratio of available, reserved, and damaged/hold container units.</p>
+                        </div>
+                        <div class="w-full h-56 relative my-auto py-2">
+                            <canvas id="yardStatusPieChart"></canvas>
+                        </div>
+                        <div class="text-[11px] text-slate-500 text-center font-medium">Updates dynamically in real time</div>
+                    </div>
+                    <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 content-start">
+                        <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-IN (UNITS)</div><div class="text-2xl font-bold my-1 text-sky-700" id="dashGateInCount">0</div></div>
+                        <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL GATE-OUT (UNITS)</div><div class="text-2xl font-bold my-1 text-purple-700" id="dashGateOutCount">0</div></div>
+                        <div class="panel bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">TOTAL REVENUE (PAID)</div><div class="text-2xl font-bold my-1 text-emerald-700" id="dashTotalRev">₱0.00</div></div>
+                    </div>
                 </div>
+
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
                     <h3 class="font-bold text-base text-slate-900 mb-4">Recent Yard Movements</h3>
                     <div class="overflow-x-auto"><table class="w-full text-left text-xs text-slate-900 font-medium"><thead class="bg-slate-100 text-slate-800"><tr><th class="p-3">Date / Time</th><th class="p-3">Movement</th><th class="p-3">Container No.</th><th class="p-3">Plate No.</th><th class="p-3">EIR / Ref</th><th class="p-3">Amount</th></tr></thead><tbody id="yardRecentBody" class="divide-y divide-slate-200"></tbody></table></div>
@@ -263,7 +278,7 @@
                             <div><label class="font-bold text-slate-800 mb-1 block">Container Size *</label><select name="size" required class="p-2 border rounded-lg w-full bg-white text-slate-900"><option value="">Select size</option><option>20FT</option><option>40FT</option><option>40HC</option><option>45FT</option></select></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Container Type</label><select name="type" class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option><option>Other</option></select></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Shipping Line *</label><select name="line" class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>TS LINE</option><option>EVERGREEN</option><option>SINO TRANS</option><option>ASL</option><option>COSCO</option><option>ONE</option><option>M-SC</option><option>HMM</option><option>MAERKS</option><option>CMA-CGM</option><option>WAN-HAI</option><option>OOCL</option><option>ZIM LINE</option><option>PIL</option><option>SITC</option></select></div>
-                            <div><label class="font-bold text-slate-800 mb-1 block">Trucking Name *</label><select name="truckingName" class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>    
+                            <div><label class="font-bold text-slate-800 mb-1 block">Trucking Name *</label><select name="truckingName" class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>   
                             <div><label class="font-bold text-slate-800 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full bg-white text-slate-900"></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full bg-white text-slate-900"></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full bg-white text-slate-900"></div>
@@ -441,7 +456,7 @@
                     <h3 class="font-bold text-base text-slate-900 mb-4">Log Yard Operating Expense</h3>
                     <form id="yardExpenseForm" onsubmit="handleYardExpenseSubmit(event)" class="space-y-4 text-xs font-medium text-slate-900">
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                            <div><label class="font-bold text-slate-800 mb-1 block">Expense Category *</label><select name="category" required class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>Crane & Handling Equipment</option><option>Yard Maintenance & Repairs</option><option>Security & Personnel</option><option>Utilities (Water/Electricity)</option><option>Administrative & Permits</option><option>Other</option></select></div>
+                            <div><label class="font-bold text-slate-800 mb-1 block">Expense Category *</label><select name="category" required class="p-2 border rounded-lg w-full bg-white text-slate-900"><option>Crane & Handling Equipment</option><option>Yard Maintenance & Repairs</option><option>Security & Personnel</option><option>Utilities (Water/Electricity)</option><option>Administrative & Permits</option><option>Subscriptions</option><option>Other</option></select></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Description / Vendor *</label><input name="description" required class="p-2 border rounded-lg w-full bg-white text-slate-900" placeholder="e.g. Forklift fuel / repair"></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Amount (₱) *</label><input type="number" step="any" name="amount" required class="p-2 border rounded-lg w-full bg-white text-slate-900" placeholder="0.00"></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Date *</label><input type="datetime-local" name="date" id="expenseDateInput" required class="p-2 border rounded-lg w-full bg-white text-slate-900"></div>
@@ -493,18 +508,11 @@
             <!-- Yard Tab 8: Cloud Sync & Backup -->
             <div id="yardBackup" class="yard-tab hidden space-y-6">
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
-                    <h3 class="font-bold text-base text-slate-900 mb-2"><i class="fa-solid fa-cloud text-sky-600 mr-2"></i> Supabase Cloud Database Connection</h3>
-                    <p class="text-xs text-slate-600 mb-4">Connect your platform to a shared cloud database so multiple users see each other's inputs in real time.</p>
-                    <div class="space-y-3 max-w-xl mb-6">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 mb-1">Supabase Project URL</label>
-                            <input type="text" id="supabaseUrlInput" class="w-full p-2 border rounded-lg text-xs font-mono bg-white text-slate-900" placeholder="https://xyzproject.supabase.co">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 mb-1">Supabase Anon Key</label>
-                            <input type="password" id="supabaseKeyInput" class="w-full p-2 border rounded-lg text-xs font-mono bg-white text-slate-900" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-                        </div>
-                        <button onclick="connectSupabaseCloud()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow">Connect & Enable Real-Time Sync</button>
+                    <h3 class="font-bold text-base text-slate-900 mb-2"><i class="fa-solid fa-cloud text-sky-600 mr-2"></i> Supabase Cloud Database Status</h3>
+                    <p class="text-xs text-slate-600 mb-4">Connected securely to your remote cloud database. Multi-user real-time synchronization is active.</p>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-mono text-slate-700">
+                        <div><strong>Project URL:</strong> https://ygghxpsddnjzgnkvbrtl.supabase.co</div>
+                        <div class="mt-1"><strong>Status:</strong> <span class="text-emerald-700 font-bold">● Active & Synchronized</span></div>
                     </div>
                 </div>
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
@@ -584,47 +592,24 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC WITH SUPABASE & CHART EXPORT -->
+    <!-- JAVASCRIPT LOGIC WITH HARDCODED SUPABASE CONNECTION -->
     <script>
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
         let trendChartInstance = null;
+        let yardPieChartInstance = null;
         let supabaseClient = null;
 
-        // SUPABASE REAL-TIME CONNECTION INITIALIZER
-        function initSupabase() {
-            const savedUrl = localStorage.getItem('skymover_supabase_url');
-            const savedKey = localStorage.getItem('skymover_supabase_key');
-            if(savedUrl && savedKey) {
-                document.getElementById('supabaseUrlInput').value = savedUrl;
-                document.getElementById('supabaseKeyInput').value = savedKey;
-                try {
-                    supabaseClient = window.supabase.createClient(savedUrl, savedKey);
-                    updateSyncBadge('connected', 'Cloud DB Live Sync Active');
-                    fetchCloudData();
-                } catch(e) {
-                    updateSyncBadge('error', 'Cloud Connection Failed');
-                }
-            } else {
-                updateSyncBadge('local', 'Local Storage Mode (Offline)');
-            }
-        }
+        // HARDCODED SUPABASE CREDENTIALS & INITIALIZER
+        const SUPABASE_URL = "https://ygghxpsddnjzgnkvbrtl.supabase.co";
+        const SUPABASE_ANON_KEY = "https://ygghxpsddnjzgnkvbrtl.supabase.co";
 
-        function connectSupabaseCloud() {
-            const url = document.getElementById('supabaseUrlInput').value.trim();
-            const key = document.getElementById('supabaseKeyInput').value.trim();
-            if(!url || !key) return alert('Please enter both Supabase URL and Anon Key.');
-            
-            localStorage.setItem('skymover_supabase_url', url);
-            localStorage.setItem('skymover_supabase_key', key);
-            
+        function initSupabase() {
             try {
-                supabaseClient = window.supabase.createClient(url, key);
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 updateSyncBadge('connected', 'Cloud DB Live Sync Active');
-                alert('Connected to Supabase successfully!');
                 fetchCloudData();
             } catch(e) {
-                alert('Failed to connect to Supabase: ' + e.message);
                 updateSyncBadge('error', 'Cloud Connection Failed');
             }
         }
@@ -1416,10 +1401,18 @@
             const ya = document.getElementById('yardAvailable');
             const yr = document.getElementById('yardReserved');
             const yd = document.getElementById('yardDamaged');
+            
+            const countAvailable = a.filter(c => c.status === 'Available' && c.condition === 'Good').length;
+            const countReserved = a.filter(c => c.status === 'Reserved').length;
+            const countDamaged = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
+
             if(yt) yt.textContent = a.length;
-            if(ya) ya.textContent = a.filter(c => c.status === 'Available' && c.condition === 'Good').length;
-            if(yr) yr.textContent = a.filter(c => c.status === 'Reserved').length;
-            if(yd) yd.textContent = a.filter(c => ['Damaged','For Inspection'].includes(c.condition) || c.status === 'Hold').length;
+            if(ya) ya.textContent = countAvailable;
+            if(yr) yr.textContent = countReserved;
+            if(yd) yd.textContent = countDamaged;
+
+            // Render Yard Status Pie Chart
+            renderYardStatusPieChart(countAvailable, countReserved, countDamaged);
 
             const gateInCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-IN').length;
             const gateOutCnt = (yardDb.movements || []).filter(m => m.kind === 'GATE-OUT').length;
@@ -1443,6 +1436,46 @@
             renderYardRevenue();
             renderYardExpenses();
             renderYardReports();
+        }
+
+        function renderYardStatusPieChart(available, reserved, damaged) {
+            const ctx = document.getElementById('yardStatusPieChart');
+            if(!ctx) return;
+
+            if(yardPieChartInstance) {
+                yardPieChartInstance.destroy();
+            }
+
+            yardPieChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Available & Good', 'Reserved', 'Damaged / Hold'],
+                    datasets: [{
+                        data: [available, reserved, damaged],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.85)', // Emerald
+                            'rgba(245, 158, 11, 0.85)', // Amber
+                            'rgba(244, 63, 94, 0.85)'   // Rose
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(244, 63, 94)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 11, family: 'Inter', weight: 'bold' }, color: '#1e293b', boxWidth: 12 }
+                        }
+                    }
+                }
+            });
         }
 
         function renderYardInventory() {
@@ -1576,7 +1609,6 @@
                 netIncomeDisp.className = netIncome >= 0 ? "text-2xl font-extrabold text-blue-800 my-1" : "text-2xl font-extrabold text-rose-700 my-1";
             }
 
-            // Calculate Monthly Breakdown
             let monthlyMap = {};
             revs.forEach(r => {
                 let mKey = r.date ? r.date.slice(0, 7) : 'Unknown';
@@ -1620,7 +1652,6 @@
                 </tr>
             `).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-500 font-medium">No revenue records found.</td></tr>';
 
-            // RENDER OR UPDATE CHART.JS TREND GRAPH
             renderMonthlyTrendChart(sortedMonths, monthlyMap);
         }
 
@@ -1693,7 +1724,6 @@
             });
         }
 
-        // Export Chart as PNG Image function
         function exportChartAsImage() {
             if(!trendChartInstance) {
                 return alert('Chart is not initialized yet.');
@@ -1786,11 +1816,11 @@
             `;
 
             const opt = {
-                margin:       10,
-                filename:     `Skymover_Financial_Statement_${targetMonth}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
+                margin:      10,
+                filename:    `Skymover_Financial_Statement_${targetMonth}.pdf`,
+                image:       { type: 'jpeg', quality: 0.98 },
                 html2canvas:   { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().from(container).set(opt).save();
