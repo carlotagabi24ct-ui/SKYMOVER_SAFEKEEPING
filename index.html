@@ -289,7 +289,7 @@
                             <p class="text-xs text-slate-300">Click to upload container photo or receipt</p>
                             <p id="uploadSuccessMsg" class="text-[10px] text-emerald-400 mt-2 font-semibold hidden">Photo successfully captured & added to extraction report!</p>
                         </div>
-                        <button onclick="alert('Photo and Waybill signed successfully!');" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 rounded-lg text-xs transition">
+                        <button onclick="alert('Photo and Waybill signed successfully!');" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 rounded-lg transition">
                             Submit Proof of Delivery
                         </button>
                     </div>
@@ -400,7 +400,7 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Container Size *</label><select name="size" required class="p-2 border rounded-lg w-full"><option value="">Select size</option><option>20FT</option><option>40FT</option><option>40HC</option><option>45FT</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Container Type</label><select name="type" class="p-2 border rounded-lg w-full"><option>Dry</option><option>Reefer</option><option>Open Top</option><option>Flat Rack</option><option>Other</option></select></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Shipping Line *</label><select name="line" class="p-2 border rounded-lg w-full"><option>TS LINE</option><option>EVERGREEN</option><option>SINO TRANS</option><option>ASL</option><option>COSCO</option><option>ONE</option><option>M-SC</option><option>HMM</option><option>MAERKS</option><option>CMA-CGM</option><option>WAN-HAI</option><option>OOCL</option><option>ZIM LINE</option><option>PIL</option><option>SITC</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Name *</label><select name="name" class="p-2 border rounded-lg w-full"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>    
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Trucking Name *</label><select name="truckingName" class="p-2 border rounded-lg w-full"><option>VICTOR LAINE</option><option>SKYMOVER</option><option>GGS TRUCKING</option><option>RCLC</option></select></div>    
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">EIR / Reference No.</label><input name="eir" class="p-2 border rounded-lg w-full"></div>
@@ -417,9 +417,9 @@
                             
                             <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-IN -->
                             <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateInDropZone" 
-                                 ondragover="handleDragOver(event, 'gateInDropZone')" 
-                                 ondragleave="handleDragLeave(event, 'gateInDropZone')" 
-                                 ondrop="handleDrop(event, 'gateIn')">
+                                   ondragover="handleDragOver(event, 'gateInDropZone')" 
+                                   ondragleave="handleDragLeave(event, 'gateInDropZone')" 
+                                   ondrop="handleDrop(event, 'gateIn')">
                                 <label class="font-semibold text-slate-700 mb-1 block"><i class="fa-solid fa-cloud-arrow-up mr-1 text-amber-600"></i> Drag & Drop Photos / Files Here</label>
                                 <p class="text-[11px] text-slate-500 mb-3">or click the button below to browse files</p>
                                 <input type="file" id="gateInPhotoInput" accept="image/*,application/pdf" multiple onchange="handleFileInput(event, 'gateIn')" class="hidden">
@@ -446,7 +446,7 @@
                                 <label class="font-semibold text-slate-600 mb-1 block">Container Number *</label>
                                 <select name="container" id="yardOutContainer" required class="p-2 border rounded-lg w-full" onchange="onContainerSelectForGateOut()"><option value="">Select container in yard</option></select>
                             </div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer</label><input name="customer" class="p-2 border rounded-lg w-full"></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Release To / Customer *</label><input name="customer" required class="p-2 border rounded-lg w-full" placeholder="e.g. Acme Logistics Corp"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Truck Plate Number *</label><input name="plate" required class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Driver Name</label><input name="driver" class="p-2 border rounded-lg w-full"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out EIR / Reference *</label><input name="eir" required class="p-2 border rounded-lg w-full"></div>
@@ -454,8 +454,8 @@
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van In Amount (₱)</label><input type="number" id="calcVanInAmount" name="vanInAmount" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-semibold" value="0"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Van Out Amount (₱)</label><input type="number" id="calcVanOutAmount" name="vanOutAmount" placeholder="0.00" class="p-2 border rounded-lg w-full" oninput="recalculateTotals()"></div>
                             
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee Type</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Dry Van</option><option>Reefer Van</option></select></div>
-                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" id="calcStorageAmount" class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"><option>450</option><option>500</option><option>800</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Fee Type</label><select name="fee" class="p-2 border rounded-lg w-full"><option>Dry Van</option><option>Reefer Van</option><option>Flat Rack</option><option>Open Top</option></select></div>
+                            <div><label class="font-semibold text-slate-600 mb-1 block">Storage Amount Rate per Day (₱)</label><select name="storageamount" id="calcStorageAmount" class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"><option value="450">450</option><option value="500">500</option><option value="800">800</option><option value="1000">1000</option></select></div>
                             
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-In Date & Time (Read-only)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono"></div>
                             <div><label class="font-semibold text-slate-600 mb-1 block">Gate-Out Date & Time *</label><input name="date" id="calcGateOutDate" type="datetime-local" required class="p-2 border rounded-lg w-full" onchange="recalculateTotals()"></div>
@@ -474,9 +474,9 @@
 
                             <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-OUT -->
                             <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateOutDropZone" 
-                                 ondragover="handleDragOver(event, 'gateOutDropZone')" 
-                                 ondragleave="handleDragLeave(event, 'gateOutDropZone')" 
-                                 ondrop="handleDrop(event, 'gateOut')">
+                                   ondragover="handleDragOver(event, 'gateOutDropZone')" 
+                                   ondragleave="handleDragLeave(event, 'gateOutDropZone')" 
+                                   ondrop="handleDrop(event, 'gateOut')">
                                 <label class="font-semibold text-slate-700 mb-1 block"><i class="fa-solid fa-cloud-arrow-up mr-1 text-amber-600"></i> Drag & Drop Photos / Files Here (Gate-Out)</label>
                                 <p class="text-[11px] text-slate-500 mb-3">or click the button below to browse files</p>
                                 <input type="file" id="gateOutPhotoInput" accept="image/*,application/pdf" multiple onchange="handleFileInput(event, 'gateOut')" class="hidden">
@@ -756,10 +756,10 @@
         if (!yardDb || typeof yardDb !== 'object') {
             yardDb = {
                 containers: [
-                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", plate: "ABC-1234", driver: "Juan", condition: "Good", status: "Available", block: "A", bay: "01", tier: "1", date: "2026-11-10T08:00", gateOutDate: "—", remarks: "Clean", vanInAmount: "1500", vanOutAmount: "0", totalAmount: "1500", vanInStats: "PAID", photos: [] }
+                    { id: "yd-1", number: "MSKU-772819-2", size: "40HC", type: "Dry", line: "Maersk", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", condition: "Good", status: "Available", block: "A", bay: "01", row: "GROUND", tier: "1", date: "2026-11-10T08:00", gateOutDate: "—", remarks: "Clean", vanInAmount: "1500", vanOutAmount: "0", totalAmount: "1500", vanInStats: "PAID", photos: [] }
                 ],
                 movements: [
-                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", remarks: "Clean", vanInAmount: "1500", photos: [] }
+                    { kind: "GATE-IN", date: "2026-11-10T08:00", number: "MSKU-772819-2", truckingName: "SKYMOVER", plate: "ABC-1234", driver: "Juan", eir: "EIR-001", row: "GROUND", remarks: "Clean", vanInAmount: "1500", photos: [] }
                 ],
                 revenues: [
                     { date: "2026-11-10T08:00", source: "Gate-In Fee", container: "MSKU-772819-2", eir: "EIR-001", amount: 1500 }
@@ -1101,15 +1101,21 @@
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                         <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Date & Time:</span>${stamp(m.date)}</div>
-                        <div><span class="text-slate-500 block text-[10px]">Truck Plate / Driver:</span>${m.plate} / ${m.driver || '—'}</div>
-                        <div><span class="text-slate-500 block text-[10px]">EIR / Ref:</span>${m.eir || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Trucking Name:</span>${m.truckingName || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Plate No.:</span>${m.plate || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Driver Name:</span>${m.driver || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">EIR / Ref No.:</span>${m.eir || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Row Location:</span>${m.row || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Van In Amount:</span>₱${m.vanInAmount || '0'}</div>
                     </div>
-                    <div class="text-[11px] mb-3"><span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'} | <span class="text-slate-500">Van In Amount:</span> ₱${m.vanInAmount || '0'}</div>
+                    <div class="text-[11px] mb-3"><span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
                     <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-In Photos (${m.photos ? m.photos.length : 0}):</div>
                     <div class="flex flex-wrap gap-3">
                         ${m.photos && m.photos.length ? m.photos.map(p => `
                             <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
-                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
+                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image">
+                                    <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1 hover:opacity-80 transition">
+                                </a>
                                 <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
                             </div>
                         `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-In entry.</span>'}
@@ -1122,15 +1128,21 @@
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                         <div><span class="text-slate-500 block text-[10px]">Container No:</span><strong class="font-mono">${m.number}</strong></div>
                         <div><span class="text-slate-500 block text-[10px]">Release Date:</span>${stamp(m.date)}</div>
-                        <div><span class="text-slate-500 block text-[10px]">Customer / Plate:</span>${m.customer || '—'} / ${m.plate}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Release To / Customer:</span>${m.customer || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Gate-Out EIR/Ref:</span>${m.eir || '—'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Storage Fee Type:</span>${m.fee || 'Dry Van'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Storage Rate/Day:</span>₱${m.storageamount || '450'}</div>
+                        <div><span class="text-slate-500 block text-[10px]">Storage Days:</span>${m.storageDays || 0} days</div>
                         <div><span class="text-slate-500 block text-[10px]">Total Billing:</span><strong class="text-emerald-600">₱${m.totalAmount || '0.00'}</strong></div>
                     </div>
-                    <div class="text-[11px] mb-3"><span class="text-slate-500">Storage Days:</span> ${m.storageDays || 0} days | <span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
+                    <div class="text-[11px] mb-3"><span class="text-slate-500">Plate:</span> ${m.plate} | <span class="text-slate-500">Driver:</span> ${m.driver || '—'} | <span class="text-slate-500">Remarks:</span> ${m.remarks || 'None'}</div>
                     <div class="font-semibold text-[11px] text-slate-700 mb-2">Attached Gate-Out Photos (${m.photos ? m.photos.length : 0}):</div>
                     <div class="flex flex-wrap gap-3">
                         ${m.photos && m.photos.length ? m.photos.map(p => `
                             <div class="border rounded-lg p-2 bg-white shadow-sm w-28 text-center">
-                                <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1">
+                                <a href="${p.dataUrl}" target="_blank" title="Click to view full image">
+                                    <img src="${p.dataUrl}" class="w-full h-20 object-cover rounded mb-1 hover:opacity-80 transition">
+                                </a>
                                 <div class="text-[9px] text-slate-600 truncate">${p.name}</div>
                             </div>
                         `).join('') : '<span class="text-slate-400 italic">No attachments for this Gate-Out release.</span>'}
@@ -1259,7 +1271,7 @@
         }
 
         function liveYard() { return (yardDb.containers || []).filter(c => c.status !== 'Released'); }
-        function yardLoc(c) { return [c.block && 'Block '+c.block, c.bay && 'Bay/Row '+c.bay, c.tier && 'Tier '+c.tier].filter(Boolean).join(' • ') || '—'; }
+        function yardLoc(c) { return [c.block && 'Block '+c.block, c.bay && 'Bay '+c.bay, c.row && 'Row '+c.row, c.tier && 'Tier '+c.tier].filter(Boolean).join(' • ') || '—'; }
         function stamp(v) { return v ? new Date(v).toLocaleString() : '—'; }
 
         function refreshYard() {
@@ -1488,9 +1500,11 @@
                 kind: 'GATE-IN', 
                 date: c.date, 
                 number: c.number, 
+                truckingName: c.truckingName,
                 plate: c.plate, 
                 driver: c.driver, 
                 eir: c.eir, 
+                row: c.row,
                 remarks: c.remarks,
                 vanInStats: c.vanInStats,
                 vanInAmount: c.vanInAmount,
@@ -1545,6 +1559,8 @@
                 driver: f.driver, 
                 customer: f.customer, 
                 eir: f.eir, 
+                fee: f.fee,
+                storageamount: f.storageamount,
                 vanInAmount: c.vanInAmount || '0',
                 vanOutAmount: f.vanOutAmount || '0',
                 storageDays: storageDays,
@@ -1614,14 +1630,14 @@
         }
 
         function exportYardCSV() {
-            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Van In Amount','Van Out Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Gate-Out Date','Truck Plate','Driver','EIR','Remarks','Photos Attached'], ...(yardDb.containers || []).map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.vanInAmount, c.vanOutAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.gateOutDate, c.plate, c.driver, c.eir, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
+            csv([['Container No','Size','Type','Shipping Line','Condition','Status','Trucking Name','Truck Plate No','Driver Name','EIR','Row','Van In Amount','Van Out Amount','Van In Status','Block','Bay','Tier','Gate-In Date','Gate-Out Date','Remarks','Photos Attached'], ...(yardDb.containers || []).map(c => [c.number, c.size, c.type, c.line, c.condition, c.status, c.truckingName, c.plate, c.driver, c.eir, c.row, c.vanInAmount, c.vanOutAmount, c.vanInStats, c.block, c.bay, c.tier, c.date, c.gateOutDate, c.remarks, c.photos ? c.photos.length : 0])], 'SKYMOVER_Yard_Inventory.csv');
         }
 
         function exportYardMovements() {
-            csv([['Date','Movement','Container No','Plate','Driver','Customer','EIR','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.plate, m.driver, m.customer, m.eir, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
+            csv([['Date','Movement','Container No','Trucking Name','Plate','Driver','Customer','EIR','Fee Type','Rate/Day','Van In Amount','Van Out Amount','Storage Days','Total Amount','Remarks'], ...(yardDb.movements || []).map(m => [m.date, m.kind, m.number, m.truckingName, m.plate, m.driver, m.customer, m.eir, m.fee, m.storageamount, m.vanInAmount, m.vanOutAmount, m.storageDays, m.totalAmount, m.remarks])], 'SKYMOVER_Yard_Movements.csv');
         }
 
-        // MERGED GATE-IN AND GATE-OUT FULL DETAILED REPORT EXPORT
+        // MERGED GATE-IN AND GATE-OUT FULL DETAILED REPORT EXPORT (WITH ALL REQUESTED FIELDS)
         function exportFullDetailedReportCSV() {
             let mergedRows = [];
             let containers = yardDb.containers || [];
@@ -1636,17 +1652,27 @@
                     line: c.line,
                     condition: c.condition,
                     status: c.status,
+                    truckingName: c.truckingName || '—',
+                    plate: c.plate || '—',
+                    driver: c.driver || '—',
+                    eir: c.eir || '—',
+                    row: c.row || '—',
                     block: c.block,
                     bay: c.bay,
                     tier: c.tier,
                     gateInDate: c.date,
                     gateOutDate: c.gateOutDate,
+                    releaseCustomer: '—',
+                    gateOutEir: '—',
+                    storageFeeType: '—',
+                    storageRatePerDay: '—',
                     vanInAmount: c.vanInAmount,
                     vanOutAmount: c.vanOutAmount,
                     totalAmount: c.totalAmount,
                     vanInStats: c.vanInStats,
                     remarks: c.remarks,
-                    photosCount: c.photos ? c.photos.length : 0
+                    photosCount: c.photos ? c.photos.length : 0,
+                    photoNames: c.photos ? c.photos.map(p => p.name).join('; ') : ''
                 };
             });
 
@@ -1659,33 +1685,60 @@
                         line: '—',
                         condition: '—',
                         status: '—',
+                        truckingName: m.truckingName || '—',
+                        plate: m.plate || '—',
+                        driver: m.driver || '—',
+                        eir: m.eir || '—',
+                        row: m.row || '—',
                         block: '—',
                         bay: '—',
                         tier: '—',
                         gateInDate: m.kind === 'GATE-IN' ? m.date : '—',
                         gateOutDate: m.kind === 'GATE-OUT' ? m.date : '—',
+                        releaseCustomer: m.customer || '—',
+                        gateOutEir: m.kind === 'GATE-OUT' ? m.eir : '—',
+                        storageFeeType: m.fee || '—',
+                        storageRatePerDay: m.storageamount || '—',
                         vanInAmount: m.vanInAmount || '0',
                         vanOutAmount: m.vanOutAmount || '0',
                         totalAmount: m.totalAmount || '0',
                         vanInStats: m.vanInStats || '—',
                         remarks: m.remarks || '',
-                        photosCount: m.photos ? m.photos.length : 0
+                        photosCount: m.photos ? m.photos.length : 0,
+                        photoNames: m.photos ? m.photos.map(p => p.name).join('; ') : ''
                     };
                 } else {
-                    if(m.kind === 'GATE-IN' && (!containerMap[m.number].gateInDate || containerMap[m.number].gateInDate === '—')) {
-                        containerMap[m.number].gateInDate = m.date;
+                    if(m.kind === 'GATE-IN') {
+                        if(!containerMap[m.number].gateInDate || containerMap[m.number].gateInDate === '—') containerMap[m.number].gateInDate = m.date;
+                        if(m.truckingName) containerMap[m.number].truckingName = m.truckingName;
+                        if(m.plate) containerMap[m.number].plate = m.plate;
+                        if(m.driver) containerMap[m.number].driver = m.driver;
+                        if(m.eir) containerMap[m.number].eir = m.eir;
+                        if(m.row) containerMap[m.number].row = m.row;
                     }
-                    if(m.kind === 'GATE-OUT' && (!containerMap[m.number].gateOutDate || containerMap[m.number].gateOutDate === '—')) {
-                        containerMap[m.number].gateOutDate = m.date;
+                    if(m.kind === 'GATE-OUT') {
+                        if(!containerMap[m.number].gateOutDate || containerMap[m.number].gateOutDate === '—') containerMap[m.number].gateOutDate = m.date;
+                        if(m.customer) containerMap[m.number].releaseCustomer = m.customer;
+                        if(m.eir) containerMap[m.number].gateOutEir = m.eir;
+                        if(m.fee) containerMap[m.number].storageFeeType = m.fee;
+                        if(m.storageamount) containerMap[m.number].storageRatePerDay = m.storageamount;
+                    }
+                    if(m.photos && m.photos.length > 0) {
+                        containerMap[m.number].photosCount += m.photos.length;
+                        let existingNames = containerMap[m.number].photoNames;
+                        let newNames = m.photos.map(p => p.name).join('; ');
+                        containerMap[m.number].photoNames = existingNames ? existingNames + '; ' + newNames : newNames;
                     }
                 }
             });
 
             let headers = [
                 'Container No', 'Size', 'Type', 'Shipping Line', 'Condition', 'Current Status',
+                'Trucking Name (Gate-In)', 'Truck Plate No. (Gate-In)', 'Driver Name (Gate-In)', 'EIR / Ref No. (Gate-In)', 'Row (Gate-In)',
                 'Yard Location (Block/Bay/Tier)', 'Gate-In Date & Time', 'Gate-Out Date & Time',
+                'Release To / Customer (Gate-Out)', 'Gate-Out EIR / Reference', 'Storage Fee Type', 'Storage Amount Rate Per Day (₱)',
                 'Van In Amount (₱)', 'Van Out Amount (₱)', 'Total Amount Billing (₱)',
-                'Van In Payment Status', 'Storage Days', 'Attached Photos Count', 'Remarks'
+                'Van In Payment Status', 'Storage Days', 'Attached Photos Count', 'Attachment File Names', 'Remarks'
             ];
 
             let dataRows = Object.values(containerMap).map(item => {
@@ -1699,9 +1752,12 @@
                 }
                 return [
                     item.number, item.size, item.type, item.line, item.condition, item.status,
+                    item.truckingName, item.plate, item.driver, item.eir, item.row,
                     [item.block && 'Block '+item.block, item.bay && 'Bay '+item.bay, item.tier && 'Tier '+item.tier].filter(Boolean).join(' / ') || '—',
-                    item.gateInDate, item.gateOutDate, item.vanInAmount || '0', item.vanOutAmount || '0', item.totalAmount || '0',
-                    item.vanInStats || '—', storageDays, item.photosCount, item.remarks || ''
+                    item.gateInDate, item.gateOutDate,
+                    item.releaseCustomer, item.gateOutEir, item.storageFeeType, item.storageRatePerDay,
+                    item.vanInAmount || '0', item.vanOutAmount || '0', item.totalAmount || '0',
+                    item.vanInStats || '—', storageDays, item.photosCount, item.photoNames || 'None', item.remarks || ''
                 ];
             });
 
