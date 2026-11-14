@@ -67,7 +67,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-                <!-- Card 1: Management Backend -->
                 <div onclick="openBackendModule('Dashboard')" class="glass-card border border-slate-800 hover:border-sky-500/50 p-6 rounded-2xl cursor-pointer transition group shadow-xl hover:shadow-sky-500/10">
                     <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 text-xl mb-4 group-hover:scale-110 transition">
                         <i class="fa-solid fa-chart-pie"></i>
@@ -77,7 +76,6 @@
                     <span class="text-sky-400 text-xs font-semibold inline-flex items-center gap-1 group-hover:translate-x-1 transition">Open Dashboard →</span>
                 </div>
 
-                <!-- Card 2: Driver Portal -->
                 <div onclick="openDriverPortal()" class="glass-card border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl cursor-pointer transition group shadow-xl hover:shadow-purple-500/10">
                     <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl mb-4 group-hover:scale-110 transition">
                         <i class="fa-solid fa-id-card"></i>
@@ -87,7 +85,6 @@
                     <button onclick="event.stopPropagation(); openNewDriverRegistrationModal();" class="text-purple-400 text-xs font-semibold inline-flex items-center gap-1 hover:underline" data-i18n="newDriverReg">New driver registration →</button>
                 </div>
 
-                <!-- Card 3: Transshipment Hub & Yard -->
                 <div onclick="openYardPortal()" class="glass-card border border-slate-800 hover:border-emerald-500/50 p-6 rounded-2xl cursor-pointer transition group shadow-xl hover:shadow-emerald-500/10">
                     <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl mb-4 group-hover:scale-110 transition">
                         <i class="fa-solid fa-ship"></i>
@@ -115,12 +112,10 @@
                     <button onclick="openSubModule('GPS & Dispatch')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700 text-white">GPS & Dispatch</button>
                     <button onclick="openSubModule('Fleet Expenses')" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg font-semibold border border-slate-700 text-white">Expenses</button>
                     <button onclick="openSubModule('Data Backup')" class="bg-amber-600 hover:bg-amber-700 text-xs px-3 py-2 rounded-lg font-semibold text-white">Backup / Restore</button>
-                    <!-- NEW RESET DATABASE BUTTON -->
                     <button onclick="confirmResetAllDatabases()" class="bg-rose-700 hover:bg-rose-800 text-xs px-3 py-2 rounded-lg font-bold text-white shadow"><i class="fa-solid fa-rotate-left mr-1"></i> Reset DB (0 Records)</button>
                 </div>
             </div>
 
-            <!-- AI Modules Bar -->
             <div class="glass-card border border-slate-800 p-6 rounded-2xl">
                 <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-800 pb-3">
                     <button onclick="switchAiTab('brain')" id="tabBrainBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 text-white transition shadow">LogiBRAIN AI</button>
@@ -210,7 +205,6 @@
                     <div class="card bg-white text-slate-900 p-5 rounded-2xl shadow border"><div class="text-xs font-semibold text-slate-700">DAMAGED / HOLD</div><div class="text-3xl font-extrabold text-rose-700 my-1" id="yardDamaged">0</div></div>
                 </div>
 
-                <!-- YARD CHARTS PANEL (PIE CHART + BAR GRAPH) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
                         <div>
@@ -307,7 +301,6 @@
                             <div class="md:col-span-3"><label class="font-bold text-slate-800 mb-1 block">Gate-In Date & Time *</label><input name="date" id="gateInDateInput" type="datetime-local" required class="p-2 border rounded-lg w-full bg-white text-slate-900"></div>
                             <div class="md:col-span-3"><label class="font-bold text-slate-800 mb-1 block">Remarks / Damage Details</label><textarea name="remarks" rows="2" class="p-2 border rounded-lg w-full bg-white text-slate-900"></textarea></div>
 
-                            <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-IN -->
                             <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateInDropZone" 
                                     ondragover="handleDragOver(event, 'gateInDropZone')" 
                                     ondragleave="handleDragLeave(event, 'gateInDropZone')" 
@@ -350,7 +343,6 @@
                             <div><label class="font-bold text-slate-800 mb-1 block">Gate-In Date & Time (Read-only)</label><input type="text" id="calcGateInDisplay" readonly class="p-2 border rounded-lg w-full bg-slate-100 font-mono text-slate-900 font-bold"></div>
                             <div><label class="font-bold text-slate-800 mb-1 block">Gate-Out Date & Time *</label><input name="date" id="calcGateOutDate" type="datetime-local" required class="p-2 border rounded-lg w-full bg-white text-slate-900" onchange="recalculateTotals()"></div>
 
-                            <!-- AUTO CALCULATED FIELDS -->
                             <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 flex flex-col justify-center">
                                 <span class="font-bold text-amber-900 text-xs">Storage Days:</span>
                                 <input type="number" id="calcStorageDays" name="storageDays" readonly class="text-xl font-extrabold text-amber-800 bg-transparent border-0 p-0 w-full" value="0">
@@ -365,7 +357,6 @@
 
                             <div class="md:col-span-2"><label class="font-bold text-slate-800 mb-1 block">Remarks</label><textarea name="remarks" id="gateOutRemarks" rows="2" class="p-2 border rounded-lg w-full bg-white text-slate-900"></textarea></div>
 
-                            <!-- DRAG-AND-DROP ATTACHMENT ZONE: GATE-OUT -->
                             <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 transition-all text-center" id="gateOutDropZone" 
                                     ondragover="handleDragOver(event, 'gateOutDropZone')" 
                                     ondragleave="handleDragLeave(event, 'gateOutDropZone')" 
@@ -387,7 +378,25 @@
 
             <!-- Yard Tab 5: Revenue History -->
             <div id="yardRevenue" class="yard-tab hidden space-y-6">
-                <!-- KPI Financial Summary Cards -->
+                <!-- DATE RANGE FILTER FOR REPORTS & REVENUES -->
+                <div class="panel bg-white text-slate-900 p-4 rounded-2xl shadow border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-filter text-sky-600"></i>
+                        <span class="text-xs font-bold text-slate-800">Date Range Filter:</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <div>
+                            <label class="text-[10px] text-slate-600 font-bold mr-1">From:</label>
+                            <input type="date" id="filterDateFrom" onchange="renderYardRevenue()" class="p-1.5 border rounded-lg bg-slate-50 font-semibold text-slate-900">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-600 font-bold mr-1">To:</label>
+                            <input type="date" id="filterDateTo" onchange="renderYardRevenue()" class="p-1.5 border rounded-lg bg-slate-50 font-semibold text-slate-900">
+                        </div>
+                        <button onclick="clearDateFilter()" class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-semibold text-slate-800">Reset Filter</button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="card bg-emerald-50 p-5 rounded-2xl shadow border border-emerald-200">
                         <div class="text-xs font-bold text-emerald-900">TOTAL REVENUE (PAID)</div>
@@ -406,7 +415,6 @@
                     </div>
                 </div>
 
-                <!-- MONTHLY FINANCIAL TREND CHART PANEL WITH PNG EXPORT BUTTON -->
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
                     <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
                         <div>
@@ -422,7 +430,6 @@
                     </div>
                 </div>
 
-                <!-- Monthly Summary Table & PDF Download Action -->
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
                         <div>
@@ -451,7 +458,6 @@
                     </div>
                 </div>
 
-                <!-- Detailed Revenue Transactions -->
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border border-slate-200">
                     <div class="flex justify-between items-center mb-4">
                         <div>
@@ -528,11 +534,11 @@
             <!-- Yard Tab 8: Cloud Sync & Backup -->
             <div id="yardBackup" class="yard-tab hidden space-y-6">
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
-                    <h3 class="font-bold text-base text-slate-900 mb-2"><i class="fa-solid fa-cloud text-sky-600 mr-2"></i> Supabase Cloud Database Status</h3>
-                    <p class="text-xs text-slate-600 mb-4">Connected securely to your remote cloud database. Multi-user real-time synchronization is active.</p>
+                    <h3 class="font-bold text-base text-slate-900 mb-2"><i class="fa-solid fa-cloud text-sky-600 mr-2"></i> Supabase Cloud Database Status (Real-Time Subscriptions Active)</h3>
+                    <p class="text-xs text-slate-600 mb-4">Connected securely to your remote cloud database. Multi-user real-time synchronization is listening for changes from other users instantly.</p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-mono text-slate-700">
                         <div><strong>Project URL:</strong> https://ygghxpsddnjzgnkvbrtl.supabase.co</div>
-                        <div class="mt-1"><strong>Status:</strong> <span class="text-emerald-700 font-bold">● Active & Synchronized</span></div>
+                        <div class="mt-1"><strong>Status:</strong> <span class="text-emerald-700 font-bold">● Active Real-Time Websocket Synced</span></div>
                     </div>
                 </div>
                 <div class="panel bg-white text-slate-900 p-6 rounded-2xl shadow border">
@@ -541,7 +547,6 @@
                     <div class="flex flex-wrap gap-2">
                         <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-semibold" onclick="backupUnifiedEnterpriseData()">Download Unified Backup</button>
                         <label class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center">Restore Unified Backup<input type="file" id="unifiedRestoreFile" accept=".json,application/json" hidden onchange="restoreUnifiedEnterpriseData(event)"></label>
-                        <!-- NEW YARD TAB RESET BUTTON -->
                         <button class="bg-rose-700 hover:bg-rose-800 text-white px-4 py-2 rounded-lg text-xs font-bold" onclick="confirmResetAllDatabases()">Reset All Records (0)</button>
                     </div>
                 </div>
@@ -620,7 +625,7 @@
         <p class="mt-1">© 2026 SKYMOVER. All rights reserved.</p>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC WITH HARDCODED SUPABASE CONNECTION -->
+    <!-- JAVASCRIPT LOGIC WITH SUPABASE REAL-TIME WEBSOCKET SUBSCRIPTIONS -->
     <script>
         let stagedGateInPhotos = [];
         let stagedGateOutPhotos = [];
@@ -629,15 +634,15 @@
         let yardBarChartInstance = null;
         let supabaseClient = null;
 
-        // HARDCODED SUPABASE CREDENTIALS & INITIALIZER
         const SUPABASE_URL = "https://ygghxpsddnjzgnkvbrtl.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable__crUSfSiNT15j2bEtSGq8A_KnXDrnLo";
 
         function initSupabase() {
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                updateSyncBadge('connected', 'Cloud DB Live Sync Active');
+                updateSyncBadge('connected', 'Cloud DB Real-Time Live Sync Active');
                 fetchCloudData();
+                subscribeToRealtimeChanges();
             } catch(e) {
                 updateSyncBadge('error', 'Cloud Connection Failed');
             }
@@ -669,11 +674,29 @@
                     db = data.payload.managementBackend || db;
                     yardDb = data.payload.emptyYard || yardDb;
                     refreshYard();
+                    renderTransshipmentTable();
                 }
             } catch(e) {
                 console.log('No existing cloud record found, saving initial local state...');
                 saveCloudData();
             }
+        }
+
+        // SUPABASE REAL-TIME WEBSOCKET SUBSCRIPTION TO SYNC OTHER USERS' INPUTS INSTANTLY
+        function subscribeToRealtimeChanges() {
+            if(!supabaseClient) return;
+            supabaseClient
+                .channel('public:skymover_enterprise_db')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'skymover_enterprise_db' }, payload => {
+                    if(payload && payload.new && payload.new.payload) {
+                        db = payload.new.payload.managementBackend || db;
+                        yardDb = payload.new.payload.emptyYard || yardDb;
+                        refreshYard();
+                        renderTransshipmentTable();
+                        console.log('⚡ Real-time database update received from another user!');
+                    }
+                })
+                .subscribe();
         }
 
         async function saveCloudData() {
@@ -693,13 +716,14 @@
             }
         }
 
-        // --- NEW RESET DATABASE FUNCTION TO RESET ALL RECORDS INTO 0 ---
+        // PASSWORD-PROTECTED RESET DATABASE FUNCTION
         async function confirmResetAllDatabases() {
-            if(!confirm('⚠️ DANGER: Are you sure you want to reset all records to 0?\nThis will permanently clear all vehicles, drivers, fuel logs, maintenance, expenses, transshipments, yard containers, movements, and revenues in both local storage and Supabase cloud DB.')) {
+            const pwd = prompt('🔒 Enter Administrator Password to Reset All Records to 0:');
+            if(pwd !== 'skymover2026') {
+                if(pwd !== null) alert('❌ Incorrect password. Reset cancelled.');
                 return;
             }
 
-            // Reset Management Backend DB to empty 0 state
             db = {
                 vehicles: [],
                 drivers: [],
@@ -711,7 +735,6 @@
                 uploads: []
             };
 
-            // Reset Empty Yard DB to empty 0 state
             yardDb = {
                 containers: [],
                 movements: [],
@@ -719,7 +742,6 @@
                 expenses: []
             };
 
-            // Save and sync cleared 0-record state to LocalStorage and Supabase Cloud
             saveDB();
             localStorage.setItem(YARD_KEY, JSON.stringify(yardDb));
 
@@ -735,12 +757,11 @@
                 }
             }
 
-            // Refresh UI components, charts, and tables
             refreshYard();
             renderTransshipmentTable();
             closeSubModule();
 
-            alert('✅ All database records have been successfully reset to 0 and synced to the cloud!');
+            alert('✅ All database records have been successfully reset to 0 and synced across all users in real-time!');
         }
 
         function handleDragOver(e, zoneId) {
@@ -843,7 +864,6 @@
             if(form) form.reset();
         }
 
-        // UNIFIED APP DATA STATE & LOCALSTORAGE FALLBACK
         let db;
         try {
             db = JSON.parse(localStorage.getItem('skymover_unified_db_v3'));
@@ -1023,7 +1043,7 @@
 
             if(!db.drivers) db.drivers = [];
             db.drivers.push({ name, license, phone, truck, status: 'Available', rating: '5.0 ★' });
-            saveDB();
+            saveCloudData();
             closeNewDriverRegistrationModal();
             alert('New driver ' + name + ' registered successfully and saved to Unified Database!');
             document.getElementById('driverRegForm').reset();
@@ -1116,7 +1136,7 @@
                         type: 'Delivery Proof',
                         dataUrl: event.target.result
                     });
-                    saveDB();
+                    saveCloudData();
                     const msg = document.getElementById('uploadSuccessMsg');
                     if(msg) msg.classList.remove('hidden');
                 };
@@ -1249,7 +1269,7 @@
             if(id && model) {
                 if(!db.vehicles) db.vehicles = [];
                 db.vehicles.push({ id, model, status: "Active", driver: "Unassigned" });
-                saveDB();
+                saveCloudData();
                 openSubModule('Vehicle Management');
             }
         }
@@ -1262,7 +1282,7 @@
             if(unit && liters && cost) {
                 if(!db.fuelLogs) db.fuelLogs = [];
                 db.fuelLogs.push({ unit, liters, cost, station: station || "Petron Station", date: new Date().toISOString().substring(0, 10) });
-                saveDB();
+                saveCloudData();
                 openSubModule('Fuel Monitoring');
             }
         }
@@ -1274,7 +1294,7 @@
             if(unit && issue) {
                 if(!db.maintenanceLogs) db.maintenanceLogs = [];
                 db.maintenanceLogs.push({ unit, issue, cost: cost || "₱0", status: "In Shop", date: new Date().toISOString().substring(0, 10) });
-                saveDB();
+                saveCloudData();
                 openSubModule('Maintenance');
             }
         }
@@ -1286,7 +1306,7 @@
             if(unit && route) {
                 if(!db.dispatchLogs) db.dispatchLogs = [];
                 db.dispatchLogs.push({ unit, route, driver: driver || "Assigned Driver", status: "In Transit" });
-                saveDB();
+                saveCloudData();
                 openSubModule('GPS & Dispatch');
             }
         }
@@ -1300,7 +1320,7 @@
             if(trip && total) {
                 if(!db.expenseLogs) db.expenseLogs = [];
                 db.expenseLogs.push({ trip, fuel: fuel || "₱0", tolls: tolls || "₱0", maintenance: maint || "₱0", total });
-                saveDB();
+                saveCloudData();
                 openSubModule('Fleet Expenses');
             }
         }
@@ -1441,12 +1461,12 @@
                 commission,
                 status: 'Pending Hub Review'
             });
-            saveDB();
+            saveCloudData();
             closeNewTransshipmentModal();
             renderTransshipmentTable();
             const form = document.getElementById('transForm');
             if(form) form.reset();
-            alert('Transshipment order successfully saved to Unified DB.');
+            alert('Transshipment order successfully saved and synced across all users.');
         }
 
         function acceptTransshipment(idx) {
@@ -1459,7 +1479,7 @@
                 status: 'Assigned / On Trip',
                 driver: 'Assigned Hub Driver'
             });
-            saveDB();
+            saveCloudData();
             renderTransshipmentTable();
             alert('Transshipment order accepted! Data synchronized to Management Backend and Driver Portal.');
         }
@@ -1467,7 +1487,7 @@
         function rejectTransshipment(idx) {
             if(!db.transshipments) db.transshipments = [];
             db.transshipments[idx].status = 'Rejected / Cancelled';
-            saveDB();
+            saveCloudData();
             renderTransshipmentTable();
         }
 
@@ -1508,7 +1528,6 @@
             if(yr) yr.textContent = countReserved;
             if(yd) yd.textContent = countDamaged;
 
-            // Render Yard Charts (Pie Chart & Bar Graph)
             renderYardStatusPieChart(countAvailable, countReserved, countDamaged);
             renderYardStatusBarGraph(countAvailable, countReserved, countDamaged, a.length);
 
@@ -1736,6 +1755,14 @@
             document.getElementById('calcTotalAmount').value = finalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
+        function clearDateFilter() {
+            const fromEl = document.getElementById('filterDateFrom');
+            const toEl = document.getElementById('filterDateTo');
+            if(fromEl) fromEl.value = '';
+            if(toEl) toEl.value = '';
+            renderYardRevenue();
+        }
+
         function renderYardRevenue() {
             const tbody = document.getElementById('revenueTableBody');
             const totalDisp = document.getElementById('totalRevenueDisplay');
@@ -1743,13 +1770,38 @@
             const netIncomeDisp = document.getElementById('netTotalIncomeDisplay');
             const monthlyBody = document.getElementById('monthlyFinancialBody');
             const monthSelect = document.getElementById('statementMonthSelect');
+            const fromDateEl = document.getElementById('filterDateFrom');
+            const toDateEl = document.getElementById('filterDateTo');
+
             if(!tbody) return;
 
-            const revs = yardDb.revenues || [];
+            let fFrom = fromDateEl && fromDateEl.value ? new Date(fromDateEl.value) : null;
+            let fTo = toDateEl && toDateEl.value ? new Date(toDateEl.value) : null;
+            if(fTo) fTo.setHours(23, 59, 59, 999);
+
+            let revs = yardDb.revenues || [];
+            let exps = yardDb.expenses || [];
+
+            if(fFrom || fTo) {
+                revs = revs.filter(r => {
+                    if(!r.date) return false;
+                    let d = new Date(r.date);
+                    if(fFrom && d < fFrom) return false;
+                    if(fTo && d > fTo) return false;
+                    return true;
+                });
+                exps = exps.filter(e => {
+                    if(!e.date) return false;
+                    let d = new Date(e.date);
+                    if(fFrom && d < fFrom) return false;
+                    if(fTo && d > fTo) return false;
+                    return true;
+                });
+            }
+
             let totalRev = revs.reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
             if(totalDisp) totalDisp.textContent = '₱' + totalRev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-            const exps = yardDb.expenses || [];
             let totalExp = exps.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
             if(totalExpDispRev) totalExpDispRev.textContent = '₱' + totalExp.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
@@ -1760,12 +1812,12 @@
             }
 
             let monthlyMap = {};
-            revs.forEach(r => {
+            (yardDb.revenues || []).forEach(r => {
                 let mKey = r.date ? r.date.slice(0, 7) : 'Unknown';
                 if(!monthlyMap[mKey]) monthlyMap[mKey] = { rev: 0, exp: 0 };
                 monthlyMap[mKey].rev += parseFloat(r.amount) || 0;
             });
-            exps.forEach(e => {
+            (yardDb.expenses || []).forEach(e => {
                 let mKey = e.date ? e.date.slice(0, 7) : 'Unknown';
                 if(!monthlyMap[mKey]) monthlyMap[mKey] = { rev: 0, exp: 0 };
                 monthlyMap[mKey].exp += parseFloat(e.amount) || 0;
@@ -1800,7 +1852,7 @@
                     <td class="p-3 font-semibold">${r.eir || '—'}</td>
                     <td class="p-3 text-right font-extrabold text-emerald-700">₱${Number(r.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 </tr>
-            `).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-500 font-medium">No revenue records found (0 records).</td></tr>';
+            `).join('') : '<tr><td colspan="5" class="p-4 text-center text-slate-500 font-medium">No revenue records found for this date range.</td></tr>';
 
             renderMonthlyTrendChart(sortedMonths, monthlyMap);
         }
@@ -2006,9 +2058,9 @@
                 description: data.description,
                 amount: parseFloat(data.amount) || 0
             });
-            saveYardDB();
+            saveCloudData();
             form.reset();
-            alert('Yard expense successfully recorded.');
+            alert('Yard expense successfully recorded and synced across cloud database.');
             renderYardExpenses();
         }
 
@@ -2096,11 +2148,11 @@
                 });
             }
 
-            saveYardDB();
+            saveCloudData();
             e.target.reset();
             clearGateInPhotos();
             
-            alert('Yard Gate-In saved successfully and synced across cloud database!');
+            alert('Yard Gate-In saved successfully and synced across all users in real-time!');
             switchYardTab('yardInventory');
         }
 
@@ -2167,7 +2219,7 @@
                 });
             }
 
-            saveYardDB();
+            saveCloudData();
             e.target.reset();
             clearGateOutPhotos();
             
@@ -2183,7 +2235,7 @@
             let m = {available:'Available', reserved:'Reserved', hold:'Hold'}[s.trim().toLowerCase()];
             if(!m) return alert('Use Available, Reserved, or Hold.');
             c.status = m;
-            saveYardDB();
+            saveCloudData();
         }
 
         function blobDownload(blob, name) {
