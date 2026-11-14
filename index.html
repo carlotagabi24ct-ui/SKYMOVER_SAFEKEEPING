@@ -594,7 +594,7 @@
     <!-- SUB-MODULE MODAL OVERLAY -->
     <div id="subModuleModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
-            <button onclick="closeSubModule()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="closeSubModule()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl z-50 p-2 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             <div id="subModuleContent"></div>
         </div>
     </div>
@@ -602,7 +602,7 @@
     <!-- NEW TRANSSHIPMENT MODAL -->
     <div id="transModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
-            <button onclick="closeNewTransshipmentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="closeNewTransshipmentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="text-lg font-bold text-white mb-4">Post Transshipment Order</h3>
             <form id="transForm" onsubmit="handleTransSubmit(event)" class="space-y-4 text-xs">
                 <div>
@@ -625,7 +625,7 @@
     <!-- NEW DRIVER REGISTRATION MODAL -->
     <div id="driverRegModal" class="fixed inset-0 modal-glass z-50 hidden flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-slate-700 shadow-2xl">
-            <button onclick="closeNewDriverRegistrationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="closeNewDriverRegistrationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-user-plus text-purple-400 mr-2"></i> New Driver Registration</h3>
             <form id="driverRegForm" onsubmit="handleNewDriverSubmit(event)" class="space-y-3 text-xs">
                 <div>
@@ -1242,12 +1242,12 @@
             r.readAsText(f);
         }
 
-        function clearBackendDataOnly() {
-            if(!confirm('Are you sure you want to reset and clear all Management Backend saved data (vehicles, drivers, fuel logs, maintenance, dispatch, expenses, and transshipment records)? This action cannot be undone.')) return;
-            
-            // Reset Management Backend database to default clean state
-            db = {
-                vehicles: [
+        function closeSubModule() {
+            const modal = document.getElementById('subModuleModal');
+            if(modal) modal.classList.add('hidden');
+        }
+
+        function addVehiclePrompt() {
                     { id: "SKV-101", model: "ISUZU GIGA 10-Wheeler", status: "Active", driver: "Juan Dela Cruz" }
                 ],
                 drivers: [
